@@ -22,3 +22,9 @@
 ## Verification limits
 
 Implementation and available local QA are complete; evidence is in `qa/local-refresh/REVIEW.md`. Firefox launch was attempted for desktop and phone projects and failed before page creation due to this Mac's browser sandbox/framebuffer error. Physical mobile inference and real mobile keyboards remain unverified. WebKit Gemma recovered on retry with a quota warning; Tiny has a recorded cited-answer failure. These are explicit review limits, not passing checks. No commit or remote write was performed.
+
+## Deployment follow-up
+
+- [x] User authorized committing/pushing related repositories and deploying Labs.
+- [x] Pin sibling revisions, include Hex Earth, and gate Pages on successful desktop Chromium CI.
+- [ ] Verify remote repository CI and live Pages deployment.
