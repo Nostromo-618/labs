@@ -1,4 +1,5 @@
 <script setup>
+import VdlModelDetails from './VdlModelDetails.vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { VdButton, VdCard, VdIcon, VdModal, VdProgress, VdSpinner } from '@vanduo-oss/vd3';
 import {
@@ -6,7 +7,6 @@ import {
   MODEL_GROUPS,
   MODEL_OPTIONS,
   assessLoadCapacity,
-  buildWeakDeviceConfirmCopy,
   collectDeviceSignals,
   describeLoadProgress,
   getLiteRTRuntimeBlockReason,
@@ -14,6 +14,13 @@ import {
   getModelOption,
   shouldFocusChatComposer,
 } from '@vanduo-oss/vdl-ai-chat';
+import { chatRuntimeOptions, clearChatCaches } from '../lib/chat-runtime.js';
+import {
+  createDocsSearch,
+  retrieveDocs,
+  citedSources,
+  INSUFFICIENT_EVIDENCE,
+} from '../lib/docs-search.js';
 import { labsMarkdownToHtml } from '@vanduo-oss/vdl-ai-chat/markdown';
 
 const MODEL_CACHE_FLAG_PREFIX = 'vdl-ai-chat-model-cached:';
@@ -25,7 +32,7 @@ const props = defineProps({
 /**
  * Inference engines (LiteRT / WebLLM WASM) must not live inside Vue reactivity
  * (Proxy breaks bindings) and only one runtime should exist per tab.
- * Keep AiChat as a plain module singleton.
+ * Keep the owned runtime outside Vue proxies and dispose it on exit.
  * @type {AiChat | null}
  */
 let chat = null;
@@ -54,6 +61,21 @@ const composerInput = ref(null);
 const stickToBottom = ref(true);
 const capacityNote = ref('');
 const freezeHint = ref('');
+const advanced = ref(false);
+const mode = ref('general');
+const contextNotice = ref('');
+const docsSemanticLoading = ref(false);
+const docsStatus = ref(
+  'Docs mode uses the local vd3 index. Optional semantic search downloads about 23 MB.',
+);
+const sessions = { general: { messages: [], history: [] }, docs: { messages: [], history: [] } };
+let docsSearch = null;
+let alive = true;
+let uiOperation = 0;
+let generationAbort = null;
+let modeChanging = ref(false);
+let docsSearchPending = null;
+const curatedIds = new Set(['gemma-4-E2B-it-web', 'gemma-4-E4B-it-web', 'Qwen3-0.6B-q4f16_1-MLC']);
 
 let unsubProgress = null;
 
@@ -75,7 +97,9 @@ const deviceSummary = computed(() => {
 const groupedModels = computed(() =>
   MODEL_GROUPS.map((group) => ({
     ...group,
-    models: MODEL_OPTIONS.filter((m) => (m.group || 'optional') === group.id).map((model) => {
+    models: MODEL_OPTIONS.filter(
+      (m) => (advanced.value || curatedIds.has(m.id)) && (m.group || 'optional') === group.id,
+    ).map((model) => {
       const resolved = resolveModelForSystem(model.id);
       return {
         ...model,
@@ -84,7 +108,7 @@ const groupedModels = computed(() =>
         label: buildOptionLabel(model, resolved),
       };
     }),
-  })),
+  })).filter((group) => group.models.length),
 );
 
 function cacheFlagKey(modelId) {
@@ -127,11 +151,20 @@ function resolveModelForSystem(modelId) {
   if (!systemInfo.value) {
     return { modelId, changed: false, unavailable: false, loadBlocked: false, reason: '' };
   }
+  if (!systemInfo.value.webgpuSupported || systemInfo.value.error)
+    return {
+      modelId,
+      changed: false,
+      unavailable: true,
+      loadBlocked: false,
+      reason:
+        'WebGPU is unavailable in this browser. Model loading requires a compatible browser and GPU.',
+    };
   const missing = (option.requires || []).filter((feature) => {
     if (feature === 'shader-f16') return !systemInfo.value.shaderF16;
     return true;
   });
-  if (missing.length && option.fallbackId) {
+  if (missing.length && option.fallbackId && !option.experimental) {
     return {
       modelId: option.fallbackId,
       changed: true,
@@ -340,20 +373,6 @@ async function loadModel() {
     return;
   }
 
-  const assessment = assessLoadCapacity({
-    modelId: resolved.modelId,
-    systemInfo: systemInfo.value || {},
-  });
-  if (assessment.level === 'high' || assessment.level === 'caution') {
-    const ok = window.confirm(
-      buildWeakDeviceConfirmCopy({
-        approxGb: assessment.approxGb,
-        recommendedLabel: assessment.recommendedLabel,
-      }),
-    );
-    if (!ok) return;
-  }
-
   errorBanner.value = '';
   applySelection(catalogId);
   await chat.setModelId(resolved.modelId, { resetMessages: true });
@@ -370,6 +389,8 @@ async function loadModel() {
   statusText.value = 'Loading…';
   try {
     await chat.load();
+    await chat.setHistory(sessions[mode.value].history);
+    if (!alive) return;
     markModelCached(catalogId);
     markModelCached(resolved.modelId);
     loaded.value = true;
@@ -402,6 +423,8 @@ async function switchModel() {
   }
   if (resolved.modelId === chat.modelId && loaded.value) return;
   loaded.value = false;
+  sessions.general = { messages: [], history: [] };
+  sessions.docs = { messages: [], history: [] };
   messages.value = [];
   tokenCount.value = null;
   stickToBottom.value = true;
@@ -409,10 +432,67 @@ async function switchModel() {
   await loadModel();
 }
 
+async function getDocsEngine() {
+  if (!docsSearch && !docsSearchPending)
+    docsSearchPending = createDocsSearch()
+      .then(async (engine) => {
+        if (!alive) {
+          await engine.dispose();
+          throw new DOMException('Closed', 'AbortError');
+        }
+        docsSearch = engine;
+        return engine;
+      })
+      .finally(() => {
+        docsSearchPending = null;
+      });
+  if (docsSearchPending) await docsSearchPending;
+  return docsSearch;
+}
+async function enableDocsSemantic() {
+  docsSemanticLoading.value = true;
+  try {
+    await (await getDocsEngine()).initSemantic();
+    docsStatus.value = 'Semantic docs search ready.';
+  } catch (error) {
+    docsStatus.value = `Fuzzy docs search remains available. ${error.message}`;
+  } finally {
+    docsSemanticLoading.value = false;
+  }
+}
+function stopGeneration() {
+  generationAbort?.abort();
+  chat?.cancel?.();
+}
+async function resetConversation() {
+  generationAbort?.abort();
+  const operation = ++uiOperation;
+  chat?.reset();
+  messages.value = [];
+  sessions[mode.value] = { messages: [], history: [] };
+  contextNotice.value = '';
+  errorBanner.value = '';
+  await chat?.setHistory?.([]);
+  if (alive && operation === uiOperation) streaming.value = false;
+}
+watch(mode, async (next, previous) => {
+  modeChanging.value = true;
+  uiOperation += 1;
+  sessions[previous] = { messages: messages.value, history: chat?.getHistory?.() || [] };
+  messages.value = sessions[next].messages;
+  await chat?.setHistory?.(sessions[next].history);
+  contextNotice.value = '';
+  errorBanner.value = '';
+  modeChanging.value = false;
+});
 async function sendMessage() {
-  if (!chat || !loaded.value || streaming.value) return;
+  if (!chat || !loaded.value || streaming.value || modeChanging.value) return;
   const text = inputText.value.trim();
   if (!text) return;
+  const operation = ++uiOperation;
+  const current = () => alive && operation === uiOperation;
+  const controller = new AbortController();
+  generationAbort = controller;
   errorBanner.value = '';
   inputText.value = '';
   messages.value.push({ role: 'user', content: text });
@@ -421,30 +501,63 @@ async function sendMessage() {
   streaming.value = true;
   stickToBottom.value = true;
   await scrollToLatest(true);
-  // Keep caret on the composer while streaming (readonly, not disabled).
   await focusComposer({ force: true });
   try {
-    await chat.generate(
-      text,
-      (partial) => {
+    const sources = mode.value === 'docs' ? await retrieveDocs(await getDocsEngine(), text) : [];
+    if (!current()) return;
+    if (controller.signal.aborted) throw new DOMException('Stopped', 'AbortError');
+    if (mode.value === 'docs' && !sources.length) {
+      messages.value[assistantIdx] = { role: 'assistant', content: INSUFFICIENT_EVIDENCE };
+      return;
+    }
+    const reply = await chat.generate(text, {
+      signal: controller.signal,
+      sources,
+      maxOutputTokens: 768,
+      onContext: ({ omittedTurns }) => {
+        if (current())
+          contextNotice.value = omittedTurns
+            ? `${omittedTurns} older turn(s) omitted from model context. Your transcript is still visible.`
+            : '';
+      },
+      onUpdate: (partial) => {
+        if (!current() || mode.value === 'docs') return;
         messages.value[assistantIdx] = { role: 'assistant', content: partial };
         void scrollToLatest();
       },
-      (usage) => {
-        tokenCount.value = usage?.total_tokens ?? null;
+      onFinish: (usage) => {
+        if (current()) tokenCount.value = usage?.total_tokens ?? null;
       },
-    );
+    });
+    if (!current()) return;
+    const citations = citedSources(reply, sources);
+    const answer =
+      mode.value === 'docs' && !citations.length
+        ? INSUFFICIENT_EVIDENCE
+        : reply.replace(/\[source:([^[\]]+)\]/g, (_match, id) =>
+            citations.some((c) => c.id === id)
+              ? `[${citations.findIndex((c) => c.id === id) + 1}]`
+              : '',
+          );
+    messages.value[assistantIdx] = { role: 'assistant', content: answer, citations };
+    if (mode.value === 'docs') {
+      const history = chat.getHistory();
+      if (history.length) history[history.length - 1].content = answer;
+      await chat.setHistory(history);
+    }
   } catch (err) {
-    const msg = err?.message || 'Generation failed.';
-    errorBanner.value = msg;
-    messages.value[assistantIdx] = {
-      role: 'assistant',
-      content: `⚠️ ${msg}`,
-    };
+    if (!current()) return;
+    const stopped = err?.name === 'AbortError';
+    const msg = stopped ? 'Generation stopped.' : err?.message || 'Generation failed.';
+    if (!stopped) errorBanner.value = msg;
+    messages.value[assistantIdx] = { role: 'assistant', content: msg };
   } finally {
-    streaming.value = false;
-    await scrollToLatest(true);
-    await focusComposer({ force: true });
+    if (current()) {
+      generationAbort = null;
+      streaming.value = false;
+      await scrollToLatest(true);
+      await focusComposer();
+    }
   }
 }
 
@@ -455,61 +568,27 @@ function onComposerKeydown(event) {
   sendMessage();
 }
 
-function isLikelyModelStorageName(name) {
-  return /(webllm|mlc|onnx|wasm|gguf|gemma|llama|qwen|smol|model)/i.test(String(name || ''));
-}
-
 async function clearModelStorage() {
-  let deletedCacheStores = 0;
-  let deletedDatabases = 0;
-  let deletedFlags = 0;
+  await resetConversation();
   try {
-    const toDelete = [];
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(MODEL_CACHE_FLAG_PREFIX)) toDelete.push(key);
+    await chat?.dispose?.();
+    await clearChatCaches();
+    try {
+      const keys = Object.keys(localStorage).filter((key) =>
+        key.startsWith(MODEL_CACHE_FLAG_PREFIX),
+      );
+      for (const key of keys) localStorage.removeItem(key);
+    } catch {
+      /* storage may be disabled */
     }
-    for (const key of toDelete) {
-      localStorage.removeItem(key);
-      deletedFlags += 1;
-    }
-  } catch {
-    /* ignore */
+    errorBanner.value = '';
+    statusText.value = 'Chat model storage cleared';
+  } catch (error) {
+    errorBanner.value = `Some chat assets could not be cleared: ${error.message}`;
   }
-
-  if (typeof caches !== 'undefined' && caches.keys) {
-    const keys = await caches.keys();
-    for (const key of keys) {
-      if (!isLikelyModelStorageName(key)) continue;
-      if (await caches.delete(key)) deletedCacheStores += 1;
-    }
-  }
-
-  if (indexedDB?.databases && indexedDB.deleteDatabase) {
-    const dbs = await indexedDB.databases();
-    for (const db of dbs) {
-      const name = db?.name;
-      if (!name || !isLikelyModelStorageName(name)) continue;
-      await new Promise((resolve) => {
-        const req = indexedDB.deleteDatabase(name);
-        req.onsuccess = () => {
-          deletedDatabases += 1;
-          resolve();
-        };
-        req.onerror = () => resolve();
-        req.onblocked = () => resolve();
-      });
-    }
-  }
-
   clearModalOpen.value = false;
   loaded.value = false;
-  messages.value = [];
-  tokenCount.value = null;
-  if (chat) chat.reset();
   statusTone.value = 'muted';
-  statusText.value = 'Offline';
-  errorBanner.value = `Cleared ${deletedFlags} markers, ${deletedCacheStores} caches, ${deletedDatabases} databases.`;
   await refreshStoragePanel();
 }
 
@@ -517,7 +596,10 @@ function renderMarkdown(text) {
   try {
     return labsMarkdownToHtml(String(text || ''));
   } catch {
-    return String(text || '');
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 }
 
@@ -525,13 +607,12 @@ onMounted(async () => {
   // Reuse one AiChat/WebLLM runtime for the tab (HMR / v-if remount safe).
   if (props.chat) chat = props.chat;
   else if (!chat) {
-    chat = new AiChat({
-      loadLiteRT: async () => import('@litert-lm/core'),
-    });
+    chat = new AiChat(chatRuntimeOptions);
   }
 
   selectedModelId.value = chat.modelId || MODEL_OPTIONS[0].id;
   systemInfo.value = await detectSystemInfo();
+  if (!alive) return;
   applySelection(selectedModelId.value);
   loaded.value = !!chat.isLoaded?.();
   if (loaded.value) {
@@ -564,7 +645,12 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  // Do not unload the WASM engine here — remount / HMR must reuse the same runtime.
+  generationAbort?.abort();
+  alive = false;
+  uiOperation += 1;
+  chat?.cancel?.();
+  if (!props.chat) void chat?.dispose?.();
+  void docsSearch?.dispose?.();
   if (unsubProgress) {
     unsubProgress();
     unsubProgress = null;
@@ -590,6 +676,22 @@ watch(loaded, async (isLoaded, wasLoaded) => {
     await focusComposer();
   }
 });
+async function suspend() {
+  uiOperation++;
+  generationAbort?.abort();
+  chat?.cancel();
+  if (chat) {
+    sessions[mode.value] = { messages: [...messages.value], history: chat.getHistory() };
+    await chat.dispose();
+  }
+  loaded.value = false;
+  loading.value = false;
+  streaming.value = false;
+  statusText.value = 'Not loaded';
+  await docsSearch?.dispose();
+  docsSearch = null;
+}
+defineExpose({ suspend, getModelId: () => selectedModelId.value });
 </script>
 
 <template>
@@ -623,7 +725,12 @@ watch(loaded, async (isLoaded, wasLoaded) => {
       <VdIcon name="download-simple" class="vdl-ai-setup-icon" />
       <div class="vdl-ai-setup-grid">
         <div class="vdl-ai-setup-col">
-          <label class="vdl-form-label" for="vdl-ai-model-select">Model</label>
+          <label class="vdl-form-label" for="vdl-ai-model-select"
+            >Model · download size shown before loading</label
+          >
+          <label class="vdl-ai-note"
+            ><input v-model="advanced" type="checkbox" /> More models</label
+          >
           <select
             id="vdl-ai-model-select"
             class="vd-select vdl-ai-model-select"
@@ -645,21 +752,13 @@ watch(loaded, async (isLoaded, wasLoaded) => {
           <p v-if="fallbackNote && !selectedResolved.loadBlocked" class="vdl-ai-note">
             {{ fallbackNote }}
           </p>
+          <VdlModelDetails :model-id="selectedModelId" />
           <p v-if="cacheHint" class="vdl-ai-note">{{ cacheHint }}</p>
           <p v-if="capacityNote" class="vdl-ai-capacity-note" role="status">{{ capacityNote }}</p>
-          <div class="vdl-ai-cache-badges">
-            <span
-              v-for="model in MODEL_OPTIONS"
-              :key="model.id"
-              class="vdl-ai-mini-badge"
-              :data-cached="isModelLikelyCached(model.id) ? '1' : '0'"
-            >
-              {{ model.tier }}
-              {{ isModelLikelyCached(model.id) ? 'cached' : 'not cached' }}
-            </span>
-          </div>
         </div>
-
+      </div>
+      <details class="vdl-ai-diagnostics">
+        <summary>Device and storage details</summary>
         <aside class="vdl-ai-storage-panel" aria-label="Local storage for this site">
           <div class="vdl-ai-storage-title">Storage &amp; memory</div>
           <div class="vd-text-sm vd-text-muted">
@@ -674,61 +773,34 @@ watch(loaded, async (isLoaded, wasLoaded) => {
             page.
           </p>
         </aside>
-      </div>
 
-      <div class="vdl-ai-system-info">
-        <div class="vdl-ai-storage-title">System Info</div>
-        <div class="vd-text-sm vd-text-muted">
-          WebGPU:
-          {{
-            systemInfo ? (systemInfo.webgpuSupported ? 'Supported' : 'Not supported') : 'Checking…'
-          }}
-        </div>
-        <div class="vd-text-sm vd-text-muted">
-          GPU: {{ systemInfo?.adapterName || systemInfo?.error || 'Detecting…' }}
-        </div>
-        <div class="vd-text-sm vd-text-muted">
-          shader-f16:
-          {{ systemInfo ? (systemInfo.shaderF16 ? 'Supported' : 'Unavailable') : 'Checking…' }}
-        </div>
-        <div
-          class="vd-text-sm vd-text-muted"
-          :title="'deviceMemory is browser-capped/approximate; GPU VRAM is not exposed to web pages.'"
-        >
-          Device: {{ deviceSummary }}
-        </div>
-        <div class="vdl-ai-compat-row">
-          <span
-            v-for="model in MODEL_OPTIONS"
-            :key="'compat-' + model.id"
-            class="vdl-ai-mini-badge"
-            :data-state="
-              resolveModelForSystem(model.id).loadBlocked
-                ? 'unsupported'
-                : resolveModelForSystem(model.id).unavailable
-                  ? 'unavailable'
-                  : resolveModelForSystem(model.id).changed
-                    ? 'fallback'
-                    : model.experimental
-                      ? 'experimental'
-                      : 'native'
-            "
-          >
-            {{ model.tier }}:
+        <div class="vdl-ai-system-info">
+          <div class="vdl-ai-storage-title">System Info</div>
+          <div class="vd-text-sm vd-text-muted">
+            WebGPU:
             {{
-              resolveModelForSystem(model.id).loadBlocked
-                ? 'unsupported'
-                : resolveModelForSystem(model.id).unavailable
-                  ? 'unavailable'
-                  : resolveModelForSystem(model.id).changed
-                    ? 'fallback'
-                    : model.experimental
-                      ? 'experimental'
-                      : 'native'
+              systemInfo
+                ? systemInfo.webgpuSupported
+                  ? 'Supported'
+                  : 'Not supported'
+                : 'Checking…'
             }}
-          </span>
+          </div>
+          <div class="vd-text-sm vd-text-muted">
+            GPU: {{ systemInfo?.adapterName || systemInfo?.error || 'Detecting…' }}
+          </div>
+          <div class="vd-text-sm vd-text-muted">
+            shader-f16:
+            {{ systemInfo ? (systemInfo.shaderF16 ? 'Supported' : 'Unavailable') : 'Checking…' }}
+          </div>
+          <div
+            class="vd-text-sm vd-text-muted"
+            :title="'deviceMemory is browser-capped/approximate; GPU VRAM is not exposed to web pages.'"
+          >
+            Device: {{ deviceSummary }}
+          </div>
         </div>
-      </div>
+      </details>
 
       <p class="vd-text-muted vd-text-sm">
         Gemma 4 is the primary family. Optional small/fast models are available when you need a
@@ -760,8 +832,32 @@ watch(loaded, async (isLoaded, wasLoaded) => {
 
     <div v-else class="vdl-ai-chat-interface">
       <div class="vdl-ai-toolbar">
+        <label
+          >Conversation
+          <select v-model="mode" class="vd-select" :disabled="streaming || modeChanging">
+            <option value="general">General chat</option>
+            <option value="docs">Docs · cited vd3 answers</option>
+          </select></label
+        >
+        <VdButton variant="ghost" :disabled="loading" @click="resetConversation"
+          >New conversation</VdButton
+        >
+      </div>
+      <div v-if="mode === 'docs'" class="vdl-ai-docs-note">
+        <p role="status">{{ docsStatus }}</p>
+        <VdButton
+          size="sm"
+          variant="secondary"
+          :disabled="docsSemanticLoading || streaming"
+          @click="enableDocsSemantic"
+          >Enable semantic docs search · ~23 MB</VdButton
+        >
+      </div>
+      <p v-if="contextNotice" class="vdl-ai-docs-note" role="status">{{ contextNotice }}</p>
+      <div class="vdl-ai-toolbar">
         <select
           class="vd-select vdl-ai-model-select"
+          aria-label="Model"
           :value="selectedModelId"
           :disabled="loading || streaming"
           @change="applySelection($event.target.value)"
@@ -804,6 +900,15 @@ watch(loaded, async (isLoaded, wasLoaded) => {
         <div v-for="(msg, idx) in messages" :key="idx" class="vdl-ai-message" :data-role="msg.role">
           <div class="vdl-ai-message-role">{{ msg.role === 'user' ? 'You' : 'Assistant' }}</div>
           <div class="vdl-ai-message-body" v-html="renderMarkdown(msg.content)"></div>
+          <ol
+            v-if="msg.citations?.length"
+            class="vdl-ai-citations"
+            aria-label="Documentation sources"
+          >
+            <li v-for="source in msg.citations" :key="source.id">
+              <a :href="source.url" target="_blank" rel="noopener noreferrer">{{ source.title }}</a>
+            </li>
+          </ol>
         </div>
         <div v-if="!messages.length" class="vdl-ai-empty">
           Ask anything. Answers stay on this device.
@@ -815,6 +920,7 @@ watch(loaded, async (isLoaded, wasLoaded) => {
           ref="composerInput"
           v-model="inputText"
           class="vdl-ai-input"
+          aria-label="Message"
           rows="3"
           maxlength="2000"
           placeholder="Message the local model… (Enter to send, Shift+Enter for newline)"
@@ -826,7 +932,9 @@ watch(loaded, async (isLoaded, wasLoaded) => {
           <span v-if="tokenCount != null" class="vd-text-sm vd-text-muted"
             >Tokens: {{ tokenCount }}</span
           >
+          <VdButton v-if="streaming" variant="secondary" @click="stopGeneration">Stop</VdButton>
           <VdButton
+            v-else
             type="submit"
             variant="primary"
             :loading="streaming"
@@ -848,8 +956,8 @@ watch(loaded, async (isLoaded, wasLoaded) => {
       <strong>this site only</strong>. The next load may download again.
     </p>
     <ul>
-      <li>Cache Storage entries that look like MLC / WebLLM model files</li>
-      <li>Matching IndexedDB databases</li>
+      <li>Chat model files from the curated and advanced catalog</li>
+      <li>The chat-owned LiteRT cache</li>
       <li>Local “model cached” markers</li>
     </ul>
     <template #footer>
@@ -860,6 +968,21 @@ watch(loaded, async (isLoaded, wasLoaded) => {
 </template>
 
 <style scoped>
+.vdl-ai-diagnostics summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.vdl-ai-diagnostics[open] {
+  display: grid;
+  gap: 0.75rem;
+}
+.vdl-ai-docs-note {
+  padding: 0 1.25rem;
+  font-size: 0.85rem;
+}
+.vdl-ai-citations {
+  overflow-wrap: anywhere;
+}
 .vdl-ai-chat-wrap {
   width: 100%;
   position: relative;

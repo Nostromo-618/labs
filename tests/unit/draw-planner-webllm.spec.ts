@@ -4,7 +4,7 @@ const HARNESS = '/tests/fixtures/neptune-harness.html';
 
 test.describe('tiny planner (fast planner experiment)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(HARNESS);
+    await page.goto(HARNESS, { waitUntil: 'domcontentloaded' });
   });
 
   test('generatePlan delegates to the injected chat and stays planning-only', async ({ page }) => {

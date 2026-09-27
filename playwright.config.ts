@@ -11,10 +11,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['html', { open: 'never' }],
-    ['list'],
-  ],
+  reporter: [['html', { open: 'never' }], ['list']],
   use: {
     baseURL: 'http://localhost:8790',
     trace: 'on-first-retry',
@@ -33,11 +30,24 @@ export default defineConfig({
       name: 'Chromium Mobile',
       use: { ...devices['Pixel 7'] },
     },
+    {
+      name: 'Firefox Desktop',
+      use: { ...devices['Desktop Firefox'], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'Firefox Mobile',
+      use: { ...devices['Desktop Firefox'], viewport: { width: 390, height: 844 }, hasTouch: true },
+    },
+    {
+      name: 'WebKit Desktop',
+      use: { ...devices['Desktop Safari'], viewport: { width: 1440, height: 900 } },
+    },
+    { name: 'WebKit Mobile', use: { ...devices['iPhone 13'] } },
   ],
   webServer: {
     command: process.env.CI
-      ? `pnpm exec vite --host 127.0.0.1 --port 8790 --strictPort >/dev/null 2>&1`
-      : `pnpm exec vite --host 127.0.0.1 --port 8790 --strictPort`,
+      ? `LABS_STABLE_EVAL=1 ./node_modules/.bin/vite --host 127.0.0.1 --port 8790 --strictPort >/dev/null 2>&1`
+      : `LABS_STABLE_EVAL=1 ./node_modules/.bin/vite --host 127.0.0.1 --port 8790 --strictPort`,
     url: 'http://localhost:8790',
     reuseExistingServer: !process.env.CI,
     timeout: 60 * 1000,

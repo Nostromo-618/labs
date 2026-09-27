@@ -2,10 +2,25 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+const litertRoot = path.dirname(require.resolve('@litert-lm/core/package.json'));
+const transformersRoot = path.resolve(
+  path.dirname(require.resolve('@huggingface/transformers')),
+  '..',
+);
+const ortRoot = path.resolve(
+  path.dirname(
+    createRequire(path.join(transformersRoot, 'package.json')).resolve('onnxruntime-web'),
+  ),
+  '..',
+);
+
 const localModelsDir = path.join(root, '.models');
 const vdlCbunRoot = path.resolve(root, '../vdl-cbun');
 const vdlCbunDist = path.join(vdlCbunRoot, 'dist');
@@ -23,7 +38,7 @@ function localModelsPlugin() {
           const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
           let rel = urlPath.replace(/^\/+/, '');
           // WebLLM HF URL helper: {model}/resolve/main/<file>
-          rel = rel.replace(/\/resolve\/main(?=\/|$)/g, '');
+          rel = rel.replace(/\/resolve\/(?:main|[a-f0-9]{40})(?=\/|$)/g, '');
           if (!rel || rel.includes('..')) {
             res.statusCode = 400;
             res.end('Bad path');
@@ -45,7 +60,13 @@ function localModelsPlugin() {
           res.setHeader('Content-Type', 'application/octet-stream');
           res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
           res.setHeader('Accept-Ranges', 'bytes');
-          fs.createReadStream(filePath).pipe(res);
+          if (req.method === 'HEAD') {
+            res.end();
+            return;
+          }
+          const stream = fs.createReadStream(filePath);
+          res.on('close', () => stream.destroy());
+          stream.on('error', next).pipe(res);
         } catch (err) {
           next(err);
         }
@@ -81,7 +102,9 @@ function devLogsPlugin() {
             const tag = payload.tag || 'AI-DRAW';
             const title = payload.title || '';
             const dataStr =
-              typeof payload.data === 'string' ? payload.data : JSON.stringify(payload.data, null, 2);
+              typeof payload.data === 'string'
+                ? payload.data
+                : JSON.stringify(payload.data, null, 2);
             const entry = `[${timestamp}] [${level}] [${tag}] ${title}\n${dataStr}\n${'─'.repeat(80)}\n`;
             fs.appendFileSync(logFile, entry, 'utf8');
             res.statusCode = 200;
@@ -121,21 +144,46 @@ const vdlCbunAlias = useLocalVdlCbun
     }
   : {};
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
+    {
+      name: 'labs-csp',
+      transformIndexHtml: {
+        order: 'post',
+        handler(html, context) {
+          if (!context.bundle) return html;
+          const hashes = [
+            ...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g),
+          ].map((m) => `'sha256-${createHash('sha256').update(m[1]).digest('base64')}'`);
+          const policy = `default-src 'self'; script-src 'self' 'wasm-unsafe-eval' ${hashes.join(' ')}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' ws: wss: https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; media-src 'self' blob: https:; object-src 'none'; base-uri 'self'`;
+          return html.replace(
+            '<head>',
+            `<head><meta http-equiv="Content-Security-Policy" content="${policy}">`,
+          );
+        },
+      },
+    },
     vue(),
     localModelsPlugin(),
     devLogsPlugin(),
     viteStaticCopy({
       targets: [
-        { src: 'model-eval.js', dest: '.' },
-        { src: 'data', dest: '.' },
+        { src: path.join(litertRoot, 'wasm/*'), dest: 'litert-wasm', rename: { stripBase: true } },
+        {
+          src: path.join(ortRoot, 'dist/ort-wasm*'),
+          dest: 'transformers-wasm',
+          rename: { stripBase: true },
+        },
+        { src: 'data/search-manifest.json', dest: '.' },
+        { src: 'data/search', dest: '.' },
         { src: 'doc', dest: '.' },
         { src: 'favicon.svg', dest: '.' },
       ],
     }),
   ],
+  worker: { format: 'es' },
   resolve: {
+    dedupe: ['vue', '@vanduo-oss/vd3'],
     alias: {
       ...vdlCbunAlias,
     },
@@ -147,23 +195,22 @@ export default defineConfig({
       input: {
         main: path.resolve(root, 'index.html'),
         'ai-chat-demo': path.resolve(root, 'demo/ai-chat-demo.html'),
-        'ai-draw-demo': path.resolve(root, 'demo/ai-draw-demo.html'),
         'hybrid-search-demo': path.resolve(root, 'demo/hybrid-search-demo.html'),
-        'model-eval-harness': path.resolve(root, 'demo/model-eval-harness.html'),
+        ...(mode === 'qa'
+          ? { 'model-eval-harness': path.resolve(root, 'demo/model-eval-harness.html') }
+          : {}),
       },
     },
   },
   server: {
+    hmr: process.env.LABS_STABLE_EVAL !== '1',
+    watch: process.env.LABS_STABLE_EVAL === '1' ? { ignored: ['**/*'] } : undefined,
     port: 3000,
-    // Large local `.litertlm` downloads need more than the default keep-alive window.
-    headers: {
-      Connection: 'keep-alive',
-    },
     fs: {
-      allow: [root, ...(useLocalVdlCbun ? [vdlCbunRoot] : [])],
+      allow: [path.resolve(root, '..'), root, ...(useLocalVdlCbun ? [vdlCbunRoot] : [])],
     },
   },
   preview: {
     port: 3000,
   },
-});
+}));

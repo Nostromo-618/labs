@@ -3,23 +3,23 @@ import { VanduoVue, VdCard, VdThemeSwitcher } from '@vanduo-oss/vd3';
 import '@vanduo-oss/vd3/css';
 import '../styles/legacy-bridge.css';
 import { installResolvedTheme } from '../vdl-resolved-theme.js';
-import VdlAiChatUI from '../components/VdlAiChatUI.vue';
+import VdlChatWorkbench from '../components/VdlChatWorkbench.vue';
 
 const DemoApp = {
   name: 'AiChatDemo',
   setup() {
     return () =>
-      h('div', { class: 'demo-root' }, [
+      h('div', { class: 'demo-root vdl-chat-demo' }, [
         h('header', { class: 'demo-header' }, [
           h('h1', 'AI Chat (WebGPU)'),
           h('p', [
             'In-browser inference using LiteRT-LM for Gemma 4 (true multi-turn), plus optional WebLLM models.',
             h('br'),
-            'Fully private, FOSS guardrails enforced. No server required.',
+            'Your prompts stay on this device. Models download only when you choose Load.',
           ]),
           h(VdThemeSwitcher, { menu: false }),
         ]),
-        h('div', { class: 'demo-chat-wrap' }, [h(VdlAiChatUI)]),
+        h('div', { class: 'demo-chat-wrap' }, [h(VdlChatWorkbench)]),
         h(
           VdCard,
           { class: 'demo-info-section vdl-card-glow vd-glass' },
@@ -29,17 +29,17 @@ const DemoApp = {
               h('h4', 'Browser Caching & Loading Behavior'),
               h(
                 'p',
-                'This component requires the user to explicitly click "Load AI Model" to initiate the WebGPU engine. This prevents hijacking your GPU and network bandwidth immediately upon page load.',
+                'Choose a model and click "Load AI Model" when you are ready to download it and use your GPU.',
               ),
               h('p', [h('strong', 'What happens when the page is refreshed?')]),
               h('ul', [
                 h('li', [
-                  h('strong', 'The Download is Cached: '),
-                  'After the initial model download, weights are stored securely on your hard drive (LiteRT/OPFS or browser Cache API depending on backend).',
+                  h('strong', 'Browser cache: '),
+                  'The browser can retain downloaded weights for later loads. Storage denial, quota limits, or clearing site data may require another download.',
                 ]),
                 h('li', [
                   h('strong', 'VRAM Initialization: '),
-                  'A page refresh destroys the active WebAssembly memory and WebGPU context. When you click "Load AI Model" after a refresh, the component skips the network download and reads weights from the local cache into GPU VRAM.',
+                  'Refreshing releases the active model. Click Load again to initialize it; when cached weights are available, the browser can reuse them.',
                 ]),
               ]),
               h('h4', 'Acknowledgments, Technologies & Attribution'),

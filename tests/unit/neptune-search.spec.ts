@@ -4,7 +4,7 @@ const HARNESS = '/tests/fixtures/neptune-harness.html';
 
 test.describe('HybridSearch Unit', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(HARNESS);
+    await page.goto(HARNESS, { waitUntil: 'domcontentloaded' });
   });
 
   test('cosineSimilarity of identical vectors is 1', async ({ page }) => {
@@ -115,12 +115,8 @@ test.describe('HybridSearch Unit', () => {
   test('mergeResults ranks by score across semantic and fuzzy', async ({ page }) => {
     const result = await page.evaluate(async () => {
       const search = await window.createSearch({ maxResults: 10, confidence: false });
-      const fuzzy = [
-        { item: { ...window.mockDocs[0], id: 'fuzzy-only' }, score: 0.05 },
-      ];
-      const semantic = [
-        { id: 'buttons', score: 0.3 },
-      ];
+      const fuzzy = [{ item: { ...window.mockDocs[0], id: 'fuzzy-only' }, score: 0.05 }];
+      const semantic = [{ id: 'buttons', score: 0.3 }];
       return search.mergeResults(fuzzy, semantic);
     });
 
@@ -148,8 +144,15 @@ test.describe('HybridSearch Unit', () => {
   test('initFuzzy rejects malformed index payload', async ({ page }) => {
     const result = await page.evaluate(async () => {
       const badPayload = { documents: [{ id: 'x', title: 'Only title' }] };
-      const toBase64 = (str: string) => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1)));
-      const search = new (await import('/node_modules/@vanduo-oss/vdl-hybrid-search/dist/index.js')).HybridSearch({
+      const toBase64 = (str: string) =>
+        btoa(
+          encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+            String.fromCharCode('0x' + p1),
+          ),
+        );
+      const search = new (
+        await import('/node_modules/@vanduo-oss/vdl-hybrid-search/dist/index.js')
+      ).HybridSearch({
         indexUrl: 'data:application/json;base64,' + toBase64(JSON.stringify(badPayload)),
       });
       try {
@@ -167,19 +170,21 @@ test.describe('HybridSearch Unit', () => {
   test('UI result links are safely constructed', async ({ page }) => {
     const href = await page.evaluate(async () => {
       const { ui } = await window.createUI({ baseUrl: 'javascript:alert(1)' });
-      ui._results = [{
-        doc: {
-          id: 'bad-doc',
-          title: 'Unsafe',
-          category: 'Security',
-          icon: 'ph-file-text" onclick="alert(1)',
-          bodyText: 'Unsafe payload test',
-          route: 'javascript:alert(1)',
-          keywords: ['unsafe'],
+      ui._results = [
+        {
+          doc: {
+            id: 'bad-doc',
+            title: 'Unsafe',
+            category: 'Security',
+            icon: 'ph-file-text" onclick="alert(1)',
+            bodyText: 'Unsafe payload test',
+            route: 'javascript:alert(1)',
+            keywords: ['unsafe'],
+          },
+          score: 0.9,
+          source: 'fuzzy',
         },
-        score: 0.9,
-        source: 'fuzzy',
-      }];
+      ];
       ui._renderResults();
       return document.querySelector('.vdl-neptune-result-link')?.getAttribute('href');
     });
@@ -189,7 +194,8 @@ test.describe('HybridSearch Unit', () => {
 
   test('curriculum-shaped corpus loads via injectable Fuse loader', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const { HybridSearch } = await import('/node_modules/@vanduo-oss/vdl-hybrid-search/dist/index.js');
+      const { HybridSearch } =
+        await import('/node_modules/@vanduo-oss/vdl-hybrid-search/dist/index.js');
       const FuseMod = await import('https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.basic.mjs');
       const indexRes = await fetch('/tests/fixtures/curriculum-search-index.json');
       const index = await indexRes.json();

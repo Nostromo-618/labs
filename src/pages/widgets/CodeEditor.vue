@@ -109,12 +109,22 @@ const code = ref('const hello = "world";');
               <option v-for="l in languageOptions" :key="l.id" :value="l.id">{{ l.label }}</option>
             </select>
           </label>
-          <label class="ce-control ce-check"><input v-model="lineNumbers" type="checkbox" /> line numbers</label>
+          <label class="ce-control ce-check"
+            ><input v-model="lineNumbers" type="checkbox" /> line numbers</label
+          >
           <label class="ce-control ce-check"><input v-model="wrap" type="checkbox" /> wrap</label>
-          <label class="ce-control ce-check"><input v-model="readOnly" type="checkbox" /> read-only</label>
-          <label class="ce-control ce-check"><input v-model="autoClose" type="checkbox" /> auto-close</label>
-          <label class="ce-control ce-check"><input v-model="highlightActiveLine" type="checkbox" /> active line</label>
-          <label class="ce-control ce-check"><input v-model="showCopy" type="checkbox" /> copy</label>
+          <label class="ce-control ce-check"
+            ><input v-model="readOnly" type="checkbox" /> read-only</label
+          >
+          <label class="ce-control ce-check"
+            ><input v-model="autoClose" type="checkbox" /> auto-close</label
+          >
+          <label class="ce-control ce-check"
+            ><input v-model="highlightActiveLine" type="checkbox" /> active line</label
+          >
+          <label class="ce-control ce-check"
+            ><input v-model="showCopy" type="checkbox" /> copy</label
+          >
         </div>
 
         <VdCodeEditor

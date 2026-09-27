@@ -11,35 +11,33 @@
   --labs-main-min-height-offset: 12.5rem;
 }
 
-html[data-labs-dock="bottom"],
+html[data-labs-dock='bottom'],
 html:not([data-labs-dock]) {
   --labs-main-offset: 1rem;
   --labs-sticky-offset: 1rem;
   --labs-dock-edge-pad-bottom: var(--labs-dock-clearance);
 }
 
-html[data-labs-dock="top"] {
+html[data-labs-dock='top'] {
   --labs-main-offset: var(--labs-dock-clearance);
   --labs-sticky-offset: var(--labs-dock-clearance);
   --labs-dock-edge-pad-top: var(--labs-dock-clearance);
   --labs-dock-edge-pad-bottom: 0;
 }
 
-html[data-labs-dock="left"],
-html[data-labs-dock="right"] {
-  --labs-dock-clearance: calc(
-    var(--vd-dock-height) + var(--vd-dock-inset) + 0.5rem
-  );
+html[data-labs-dock='left'],
+html[data-labs-dock='right'] {
+  --labs-dock-clearance: calc(var(--vd-dock-height) + var(--vd-dock-inset) + 0.5rem);
 }
 
-html[data-labs-dock="left"] {
+html[data-labs-dock='left'] {
   --labs-main-offset: 1rem;
   --labs-sticky-offset: 1rem;
   --labs-dock-edge-pad-left: var(--labs-dock-clearance);
   --labs-dock-edge-pad-bottom: 0;
 }
 
-html[data-labs-dock="right"] {
+html[data-labs-dock='right'] {
   --labs-main-offset: 1rem;
   --labs-sticky-offset: 1rem;
   --labs-dock-edge-pad-right: var(--labs-dock-clearance);
@@ -50,16 +48,12 @@ html[data-labs-dock="right"] {
   :root {
     --vd-site-dock-height: 4.375rem;
     --vd-site-dock-inset: 0.75rem;
-    --labs-dock-clearance: calc(
-      var(--vd-site-dock-height) + var(--vd-site-dock-inset) + 0.375rem
-    );
+    --labs-dock-clearance: calc(var(--vd-site-dock-height) + var(--vd-site-dock-inset) + 0.375rem);
   }
 
-  html[data-labs-dock="left"],
-  html[data-labs-dock="right"] {
-    --labs-dock-clearance: calc(
-      var(--vd-site-dock-height) + var(--vd-site-dock-inset) + 0.375rem
-    );
+  html[data-labs-dock='left'],
+  html[data-labs-dock='right'] {
+    --labs-dock-clearance: calc(var(--vd-site-dock-height) + var(--vd-site-dock-inset) + 0.375rem);
   }
 }
 
@@ -137,8 +131,8 @@ html[data-labs-dock="right"] {
   --vd-glass-highlight-alpha: 0;
 }
 
-.vd-site-dock.vd-dock-dark.vd-glass-34:not([class*="vd-dock-tint-"]),
-.vd-site-dock.vd-dock-dark.vd-glass-34.vd-dock-tint-accent[class*="vd-dock-tint-"] {
+.vd-site-dock.vd-dock-dark.vd-glass-34:not([class*='vd-dock-tint-']),
+.vd-site-dock.vd-dock-dark.vd-glass-34.vd-dock-tint-accent[class*='vd-dock-tint-'] {
   background: color-mix(in srgb, #030303 90%, transparent);
   background-image: none;
   border-color: rgb(255 255 255 / 10%);
@@ -147,8 +141,8 @@ html[data-labs-dock="right"] {
     inset 0 1px 0 rgb(255 255 255 / 6%);
 }
 
-.vd-site-dock.vd-dock-dark.vd-glass-34:not([class*="vd-dock-tint-"])::before,
-.vd-site-dock.vd-dock-dark.vd-glass-34.vd-dock-tint-accent[class*="vd-dock-tint-"]::before {
+.vd-site-dock.vd-dock-dark.vd-glass-34:not([class*='vd-dock-tint-'])::before,
+.vd-site-dock.vd-dock-dark.vd-glass-34.vd-dock-tint-accent[class*='vd-dock-tint-']::before {
   opacity: 0;
 }
 
@@ -160,7 +154,7 @@ html[data-labs-dock="right"] {
   --vd-dock-ink-active: var(--vd-dock-ink);
 }
 
-.vd-site-dock[class*="vd-dock-tint-"] {
+.vd-site-dock[class*='vd-dock-tint-'] {
   --vd-dock-ink: color-mix(in srgb, var(--vd-dock-tint) 35%, white);
   --vd-dock-ink-active: color-mix(in srgb, var(--vd-dock-tint) 22%, white);
 }
@@ -272,35 +266,19 @@ html[data-labs-dock="right"] {
     opacity: 0.92;
   }
 
-  .vd-site-dock.vd-dock-edge-top
-    .vd-dock-links
-    .vd-dock-item
-    :is(.ph, .ph-fill),
-  .vd-site-dock.vd-dock-edge-bottom
-    .vd-dock-links
-    .vd-dock-item
-    :is(.ph, .ph-fill) {
+  .vd-site-dock.vd-dock-edge-top .vd-dock-links .vd-dock-item :is(.ph, .ph-fill),
+  .vd-site-dock.vd-dock-edge-bottom .vd-dock-links .vd-dock-item :is(.ph, .ph-fill) {
     font-size: 1.7813rem;
   }
 
-  .vd-site-dock.vd-dock-edge-top
-    .vd-dock-links
-    .vd-dock-item.is-active
-    .vd-dock-label,
-  .vd-site-dock.vd-dock-edge-bottom
-    .vd-dock-links
-    .vd-dock-item.is-active
-    .vd-dock-label {
+  .vd-site-dock.vd-dock-edge-top .vd-dock-links .vd-dock-item.is-active .vd-dock-label,
+  .vd-site-dock.vd-dock-edge-bottom .vd-dock-links .vd-dock-item.is-active .vd-dock-label {
     opacity: 1;
     font-weight: 700;
   }
 
-  .vd-site-dock.vd-dock-edge-top.vd-dock-items-inline
-    .vd-dock-links
-    .vd-dock-item,
-  .vd-site-dock.vd-dock-edge-bottom.vd-dock-items-inline
-    .vd-dock-links
-    .vd-dock-item {
+  .vd-site-dock.vd-dock-edge-top.vd-dock-items-inline .vd-dock-links .vd-dock-item,
+  .vd-site-dock.vd-dock-edge-bottom.vd-dock-items-inline .vd-dock-links .vd-dock-item {
     flex-direction: row;
     gap: 0.35rem;
     min-width: 0;
@@ -314,8 +292,7 @@ html[data-labs-dock="right"] {
 .vd-site-dock.vd-dock-edge-bottom:not(.is-square, .is-morphing),
 .vd-site-dock.vd-dock-edge-top:not(.is-square, .is-morphing) {
   transition-property:
-    height, min-height, left, right, top, bottom, transform, padding, gap,
-    flex-direction;
+    height, min-height, left, right, top, bottom, transform, padding, gap, flex-direction;
 }
 
 /* Mobile / narrow: keep the full-span strip. Use 100vw (not left+right+
@@ -339,9 +316,7 @@ html[data-labs-dock="right"] {
   .vd-site-dock.vd-dock.vd-dock-edge-top:not(.is-square) {
     left: 50%;
     right: auto;
-    width: calc(
-      var(--vd-site-dock-length-ratio) * (100vw - 2 * var(--vd-dock-inset))
-    );
+    width: calc(var(--vd-site-dock-length-ratio) * (100vw - 2 * var(--vd-dock-inset)));
     max-width: none;
     transform: translateX(-50%);
   }
@@ -350,9 +325,7 @@ html[data-labs-dock="right"] {
   .vd-site-dock.vd-dock.vd-dock-edge-right:not(.is-square) {
     top: 50%;
     bottom: auto;
-    height: calc(
-      var(--vd-site-dock-length-ratio) * (100vh - 2 * var(--vd-dock-inset))
-    );
+    height: calc(var(--vd-site-dock-length-ratio) * (100vh - 2 * var(--vd-dock-inset)));
     min-height: 0;
     max-height: none;
     transform: translateY(-50%);
@@ -361,8 +334,7 @@ html[data-labs-dock="right"] {
   .vd-site-dock.vd-dock-edge-left:not(.is-square, .is-morphing),
   .vd-site-dock.vd-dock-edge-right:not(.is-square, .is-morphing) {
     transition-property:
-      width, max-width, left, right, top, bottom, transform, padding, gap,
-      flex-direction;
+      width, max-width, left, right, top, bottom, transform, padding, gap, flex-direction;
   }
 }
 
@@ -407,13 +379,13 @@ html[data-labs-dock="right"] {
 
 /* Brand mark: idle still; hover ramps slow→medium; morph spins fast. */
 @property --vd-site-dock-brand-spin {
-  syntax: "<time>";
+  syntax: '<time>';
   inherits: true;
   initial-value: 12s;
 }
 
 @property --vd-site-dock-brand-angle {
-  syntax: "<angle>";
+  syntax: '<angle>';
   inherits: false;
   initial-value: 0deg;
 }
@@ -427,8 +399,7 @@ html[data-labs-dock="right"] {
 .vd-site-dock .vd-dock-brand .labs-dock-atom-spin {
   transform: rotate(var(--vd-site-dock-brand-angle));
   transform-origin: 50px 50px;
-  animation: vd-site-dock-brand-spin var(--vd-site-dock-brand-spin) linear
-    infinite;
+  animation: vd-site-dock-brand-spin var(--vd-site-dock-brand-spin) linear infinite;
   animation-play-state: paused;
 }
 
@@ -474,7 +445,7 @@ html[data-labs-dock="right"] {
 
 .vd-site-dock .vd-dock-actions button:hover,
 .vd-site-dock .vd-dock-actions button:focus-visible,
-.vd-site-dock .vd-dock-actions button[aria-expanded="true"] {
+.vd-site-dock .vd-dock-actions button[aria-expanded='true'] {
   opacity: 1;
   color: var(--vd-dock-ink-active);
   background: transparent;
@@ -532,7 +503,7 @@ html[data-labs-dock="right"] {
     bottom: max(var(--vd-dock-inset), env(safe-area-inset-bottom, 0px));
   }
 
-  html[data-labs-dock="top"] .vd-site-dock.vd-dock-edge-top:not(.is-square) {
+  html[data-labs-dock='top'] .vd-site-dock.vd-dock-edge-top:not(.is-square) {
     top: max(var(--vd-dock-inset), env(safe-area-inset-top, 0px));
   }
 
@@ -670,9 +641,7 @@ html[data-labs-dock="right"] {
   .vd-site-dock .vd-dock-links .vd-theme-switcher button:focus-visible,
   .vd-site-dock .vd-dock-links .vd-theme-customizer-trigger:hover,
   .vd-site-dock .vd-dock-links .vd-theme-customizer-trigger:focus-visible,
-  .vd-site-dock
-    .vd-dock-links
-    .vd-theme-customizer-trigger[aria-expanded="true"] {
+  .vd-site-dock .vd-dock-links .vd-theme-customizer-trigger[aria-expanded='true'] {
     opacity: 1;
     color: var(--vd-dock-ink-active);
   }
@@ -759,7 +728,7 @@ html[data-labs-dock="right"] {
 }
 
 .navbar-actions-always .vd-theme-customizer-trigger:hover,
-.navbar-actions-always .vd-theme-customizer-trigger[aria-expanded="true"] {
+.navbar-actions-always .vd-theme-customizer-trigger[aria-expanded='true'] {
   color: var(--vd-color-primary);
   border-color: transparent;
   background: var(--vd-bg-secondary);
@@ -811,7 +780,7 @@ html[data-labs-dock="right"] {
    ------------------------------------------------------------------------- */
 .vd-site-dock .vd-theme-customizer-trigger i.ph-bold.ph-swatches,
 .vd-site-dock .labs-dock-github i.ph-bold.ph-github-logo {
-  font-family: "Phosphor" !important;
+  font-family: 'Phosphor' !important;
   speak: never;
   font-style: normal;
   font-weight: normal;
@@ -819,54 +788,54 @@ html[data-labs-dock="right"] {
   text-transform: none;
   line-height: 1;
   letter-spacing: 0;
-  -webkit-font-feature-settings: "liga";
-  font-feature-settings: "liga";
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
 
 .vd-site-dock .vd-theme-customizer-trigger i.ph-bold.ph-swatches::before {
-  content: "\e5b8";
+  content: '\e5b8';
 }
 
 .vd-site-dock .labs-dock-github i.ph-bold.ph-github-logo::before {
-  content: "\e576";
+  content: '\e576';
 }
 
 /* Surface-tinted pills: full-strength ink (88% mix vanishes on same-hue backgrounds). */
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-dock-item:not(.is-active),
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions button,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions .vd-theme-switcher-toggle,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions .vd-theme-customizer-trigger,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-theme-switcher button,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-theme-customizer-trigger,
-.vd-site-dock[class*="vd-dock-tint-"] .labs-dock-github,
-.vd-site-dock[class*="vd-dock-tint-"] .labs-site-dock-brand-mark {
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-dock-item:not(.is-active),
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions button,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions .vd-theme-switcher-toggle,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions .vd-theme-customizer-trigger,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-theme-switcher button,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-theme-customizer-trigger,
+.vd-site-dock[class*='vd-dock-tint-'] .labs-dock-github,
+.vd-site-dock[class*='vd-dock-tint-'] .labs-site-dock-brand-mark {
   color: var(--vd-dock-ink);
   opacity: 1;
 }
 
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-dock-item.is-active,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-dock-item:hover:not(.is-active),
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-dock-item:focus-visible:not(.is-active),
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions button:hover,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions button:focus-visible,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions button[aria-expanded="true"],
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions .vd-theme-switcher-toggle:hover,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions .vd-theme-switcher-toggle:focus-visible,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions .vd-theme-customizer-trigger:hover,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-actions .vd-theme-customizer-trigger:focus-visible,
-.vd-site-dock[class*="vd-dock-tint-"]
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-dock-item.is-active,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-dock-item:hover:not(.is-active),
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-dock-item:focus-visible:not(.is-active),
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions button:hover,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions button:focus-visible,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions button[aria-expanded='true'],
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions .vd-theme-switcher-toggle:hover,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions .vd-theme-switcher-toggle:focus-visible,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions .vd-theme-customizer-trigger:hover,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-actions .vd-theme-customizer-trigger:focus-visible,
+.vd-site-dock[class*='vd-dock-tint-']
   .vd-dock-actions
-  .vd-theme-customizer-trigger[aria-expanded="true"],
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-theme-switcher button:hover,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-theme-switcher button:focus-visible,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-theme-customizer-trigger:hover,
-.vd-site-dock[class*="vd-dock-tint-"] .vd-dock-links .vd-theme-customizer-trigger:focus-visible,
-.vd-site-dock[class*="vd-dock-tint-"]
+  .vd-theme-customizer-trigger[aria-expanded='true'],
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-theme-switcher button:hover,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-theme-switcher button:focus-visible,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-theme-customizer-trigger:hover,
+.vd-site-dock[class*='vd-dock-tint-'] .vd-dock-links .vd-theme-customizer-trigger:focus-visible,
+.vd-site-dock[class*='vd-dock-tint-']
   .vd-dock-links
-  .vd-theme-customizer-trigger[aria-expanded="true"],
-.vd-site-dock[class*="vd-dock-tint-"] .labs-dock-github:hover,
-.vd-site-dock[class*="vd-dock-tint-"] .labs-dock-github:focus-visible {
+  .vd-theme-customizer-trigger[aria-expanded='true'],
+.vd-site-dock[class*='vd-dock-tint-'] .labs-dock-github:hover,
+.vd-site-dock[class*='vd-dock-tint-'] .labs-dock-github:focus-visible {
   color: var(--vd-dock-ink-active);
   opacity: 1;
 }
@@ -879,15 +848,15 @@ html[data-labs-dock="right"] {
 }
 
 .navbar-actions-always .vd-theme-switcher-toggle .ph-desktop::before {
-  content: "\e560";
+  content: '\e560';
 }
 
 .navbar-actions-always .vd-theme-switcher-toggle .ph-sun::before {
-  content: "\e472";
+  content: '\e472';
 }
 
 .navbar-actions-always .vd-theme-switcher-toggle .ph-moon::before {
-  content: "\e330";
+  content: '\e330';
 }
 
 /* Hero search wrapper — matches .hero-content width (same as CTA button row) */

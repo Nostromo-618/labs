@@ -1,0 +1,14 @@
+[
+  {"query":"dock","expected":"dock"},
+  {"query":"global search","expected":"global-search"},
+  {"query":"surfaces","expected":"surfaces"},
+  {"query":"login","expected":"login"},
+  {"query":"liquid gradient","expected":"liquid-gradient"},
+  {"query":"canvas components bundle","expected":"cbun"},
+  {"query":"ecosystem","expected":"vd3-ecosystem"},
+  {"query":"VdDock","expected":"dock"},
+  {"query":"vd-btn","expected":"button"},
+  {"query":"buton","expected":"button"},
+  {"query":"navigation on any screen edge","expected":"dock"},
+  {"query":"quantum banana interstellar tax accountant","expected":null}
+]

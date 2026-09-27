@@ -304,7 +304,7 @@ function readCssNumber(styles, name, fallback) {
 /** Labs site defaults — match vd3-docs “Move pointer · theme-aware primary + neutrals” panel. */
 const DEFAULT_KNOBS = Object.freeze({
   speed: 0.143,
-  intensity: 0.30,
+  intensity: 0.3,
   grain: 0.38,
   distort: 0.68,
   gradientSize: 0.48,

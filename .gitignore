@@ -16,3 +16,6 @@ demo/gemma-*.html
 utils/gemma-smoke-runner.mjs
 *.tgz
 logs/
+
+# Local evaluation evidence stays on the review machine
+qa/

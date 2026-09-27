@@ -306,11 +306,39 @@ import { VdHexGrid } from '@vanduo-oss/vdl-cbun/hex-grid';
               @select="onSelect"
               @zoom="onZoom"
             />
-            <div class="canvas-toolbar" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10">
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-outline" @click="gridInstance?.zoomOut()">−</button>
+            <div
+              class="canvas-toolbar"
+              style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                gap: 8px;
+                z-index: 10;
+              "
+            >
+              <button
+                type="button"
+                class="vd-btn vd-btn-sm vd-btn-outline"
+                @click="gridInstance?.zoomOut()"
+              >
+                −
+              </button>
               <span class="vd-text-sm">{{ zoomPercent }}%</span>
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-outline" @click="gridInstance?.zoomIn()">+</button>
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-outline" @click="gridInstance?.resetView()">Reset</button>
+              <button
+                type="button"
+                class="vd-btn vd-btn-sm vd-btn-outline"
+                @click="gridInstance?.zoomIn()"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                class="vd-btn vd-btn-sm vd-btn-outline"
+                @click="gridInstance?.resetView()"
+              >
+                Reset
+              </button>
             </div>
           </div>
         </div>
@@ -320,13 +348,41 @@ import { VdHexGrid } from '@vanduo-oss/vdl-cbun/hex-grid';
           <div class="vd-card-body">
             <h4 class="vd-mb-4">Controls</h4>
             <label class="vd-form-label">Hex size {{ size }}px</label>
-            <input v-model.number="size" type="range" class="vd-range" min="10" max="50" style="width: 100%" />
+            <input
+              v-model.number="size"
+              type="range"
+              class="vd-range"
+              min="10"
+              max="50"
+              style="width: 100%"
+            />
             <label class="vd-form-label vd-mt-3">Width {{ width }}</label>
-            <input v-model.number="width" type="range" class="vd-range" min="5" max="30" style="width: 100%" />
+            <input
+              v-model.number="width"
+              type="range"
+              class="vd-range"
+              min="5"
+              max="30"
+              style="width: 100%"
+            />
             <label class="vd-form-label vd-mt-3">Height {{ height }}</label>
-            <input v-model.number="height" type="range" class="vd-range" min="5" max="20" style="width: 100%" />
+            <input
+              v-model.number="height"
+              type="range"
+              class="vd-range"
+              min="5"
+              max="20"
+              style="width: 100%"
+            />
             <label class="vd-form-label vd-mt-3">Rotation {{ rotationDeg }}°</label>
-            <input v-model.number="rotationDeg" type="range" class="vd-range" min="-180" max="180" style="width: 100%" />
+            <input
+              v-model.number="rotationDeg"
+              type="range"
+              class="vd-range"
+              min="-180"
+              max="180"
+              style="width: 100%"
+            />
             <label class="vd-form-check vd-mt-3">
               <input v-model="cull" type="checkbox" /> Viewport culling
             </label>
@@ -334,14 +390,27 @@ import { VdHexGrid } from '@vanduo-oss/vdl-cbun/hex-grid';
               Visible {{ renderStats.visible }} / {{ renderStats.total }}
             </p>
             <div class="vd-mt-3" style="display: flex; flex-wrap: wrap; gap: 0.5rem">
-              <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="resetGrid">Reset grid</button>
-              <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="generateTerrain">Terrain</button>
+              <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="resetGrid">
+                Reset grid
+              </button>
+              <button
+                type="button"
+                class="vd-btn vd-btn-outline vd-btn-sm"
+                @click="generateTerrain"
+              >
+                Terrain
+              </button>
             </div>
             <label class="vd-form-label vd-mt-3">Paint terrain</label>
             <select v-model="pickedTerrain" class="vd-form-select" :disabled="selectedQ === null">
               <option v-for="t in terrainTypes" :key="t" :value="t">{{ t }}</option>
             </select>
-            <button type="button" class="vd-btn vd-btn-sm vd-btn-outline vd-mt-2" :disabled="selectedQ === null" @click="applyTerrainToSelected">
+            <button
+              type="button"
+              class="vd-btn vd-btn-sm vd-btn-outline vd-mt-2"
+              :disabled="selectedQ === null"
+              @click="applyTerrainToSelected"
+            >
               Apply
             </button>
             <label class="vd-form-check vd-mt-3">
@@ -375,8 +444,12 @@ import { VdHexGrid } from '@vanduo-oss/vdl-cbun/hex-grid';
           <code>{{ mathDistance }}</code>
         </p>
         <div style="display: flex; gap: 1rem">
-          <label>q <input v-model.number="mathTargetQ" type="number" class="vd-form-control" /></label>
-          <label>r <input v-model.number="mathTargetR" type="number" class="vd-form-control" /></label>
+          <label
+            >q <input v-model.number="mathTargetQ" type="number" class="vd-form-control"
+          /></label>
+          <label
+            >r <input v-model.number="mathTargetR" type="number" class="vd-form-control"
+          /></label>
         </div>
         <h4 class="vd-mt-6">Install</h4>
         <DocCodeSnippet :shell="installShell" />

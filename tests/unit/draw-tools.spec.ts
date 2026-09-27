@@ -4,7 +4,7 @@ const HARNESS = '/tests/fixtures/neptune-harness.html';
 
 test.describe('AI Draw tool executor unit tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(HARNESS);
+    await page.goto(HARNESS, { waitUntil: 'domcontentloaded' });
   });
 
   test('createDrawToolExecutor executes add_shape, update_shape, remove_shape, list_shapes, clear_canvas, get_canvas with VdDrawCore', async ({

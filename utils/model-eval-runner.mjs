@@ -4,7 +4,7 @@
  *
  * Usage:
  *   pnpm model-eval
- *   pnpm model-eval -- --models gemma-4-E2B-it-web,qwen3-0.6B-litert
+ *   pnpm model-eval -- --models gemma-4-E2B-it-web,gemma-4-E4B-it-web,Qwen3-0.6B-q4f16_1-MLC
  *   MODEL_EVAL_BASE_URL=http://localhost:3000 pnpm model-eval
  *
  * Expects Vite (`pnpm dev`) serving the repo, or set MODEL_EVAL_BASE_URL.
@@ -13,21 +13,34 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
+import { BASELINE_MODEL_IDS, NEW_MODEL_IDS } from '@vanduo-oss/vdl-ai-chat';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT_DIR = path.join(ROOT, 'data/model-eval-reports/latest');
-const PROFILE = path.resolve(ROOT, '.models/.model-eval-profile');
+const OUT_DIR = path.join(ROOT, 'qa/local-refresh/model-eval');
+const PROFILE = path.resolve(ROOT, '.models/.refresh-eval-profile');
 
 const args = process.argv.slice(2);
 const modelsIdx = args.indexOf('--models');
 const models =
   modelsIdx >= 0
     ? args[modelsIdx + 1]
-    : process.env.MODEL_EVAL_MODELS || 'gemma-4-E2B-it-web,qwen3-0.6B-litert';
+    : process.env.MODEL_EVAL_MODELS || [...BASELINE_MODEL_IDS, ...NEW_MODEL_IDS].join(',');
 
 const base = (process.env.MODEL_EVAL_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const timeoutMs = Number(process.env.MODEL_EVAL_TIMEOUT_MS || 45 * 60 * 1000);
-const url = `${base}/demo/model-eval-harness.html?autorun=1&models=${encodeURIComponent(models)}`;
+const scope = process.env.MODEL_EVAL_SCOPE || 'all';
+const warmRepetitions = Number(process.env.MODEL_EVAL_WARM_REPETITIONS ?? 3);
+if (!['all', 'general', 'docs'].includes(scope))
+  throw new Error('MODEL_EVAL_SCOPE must be all, general, or docs.');
+if (!Number.isInteger(warmRepetitions) || warmRepetitions < 0 || warmRepetitions > 20)
+  throw new Error('MODEL_EVAL_WARM_REPETITIONS must be an integer from 0 to 20.');
+const isPair = args.includes('--pair');
+const reportName = process.env.MODEL_EVAL_REPORT_NAME || (isPair ? 'pair-report' : 'report');
+if (!/^[a-z0-9][a-z0-9._-]{0,63}$/i.test(reportName))
+  throw new Error('Invalid MODEL_EVAL_REPORT_NAME.');
+const url = `${base}/demo/model-eval-harness.html?autorun=1&models=${encodeURIComponent(models)}&scope=${scope}&warm=${warmRepetitions}${args.includes('--cold') ? '&cold=1' : ''}${isPair ? '&pair=1' : ''}`;
+const reportPath = path.join(OUT_DIR, `${reportName}.json`);
+const htmlPath = path.join(OUT_DIR, reportName === 'report' ? 'index.html' : `${reportName}.html`);
 
 fs.mkdirSync(PROFILE, { recursive: true });
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -37,15 +50,49 @@ console.log('[model-eval] opening', url);
 const context = await chromium.launchPersistentContext(PROFILE, {
   headless: process.env.MODEL_EVAL_HEADLESS === '1',
   channel: process.env.MODEL_EVAL_CHANNEL || 'chrome',
-  // Local WebGPU/model eval only (isolated PROFILE). --disable-web-security
-  // relaxes CORS for cross-origin model asset fetches — not for production web.
-  args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--disable-web-security'],
+  args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist'],
   viewport: { width: 1200, height: 900 },
 });
 
 const page = context.pages()[0] || (await context.newPage());
+let lastWeightProgressAt = 0;
+let lastWeightProgressText = '';
 page.on('console', (msg) => {
-  console.log(`[browser:${msg.type()}]`, msg.text());
+  const text = msg.text();
+  const checkpointPrefix = '[VDL_EVAL_CHECKPOINT]';
+  if (text.startsWith(checkpointPrefix)) {
+    try {
+      const report = JSON.parse(text.slice(checkpointPrefix.length));
+      fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+      console.log(
+        `[model-eval] checkpoint saved (${report.models?.length || 0} models${report.kind === 'paired-chat' ? ', paired' : ''})`,
+      );
+    } catch (error) {
+      console.error('[model-eval] ignored invalid checkpoint:', error.message);
+    }
+    return;
+  }
+  if (/Fetching model weights|Reading model weights/i.test(text)) {
+    const now = Date.now();
+    if (text === lastWeightProgressText && now - lastWeightProgressAt < 5000) return;
+    lastWeightProgressAt = now;
+    lastWeightProgressText = text;
+  }
+  if (
+    /(?:^|: )(?:tokenizer\.json|tokenizer_config\.json|vocab\.json|merges\.txt|progress_total)$/i.test(
+      text,
+    ) ||
+    /(?:params_shard_\d+\.bin|onnx\/model_[^ ]+|tensor-cache\.json|ndarray-cache\.json)/i.test(text)
+  )
+    return;
+  console.log(`[browser:${msg.type()}]`, text);
+});
+page.on('response', (response) => {
+  if (response.status() >= 400) console.log(`[http:${response.status()}]`, response.url());
+});
+page.on('requestfailed', (request) => {
+  const reason = request.failure()?.errorText || 'unknown';
+  if (reason !== 'net::ERR_ABORTED') console.log(`[request-failed]`, request.url(), reason);
 });
 
 await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
@@ -67,8 +114,6 @@ if (payload.error || !payload.report) {
   process.exit();
 }
 
-const reportPath = path.join(OUT_DIR, 'report.json');
-const htmlPath = path.join(OUT_DIR, 'index.html');
 fs.writeFileSync(reportPath, `${JSON.stringify(payload.report, null, 2)}\n`);
 fs.writeFileSync(htmlPath, payload.html || '<!DOCTYPE html><title>empty</title>');
 

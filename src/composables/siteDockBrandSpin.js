@@ -16,10 +16,7 @@ export function parseTimeMs(value) {
 
 export function findSiteDockBrandSpinAnimation(spin) {
   return spin.getAnimations().find((anim) => {
-    return (
-      'animationName' in anim &&
-      anim.animationName === SITE_DOCK_BRAND_SPIN_NAME
-    );
+    return 'animationName' in anim && anim.animationName === SITE_DOCK_BRAND_SPIN_NAME;
   });
 }
 

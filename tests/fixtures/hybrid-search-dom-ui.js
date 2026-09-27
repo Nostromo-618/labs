@@ -25,7 +25,8 @@ export class HybridSearchDomUI {
     this.showSemanticHint = options.showSemanticHint ?? true;
     this.autofocus = options.autofocus ?? true;
     this.baseUrl = options.baseUrl ?? 'https://vanduo-oss.github.io/vd3-docs';
-    this.emptyMessage = options.emptyMessage ?? 'No docs found. Try another query or pick a category filter.';
+    this.emptyMessage =
+      options.emptyMessage ?? 'No docs found. Try another query or pick a category filter.';
 
     this._mounted = false;
     this._elements = {};
@@ -195,12 +196,7 @@ export class HybridSearchDomUI {
     if (ae?.closest?.('dialog, [role="dialog"], [aria-modal="true"]')) return;
     if (ae && ae !== this._elements.input) {
       const tag = ae.tagName;
-      if (
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
-        tag === 'SELECT' ||
-        ae.isContentEditable
-      ) {
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || ae.isContentEditable) {
         return;
       }
     }
@@ -392,13 +388,15 @@ export class HybridSearchDomUI {
     const { doc, source } = result;
     const safeIcon = sanitizeIconClass(doc.icon || 'ph-file-text');
     const href = safeDocHref(this.baseUrl, doc.route);
-    const badge = source === 'semantic'
-      ? '<span class="vdl-neptune-badge vdl-neptune-badge-semantic">AI</span>'
-      : '<span class="vdl-neptune-badge vdl-neptune-badge-fuzzy">Fuzzy</span>';
+    const badge =
+      source === 'semantic'
+        ? '<span class="vdl-neptune-badge vdl-neptune-badge-semantic">AI</span>'
+        : '<span class="vdl-neptune-badge vdl-neptune-badge-fuzzy">Fuzzy</span>';
 
-    const keywords = (doc.keywords || []).slice(0, 3).map(k =>
-      `<span class="vdl-neptune-keyword">${this._esc(k)}</span>`
-    ).join('');
+    const keywords = (doc.keywords || [])
+      .slice(0, 3)
+      .map((k) => `<span class="vdl-neptune-keyword">${this._esc(k)}</span>`)
+      .join('');
 
     return `
       <div
@@ -441,7 +439,9 @@ export class HybridSearchDomUI {
     });
     const input = this._elements.input;
     if (this._selectedIndex >= 0 && items[this._selectedIndex]) {
-      const activeId = items[this._selectedIndex].getAttribute('id') || `vdl-neptune-result-${this._selectedIndex}`;
+      const activeId =
+        items[this._selectedIndex].getAttribute('id') ||
+        `vdl-neptune-result-${this._selectedIndex}`;
       items[this._selectedIndex].setAttribute('id', activeId);
       input.setAttribute('aria-activedescendant', activeId);
       input.setAttribute('aria-expanded', 'true');
@@ -755,7 +755,6 @@ HybridSearchDomUI.prototype.mount = function (...args) {
   injectStyles();
   return originalMount.call(this, ...args);
 };
-
 
 /** @deprecated alias for Playwright harness compatibility */
 export { HybridSearchDomUI as NeptuneSearchUI };

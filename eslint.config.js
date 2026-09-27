@@ -24,6 +24,7 @@ export default [
       sourceType: 'module',
       globals: {
         window: 'readonly',
+        Worker: 'readonly',
         document: 'readonly',
         console: 'readonly',
         fetch: 'readonly',
@@ -36,6 +37,9 @@ export default [
         ReadableStream: 'readonly',
         TransformStream: 'readonly',
         AbortController: 'readonly',
+        DOMException: 'readonly',
+        structuredClone: 'readonly',
+        queueMicrotask: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         requestAnimationFrame: 'readonly',

@@ -4,12 +4,13 @@ const HARNESS = '/tests/fixtures/neptune-harness.html';
 
 test.describe('AiChat tool calling', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(HARNESS);
+    await page.goto(HARNESS, { waitUntil: 'domcontentloaded' });
   });
 
   test('generateWithTools rejects non-LiteRT models', async ({ page }) => {
     const message = await page.evaluate(async () => {
-      const { AiChat, TOOLS_UNSUPPORTED_ERROR } = await import('/node_modules/@vanduo-oss/vdl-ai-chat/dist/index.js');
+      const { AiChat, TOOLS_UNSUPPORTED_ERROR } =
+        await import('/node_modules/@vanduo-oss/vdl-ai-chat/dist/index.js');
       const chat = new AiChat({ modelId: 'Qwen3-0.6B-q4f16_1-MLC' });
       chat.registerTools([{ name: 'ping', description: 'ping', parameters: { type: 'object' } }]);
       chat._isLoaded = true;
@@ -85,10 +86,7 @@ test.describe('AiChat tool calling', () => {
       chat._isLoaded = true;
       chat.engine = { createConversation: async () => ({}) };
       let executed = false;
-      const scripted = [
-        '<tool_call name="delete_everything">{}</tool_call>',
-        'I cannot do that.',
-      ];
+      const scripted = ['<tool_call name="delete_everything">{}</tool_call>', 'I cannot do that.'];
       let i = 0;
       chat._completeOnceLiteRTDetailed = async () => {
         const reply = scripted[i++];

@@ -2,7 +2,7 @@
   "name": "@vanduo-oss/labs",
   "version": "0.1.1",
   "private": true,
-  "description": "Vanduo Labs — demo playground for VDL engines and vdl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
+  "description": "Vanduo Labs \u2014 demo playground for VDL engines and vdl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -23,6 +23,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:qa": "vite build --mode qa",
     "preview": "vite preview",
     "demo:serve": "vite",
     "index": "node utils/hybrid-search-indexer.mjs",
@@ -49,14 +50,24 @@
     "vite-plugin-static-copy": "^4.1.1"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.2.0",
-    "@litert-lm/core": "^0.15.0",
-    "@vanduo-oss/vd3": "^1.7.2",
+    "@huggingface/transformers": "4.2.0",
+    "@litert-lm/core": "0.17.1",
+    "@vanduo-oss/vd3": "1.7.4",
     "@vanduo-oss/vd3-charts": "1.1.0",
     "@vanduo-oss/vdl-ai-chat": "link:../vdl-ai-chat",
     "@vanduo-oss/vdl-cbun": "link:../vdl-cbun",
     "@vanduo-oss/vdl-hybrid-search": "link:../vdl-hybrid-search",
     "fuse.js": "^7.5.0",
-    "vue": "^3.5.41"
+    "vue": "3.5.42",
+    "@mlc-ai/web-llm": "0.2.85",
+    "@vanduo-oss/vdl-hex-earth": "link:../vdl-hex-earth"
+  },
+  "packageManager": "pnpm@10.28.2",
+  "pnpm": {
+    "overrides": {
+      "adm-zip": "0.6.1",
+      "sharp": "0.35.4",
+      "nanoid@>=3 <3.3.18": "3.3.18"
+    }
   }
 }

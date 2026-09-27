@@ -33,8 +33,7 @@ export function useSiteDockBrandSpin(dockEl) {
       const t = Math.min(1, (now - start) / SITE_DOCK_SPIN_RAMP_MS);
       const eased = t * (2 - t);
       const duration =
-        SITE_DOCK_SPIN_IDLE_MS +
-        (SITE_DOCK_SPIN_HOVER_MS - SITE_DOCK_SPIN_IDLE_MS) * eased;
+        SITE_DOCK_SPIN_IDLE_MS + (SITE_DOCK_SPIN_HOVER_MS - SITE_DOCK_SPIN_IDLE_MS) * eased;
       setSiteDockBrandSpinDurationPreservingPhase(spin, duration);
       if (t < 1) rampFrame = requestAnimationFrame(tick);
     };

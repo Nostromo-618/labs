@@ -42,9 +42,7 @@ const isNarrow = useLabsDockNarrow({
 
 const isHorizontalEdge = computed(() => dockOrientationOf(placement.value) === 'horizontal');
 
-const itemLayout = computed(() =>
-  isHorizontalEdge.value && !isNarrow.value ? 'inline' : 'stack',
-);
+const itemLayout = computed(() => (isHorizontalEdge.value && !isNarrow.value ? 'inline' : 'stack'));
 
 const showDockTooltips = computed(() => !isNarrow.value && !isHorizontalEdge.value);
 

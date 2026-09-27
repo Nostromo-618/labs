@@ -201,8 +201,8 @@ import '@vanduo-oss/vdl-cbun/draw/css';
     </p>
     <h5 class="demo-title"><i class="ph ph-paint-brush"></i> Draw</h5>
     <p class="vd-mb-8">
-      Vector sketchpad from <code>@vanduo-oss/vdl-cbun/draw</code> — brushes, shapes,
-      sticky notes, and SVG/PNG export.
+      Vector sketchpad from <code>@vanduo-oss/vdl-cbun/draw</code> — brushes, shapes, sticky notes,
+      and SVG/PNG export.
     </p>
 
     <div
@@ -213,18 +213,48 @@ import '@vanduo-oss/vdl-cbun/draw/css';
       <div class="vd-card-header draw-stage-header">
         <h6><i class="ph ph-paint-brush"></i> Interactive Sketchpad</h6>
         <div class="draw-stage-actions">
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" :disabled="!canUndo || readonly" @click="undoDraw">
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            :disabled="!canUndo || readonly"
+            @click="undoDraw"
+          >
             Undo
           </button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" :disabled="!canRedo || readonly" @click="redoDraw">
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            :disabled="!canRedo || readonly"
+            @click="redoDraw"
+          >
             Redo
           </button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="resetToSeed">Reset</button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" :disabled="readonly" @click="clearCanvas">Clear</button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="toggleGrid">Grid</button>
-          <label class="vd-btn vd-btn-outline vd-btn-sm draw-toggle"><input v-model="snap" type="checkbox" /> Snap</label>
-          <label class="vd-btn vd-btn-outline vd-btn-sm draw-toggle"><input v-model="readonly" type="checkbox" /> Readonly</label>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" :aria-pressed="fullscreen" @click="toggleFullscreen">
+          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="resetToSeed">
+            Reset
+          </button>
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            :disabled="readonly"
+            @click="clearCanvas"
+          >
+            Clear
+          </button>
+          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="toggleGrid">
+            Grid
+          </button>
+          <label class="vd-btn vd-btn-outline vd-btn-sm draw-toggle"
+            ><input v-model="snap" type="checkbox" /> Snap</label
+          >
+          <label class="vd-btn vd-btn-outline vd-btn-sm draw-toggle"
+            ><input v-model="readonly" type="checkbox" /> Readonly</label
+          >
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            :aria-pressed="fullscreen"
+            @click="toggleFullscreen"
+          >
             {{ fullscreen ? 'Exit full screen' : 'Full screen' }}
           </button>
         </div>
@@ -247,11 +277,21 @@ import '@vanduo-oss/vdl-cbun/draw/css';
     </div>
 
     <div class="draw-state-bar vd-mb-6">
-      <span>Shapes: <strong>{{ shapeCount }}</strong></span>
-      <span>Selection: <strong>{{ selectionCount }}</strong></span>
-      <span>Zoom: <strong>{{ zoomPercent }}%</strong></span>
-      <span>Pan: <strong>{{ panPos.x }}, {{ panPos.y }}</strong></span>
-      <span>Last: <code>{{ lastAction }}</code></span>
+      <span
+        >Shapes: <strong>{{ shapeCount }}</strong></span
+      >
+      <span
+        >Selection: <strong>{{ selectionCount }}</strong></span
+      >
+      <span
+        >Zoom: <strong>{{ zoomPercent }}%</strong></span
+      >
+      <span
+        >Pan: <strong>{{ panPos.x }}, {{ panPos.y }}</strong></span
+      >
+      <span
+        >Last: <code>{{ lastAction }}</code></span
+      >
     </div>
 
     <div class="brush-grid vd-mb-6">
@@ -270,17 +310,37 @@ import '@vanduo-oss/vdl-cbun/draw/css';
     <div class="vd-card demo-card vd-mb-6">
       <div class="vd-card-body">
         <div class="export-actions vd-mb-4">
-          <button type="button" class="vd-btn vd-btn-primary vd-btn-sm" :disabled="isExporting" @click="triggerExport('svg')">
+          <button
+            type="button"
+            class="vd-btn vd-btn-primary vd-btn-sm"
+            :disabled="isExporting"
+            @click="triggerExport('svg')"
+          >
             Export SVG
           </button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" :disabled="isExporting" @click="triggerExport('png')">
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            :disabled="isExporting"
+            @click="triggerExport('png')"
+          >
             Export PNG
           </button>
           <span v-if="exportByteLabel" class="vd-text-sm vd-text-muted">{{ exportByteLabel }}</span>
-          <button v-if="exportFormat === 'svg' && exportedSvg" type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="copySvgToClipboard">
+          <button
+            v-if="exportFormat === 'svg' && exportedSvg"
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            @click="copySvgToClipboard"
+          >
             {{ copied ? 'Copied!' : 'Copy SVG' }}
           </button>
-          <button v-if="exportedSvg || exportedPng" type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="downloadExport">
+          <button
+            v-if="exportedSvg || exportedPng"
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            @click="downloadExport"
+          >
             Download
           </button>
         </div>

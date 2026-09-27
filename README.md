@@ -15,23 +15,7 @@ Clone these beside Labs (same parent directory) so `link:../vdl-*` resolves:
 | [`vanduo-oss/vdl-ai-chat`](https://github.com/vanduo-oss/vdl-ai-chat) | Headless `AiChat` + LLM/tools guardrails + markdown |
 | Labs-local `model-eval.js` | Model evaluation harness (CLI / standalone; not listed on the live site) |
 
-```javascript
-import { HybridSearch } from '@vanduo-oss/vdl-hybrid-search';
-import { AiChat } from '@vanduo-oss/vdl-ai-chat';
-import { validateToolCall } from '@vanduo-oss/vdl-ai-chat/guardrails/tools';
-import Fuse from 'fuse.js';
-
-const search = new HybridSearch({
-  indexUrl: '/data/search-index.json',
-  vectorsUrl: '/data/vectors.json',
-  loadFuse: async () => ({ default: Fuse }),
-  loadTransformers: async () => import('@huggingface/transformers'),
-});
-
-const chat = new AiChat({
-  loadLiteRT: async () => import('@litert-lm/core'),
-});
-```
+The site injects bundled runtimes through `src/lib/chat-runtime.js` and resolves the documentation manifest through `src/lib/docs-search.js`. Build the sibling packages before starting Labs. Hex Earth remains private and is consumed through `link:../vdl-hex-earth`.
 
 Guardrails docs: [doc/vdl-guardrails.md](./doc/vdl-guardrails.md)
 
@@ -45,12 +29,12 @@ Hex-grid now lives in Labs [`vdl-cbun`](https://github.com/vanduo-oss/vdl-cbun) 
 
 ## vdl-hybrid-search (demo)
 
-In-browser hybrid search over **[vd3 docs](https://vanduo-oss.github.io/vd3-docs/)** — fuzzy (Fuse.js) + semantic (Transformers.js). Labs UI: `VdlHybridSearchUI`.
+In-browser hybrid search over **[vd3 docs](https://vd3.vanduo.dev/)** — fuzzy (Fuse.js) + semantic (Transformers.js). Labs UI: `VdlHybridSearchUI`.
 
 See [doc/vdl-hybrid-search.md](./doc/vdl-hybrid-search.md).
 
 ```bash
-pnpm index   # utils/hybrid-search-indexer.mjs → data/search-index.json + data/vectors.json
+pnpm index   # canonical local vd3-docs build → atomic dual-preset data/search-manifest.json
 ```
 
 ---
@@ -67,6 +51,10 @@ pnpm model-eval     # local CLI eval harness — see doc/vdl-model-eval.md
 ```
 
 ---
+
+## Hex Earth
+
+`#demos/hex-earth` opens the sibling demo across the available viewport with the Oola dock retained. Geography and canvas code stay in `vdl-hex-earth`; they load only when the route opens. Controls and Stats can be moved with the pointer or arrow keys on desktop. Phones use compact sheets and initially select the low tier. All tiers remain selectable; comparative benchmarks run only on request. Reset layout restores panel positions.
 
 ## vdl-ai-draw (in-repo / local)
 
@@ -98,6 +86,7 @@ Expect sibling checkouts:
   vdl-ai-chat/
   vdl-hybrid-search/
   vdl-cbun/
+  vdl-hex-earth/
 ```
 
 ```bash

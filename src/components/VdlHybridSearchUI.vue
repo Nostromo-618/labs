@@ -1,38 +1,19 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { VdIcon, VdSpinner } from '@vanduo-oss/vd3';
-import { DEFAULT_DOCS_BASE_URL, HybridSearch } from '@vanduo-oss/vdl-hybrid-search';
+import { DEFAULT_DOCS_BASE_URL } from '@vanduo-oss/vdl-hybrid-search';
 import {
   normalizeSearchQuery,
   safeDocHref,
   sanitizeIconClass,
   validateSearchQuery,
 } from '@vanduo-oss/vdl-hybrid-search/guardrails/search';
-import Fuse from 'fuse.js';
-
-/**
- * Transformers.js v4 dropped `quantized`; HybridSearch still passes it.
- * Map that flag onto `dtype` so semantic search keeps loading MiniLM.
- */
-async function loadTransformersV4() {
-  const mod = await import('@huggingface/transformers');
-  const originalPipeline = mod.pipeline;
-  if (typeof originalPipeline !== 'function') return mod;
-  const pipeline = (task, model, options = {}) => {
-    const next = { ...options };
-    if (next.dtype == null && typeof next.quantized === 'boolean') {
-      next.dtype = next.quantized ? 'q8' : 'fp32';
-    }
-    delete next.quantized;
-    return originalPipeline(task, model, next);
-  };
-  return { ...mod, pipeline };
-}
+import { createDocsSearch, SEARCH_PRESETS } from '../lib/docs-search.js';
 
 const props = defineProps({
   search: { type: Object, default: null },
-  indexUrl: { type: String, default: '/data/search-index.json' },
-  vectorsUrl: { type: String, default: '/data/vectors.json' },
+  indexUrl: { type: String, default: '' },
+  vectorsUrl: { type: String, default: '' },
   baseUrl: { type: String, default: DEFAULT_DOCS_BASE_URL },
   placeholder: { type: String, default: 'Search vd3 docs…' },
   /** Debounce for auto hybrid/fuzzy search after typing pauses. */
@@ -48,14 +29,9 @@ const props = defineProps({
 
 const emit = defineEmits(['result-click']);
 
-/**
- * Reuse one HybridSearch per index/vectors URL across HMR / v-if remounts
- * so semantic preload is not restarted from scratch on every remount.
- * @type {import('@vanduo-oss/vdl-hybrid-search').HybridSearch | null}
- */
-let sharedEngine = null;
-let sharedEngineKey = '';
-
+const preset = ref('minilm');
+const semanticStatus = ref('Fuzzy search is ready. Semantic search is optional.');
+let alive = true;
 const rootEl = ref(null);
 const inputEl = ref(null);
 const query = ref('');
@@ -75,6 +51,8 @@ const shortQueryHint = ref(false);
 const listboxId = `vdl-neptune-results-${Math.random().toString(36).slice(2, 9)}`;
 
 let engine = null;
+let enginePending = null;
+let engineEpoch = 0;
 let ownsEngine = false;
 let debounceTimer = null;
 let semanticSeq = 0;
@@ -109,49 +87,90 @@ function hrefFor(doc) {
 
 async function ensureEngine() {
   if (engine) return engine;
-  if (props.search) {
-    engine = props.search;
-    ownsEngine = false;
-  } else {
-    const key = `${props.indexUrl}\0${props.vectorsUrl}`;
-    if (sharedEngine && sharedEngineKey === key) {
-      engine = sharedEngine;
-    } else {
-      engine = new HybridSearch({
+  if (enginePending) return enginePending;
+  const epoch = engineEpoch;
+  const external = props.search;
+  const pending = (async () => {
+    const eng =
+      external ||
+      (await createDocsSearch(preset.value, {
         indexUrl: props.indexUrl,
         vectorsUrl: props.vectorsUrl,
-        loadFuse: async () => ({ default: Fuse }),
-        loadTransformers: loadTransformersV4,
-      });
-      sharedEngine = engine;
-      sharedEngineKey = key;
+      }));
+    await eng.initFuzzy();
+    if (!alive || epoch !== engineEpoch) {
+      if (!external) await eng.dispose?.();
+      throw new DOMException('Search owner changed.', 'AbortError');
     }
-    ownsEngine = true;
+    engine = eng;
+    ownsEngine = !external;
+    subscribeSemantic(eng);
+    const counts = new Map();
+    for (const doc of eng.getDocuments()) {
+      const key = doc.category || 'Other';
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    categories.value = [...counts.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([name, count]) => ({ name, count }));
+    return eng;
+  })();
+  enginePending = pending;
+  try {
+    return await pending;
+  } finally {
+    if (enginePending === pending) enginePending = null;
   }
-  await engine.initFuzzy();
-  const docs = engine.getDocuments();
-  const counts = new Map();
-  for (const doc of docs) {
-    const key = doc.category || 'Other';
-    counts.set(key, (counts.get(key) || 0) + 1);
-  }
-  categories.value = [...counts.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([name, count]) => ({ name, count }));
-  return engine;
 }
+function releaseEngine() {
+  engineEpoch++;
+  enginePending = null;
+  unsubscribeSemantic?.();
+  unsubscribeSemantic = null;
+  if (ownsEngine) void engine?.dispose?.();
+  engine = null;
+  ownsEngine = false;
+  didEnrichOnReady = false;
+}
+watch(preset, async () => {
+  if (props.search) return;
+  semanticSeq++;
+  semanticStatus.value =
+    'Fuzzy search is ready. Enable the selected semantic model to download it.';
+  if (query.value.trim()) await runSearch(query.value);
+});
 
-/** Background warm of Transformers.js + MiniLM; does not block typing/fuzzy. */
-function preloadSemantic(eng) {
-  if (!eng || eng.isSemanticReady?.()) {
+async function enableSemantic() {
+  modelLoading.value = true;
+  try {
+    let eng = await ensureEngine();
+    if (!props.search && eng.embeddingPreset !== preset.value) {
+      // Keep the already loaded fuzzy corpus usable if a download cannot begin.
+      const next = await createDocsSearch(preset.value, {
+        indexUrl: props.indexUrl,
+        vectorsUrl: props.vectorsUrl,
+      });
+      if (!alive) {
+        await next.dispose();
+        return;
+      }
+      unsubscribeSemantic?.();
+      await eng.dispose();
+      engine = next;
+      eng = next;
+      ownsEngine = true;
+      didEnrichOnReady = false;
+      subscribeSemantic(next);
+    }
+    await eng.initSemantic();
+    if (!alive) return;
+    semanticStatus.value = 'Semantic search ready.';
+    if (query.value.trim()) await runSearch(query.value);
+  } catch (error) {
+    semanticStatus.value = `Fuzzy search available. ${error.message}`;
+  } finally {
     modelLoading.value = false;
-    modelProgressMessage.value = '';
-    modelProgressPct.value = 0;
-    return;
   }
-  eng.initSemantic().catch((err) => {
-    console.warn('[VdlHybridSearchUI] Semantic preload failed:', err?.message || err);
-  });
 }
 
 function openDropdown() {
@@ -196,7 +215,7 @@ function tryAutofocusInput() {
  * - Auto path: hybrid when semantic is ready, otherwise fuzzy (live while model loads).
  * - Immediate/Enter path: always hybrid (awaits model if still warming).
  */
-async function runSearch(rawQuery, { forceHybrid = false } = {}) {
+async function runSearch(rawQuery) {
   const eng = await ensureEngine();
   const normalized = normalizeSearchQuery(rawQuery, {
     maxLength: eng.queryMaxLength ?? 240,
@@ -215,7 +234,8 @@ async function runSearch(rawQuery, { forceHybrid = false } = {}) {
     return;
   }
 
-  const useHybrid = forceHybrid || Boolean(eng.isSemanticReady?.());
+  const useHybrid =
+    Boolean(eng.isSemanticReady?.()) && (props.search || eng.embeddingPreset === preset.value);
   const seq = ++semanticSeq;
   selectedIndex.value = -1;
   shortQueryHint.value = false;
@@ -288,6 +308,7 @@ function onInput() {
 }
 
 function onKeyDown(e) {
+  if (e.isComposing) return;
   const list = filteredResults.value;
   if (dropdownOpen.value && list.length > 0) {
     if (e.key === 'ArrowDown') {
@@ -328,8 +349,7 @@ function setCategory(name) {
   if (query.value.trim()) openDropdown();
 }
 
-onMounted(async () => {
-  const eng = await ensureEngine();
+function subscribeSemantic(eng) {
   unsubscribeSemantic = eng.onSemanticProgress((data) => {
     // Keep model progress out of the results dropdown so typing/fuzzy stay free.
     if (data.stage === 'loading-model' || data.stage === 'downloading') {
@@ -344,6 +364,10 @@ onMounted(async () => {
       modelLoading.value = false;
       modelProgressMessage.value = '';
       modelProgressPct.value = 0;
+      semanticStatus.value =
+        data.stage === 'ready'
+          ? 'Semantic search ready.'
+          : `Fuzzy search available. ${data.message || 'Semantic search unavailable.'}`;
       // Enrich current query once when the model first becomes ready.
       if (data.stage === 'ready' && !didEnrichOnReady && query.value.trim()) {
         didEnrichOnReady = true;
@@ -354,8 +378,22 @@ onMounted(async () => {
       }
     }
   });
+}
 
-  preloadSemantic(eng);
+onMounted(async () => {
+  let eng;
+  try {
+    eng = await ensureEngine();
+  } catch (error) {
+    semanticStatus.value = error.message;
+    return;
+  }
+  if (!alive) {
+    if (ownsEngine) void eng.dispose?.();
+    return;
+  }
+
+  // Downloads require the explicit Enable semantic search action.
   tryAutofocusInput();
 
   keyboardHandler = (e) => {
@@ -379,23 +417,31 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  alive = false;
+  semanticSeq += 1;
   clearTimeout(debounceTimer);
+  releaseEngine();
   if (keyboardHandler) document.removeEventListener('keydown', keyboardHandler);
   if (clickOutsideHandler) document.removeEventListener('click', clickOutsideHandler);
   if (unsubscribeSemantic) {
     unsubscribeSemantic();
     unsubscribeSemantic = null;
   }
-  // Keep sharedEngine alive for HMR / v-if remount; only drop the local ref.
+  // Release owned model resources on navigation.
   engine = null;
   didEnrichOnReady = false;
 });
 
 watch(
   () => props.search,
-  () => {
-    engine = null;
-    ownsEngine = false;
+  async () => {
+    releaseEngine();
+    try {
+      await ensureEngine();
+      if (query.value.trim()) await runSearch(query.value);
+    } catch (error) {
+      if (alive) semanticStatus.value = error.message;
+    }
   },
 );
 
@@ -407,6 +453,25 @@ defineExpose({
 
 <template>
   <div ref="rootEl" class="vdl-neptune-search">
+    <div class="vdl-neptune-semantic-controls">
+      <label
+        >Optional semantic model
+        <select v-model="preset" class="vd-select" :disabled="modelLoading">
+          <option v-for="choice in SEARCH_PRESETS" :key="choice.id" :value="choice.id">
+            {{ choice.label }} · {{ choice.download }}
+          </option>
+        </select></label
+      >
+      <button
+        type="button"
+        class="vd-btn vd-btn-outline"
+        :disabled="modelLoading"
+        @click="enableSemantic"
+      >
+        {{ modelLoading ? 'Loading semantic model…' : 'Enable semantic search' }}
+      </button>
+      <p role="status">{{ semanticStatus }}</p>
+    </div>
     <div
       v-if="categories.length"
       class="vdl-neptune-filters"
@@ -535,6 +600,26 @@ defineExpose({
 </template>
 
 <style scoped>
+.vdl-neptune-semantic-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+.vdl-neptune-semantic-controls label {
+  flex: 1;
+  min-width: 0;
+}
+.vdl-neptune-semantic-controls select {
+  width: 100%;
+}
+.vdl-neptune-semantic-controls p {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  margin: 0;
+  color: var(--text-secondary);
+}
 .vdl-neptune-search {
   position: relative;
   width: 100%;

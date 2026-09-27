@@ -21,10 +21,7 @@ const tracks = [
 
 <template>
   <div class="cbun-music-wrap">
-    <VdMusicPlayer
-      :tracks="tracks"
-      :options="{ showProgress: true, showPlaylist: true }"
-    />
+    <VdMusicPlayer :tracks="tracks" :options="{ showProgress: true, showPlaylist: true }" />
   </div>
 </template>
 

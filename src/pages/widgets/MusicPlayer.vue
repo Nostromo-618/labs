@@ -175,13 +175,21 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
           <label class="mp-control">
             <span>Size</span>
             <select v-model="sizeClass" class="mp-select">
-              <option v-for="s in sizeOptions" :key="s.id || 'default'" :value="s.id">{{ s.label }}</option>
+              <option v-for="s in sizeOptions" :key="s.id || 'default'" :value="s.id">
+                {{ s.label }}
+              </option>
             </select>
           </label>
-          <label class="mp-control mp-check"><input v-model="showProgress" type="checkbox" /> progress</label>
-          <label class="mp-control mp-check"><input v-model="showPlaylist" type="checkbox" /> playlist</label>
+          <label class="mp-control mp-check"
+            ><input v-model="showProgress" type="checkbox" /> progress</label
+          >
+          <label class="mp-control mp-check"
+            ><input v-model="showPlaylist" type="checkbox" /> playlist</label
+          >
           <label class="mp-control mp-check"><input v-model="glass" type="checkbox" /> glass</label>
-          <label class="mp-control mp-check"><input v-model="detachable" type="checkbox" /> detachable</label>
+          <label class="mp-control mp-check"
+            ><input v-model="detachable" type="checkbox" /> detachable</label
+          >
           <label class="mp-control mp-check">
             <input v-model="draggable" type="checkbox" :disabled="!detachable" /> draggable
           </label>
@@ -199,8 +207,12 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
         />
 
         <div v-if="detachable" class="vd-mt-4" style="display: flex; flex-wrap: wrap; gap: 0.5rem">
-          <button type="button" class="vd-btn vd-btn-sm vd-btn-primary" @click="playgroundDetach">Detach</button>
-          <button type="button" class="vd-btn vd-btn-sm vd-btn-secondary" @click="playgroundAttach">Attach</button>
+          <button type="button" class="vd-btn vd-btn-sm vd-btn-primary" @click="playgroundDetach">
+            Detach
+          </button>
+          <button type="button" class="vd-btn vd-btn-sm vd-btn-secondary" @click="playgroundAttach">
+            Attach
+          </button>
         </div>
       </div>
     </div>
@@ -234,7 +246,8 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
           <div class="vd-card-header"><h6>Detachable — fixed corners</h6></div>
           <div class="vd-card-body">
             <p class="vd-text-sm vd-text-muted vd-mb-3">
-              <code>detachable: true</code>, <code>minimizable: true</code>, <code>draggable: false</code>.
+              <code>detachable: true</code>, <code>minimizable: true</code>,
+              <code>draggable: false</code>.
             </p>
             <VdMusicPlayer
               ref="detachRef"
@@ -248,13 +261,23 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
               }"
             />
             <div class="vd-mt-4" style="display: flex; flex-wrap: wrap; gap: 0.5rem">
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-primary" @click="detachCorner('bottom-left')">
+              <button
+                type="button"
+                class="vd-btn vd-btn-sm vd-btn-primary"
+                @click="detachCorner('bottom-left')"
+              >
                 Detach bottom-left
               </button>
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-primary" @click="detachCorner('top-right')">
+              <button
+                type="button"
+                class="vd-btn vd-btn-sm vd-btn-primary"
+                @click="detachCorner('top-right')"
+              >
                 Detach top-right
               </button>
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-secondary" @click="attachPlayer">Attach</button>
+              <button type="button" class="vd-btn vd-btn-sm vd-btn-secondary" @click="attachPlayer">
+                Attach
+              </button>
             </div>
           </div>
         </div>
@@ -264,7 +287,8 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
           <div class="vd-card-header"><h6>Detachable — draggable</h6></div>
           <div class="vd-card-body">
             <p class="vd-text-sm vd-text-muted vd-mb-3">
-              <code>draggable: true</code> adds a drag handle when floating. Free positioning overrides corner presets.
+              <code>draggable: true</code> adds a drag handle when floating. Free positioning
+              overrides corner presets.
             </p>
             <VdMusicPlayer
               ref="dragRef"
@@ -278,11 +302,19 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
               }"
             />
             <div class="vd-mt-4" style="display: flex; flex-wrap: wrap; gap: 0.5rem">
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-primary" @click="dragDetachMinimize">
+              <button
+                type="button"
+                class="vd-btn vd-btn-sm vd-btn-primary"
+                @click="dragDetachMinimize"
+              >
                 Detach &amp; minimize
               </button>
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-outline" @click="dragExpand">Expand</button>
-              <button type="button" class="vd-btn vd-btn-sm vd-btn-secondary" @click="dragAttach">Attach</button>
+              <button type="button" class="vd-btn vd-btn-sm vd-btn-outline" @click="dragExpand">
+                Expand
+              </button>
+              <button type="button" class="vd-btn vd-btn-sm vd-btn-secondary" @click="dragAttach">
+                Attach
+              </button>
             </div>
           </div>
         </div>
@@ -322,19 +354,50 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
           @minimize="() => onLogged('minimize')"
           @expand="() => onLogged('expand')"
         />
-        <p class="vd-text-sm vd-mt-3"><strong>State:</strong> <code>{{ progState }}</code></p>
+        <p class="vd-text-sm vd-mt-3">
+          <strong>State:</strong> <code>{{ progState }}</code>
+        </p>
         <div style="display: flex; flex-wrap: wrap; gap: 0.5rem">
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="prog((p, el) => p.play(el))">Play</button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="prog((p, el) => p.pause(el))">Pause</button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="prog((p, el) => p.next(el))">Next</button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="prog((p, el) => p.previous(el))">
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            @click="prog((p, el) => p.play(el))"
+          >
+            Play
+          </button>
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            @click="prog((p, el) => p.pause(el))"
+          >
+            Pause
+          </button>
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            @click="prog((p, el) => p.next(el))"
+          >
+            Next
+          </button>
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            @click="prog((p, el) => p.previous(el))"
+          >
             Prev
           </button>
-          <button type="button" class="vd-btn vd-btn-outline vd-btn-sm" @click="prog((p, el) => p.setVolume(el, 0.75))">
+          <button
+            type="button"
+            class="vd-btn vd-btn-outline vd-btn-sm"
+            @click="prog((p, el) => p.setVolume(el, 0.75))"
+          >
             Vol 75%
           </button>
         </div>
-        <ul class="vd-mt-3 vd-mb-0" style="list-style: none; padding: 0; max-height: 120px; overflow: auto">
+        <ul
+          class="vd-mt-3 vd-mb-0"
+          style="list-style: none; padding: 0; max-height: 120px; overflow: auto"
+        >
           <li v-for="(e, i) in logEntries" :key="`${e.time}-${i}`" class="vd-text-sm">
             <code>{{ e.time }}</code> {{ e.type
             }}<template v-if="e.detail != null"> · {{ e.detail }}</template>
@@ -354,7 +417,10 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
             <strong>Attribution</strong>
             <p class="vd-mb-0 vd-mt-1">
               Bundled tracks from
-              <a href="https://stellardrone.bandcamp.com/album/invent-the-universe" target="_blank" rel="noopener noreferrer"
+              <a
+                href="https://stellardrone.bandcamp.com/album/invent-the-universe"
+                target="_blank"
+                rel="noopener noreferrer"
                 >Stellardrone — Invent the Universe</a
               >
               (CC BY 4.0).

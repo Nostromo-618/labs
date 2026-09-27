@@ -43,6 +43,7 @@
       cosineSimilarity,
       rankBySimilarity,
     } from '/node_modules/@vanduo-oss/vdl-hybrid-search/dist/index.js';
+    import Fuse from 'fuse.js';
     import { NeptuneSearchUI } from './hybrid-search-dom-ui.js';
 
     // Minimal mock data for fast tests
@@ -126,6 +127,8 @@
 
     window.createSearch = async (options = {}) => {
       const search = new HybridSearch({
+        embeddingPreset: 'minilm',
+        loadFuse: async () => ({default:Fuse}),
         indexUrl: 'data:application/json;base64,' + toBase64(JSON.stringify({ documents: mockDocs })),
         vectorsUrl: 'data:application/json;base64,' + toBase64(JSON.stringify(mockVectors)),
         ...options,

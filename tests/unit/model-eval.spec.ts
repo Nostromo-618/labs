@@ -8,15 +8,11 @@ test.describe('vdl-model-eval scorers', () => {
       const brandingPass = mod.scoreBranding(
         'This is the Vanduo Labs site in the vanduo-oss organization.',
       );
-      const brandingFail = mod.scoreBranding(
-        'Welcome to Vandouno Labs, part of vanduo-oss.',
-      );
+      const brandingFail = mod.scoreBranding('Welcome to Vandouno Labs, part of vanduo-oss.');
       const honestyPass = mod.scoreHonesty(
         'False. Vanduo Labs is open source under vanduo-oss on GitHub.',
       );
-      const honestyFail = mod.scoreHonesty(
-        'True — it is a closed-source OpenAI product.',
-      );
+      const honestyFail = mod.scoreHonesty('True — it is a closed-source OpenAI product.');
       const instructionPass = mod.scoreInstructionExact('blue quiet river', {
         exactNormalized: 'blue quiet river',
       });
@@ -34,13 +30,29 @@ test.describe('vdl-model-eval scorers', () => {
         suiteName: 't',
         suiteVersion: '0',
         modelResults: [
-          mod.summarizeModelResults(
-            { modelId: 'x', family: 'gemma4', backend: 'litert' },
-            [{ id: 'a', pass: true, reasons: ['ok'], latencyMs: 10 }],
-          ),
+          mod.summarizeModelResults({ modelId: 'x', family: 'gemma4', backend: 'litert' }, [
+            { id: 'a', pass: true, reasons: ['ok'], latencyMs: 10 },
+          ]),
         ],
       });
       const html = mod.renderReportHtml(report);
+      const pairHtml = mod.renderReportHtml({
+        kind: 'paired-chat',
+        mode: 'docs',
+        execution: 'together',
+        timingNote: 'shared GPU timings',
+        models: [
+          { id: 'model-a', label: 'A & B' },
+          { id: 'model-b', label: 'Model B' },
+        ],
+        modes: {
+          docs: [
+            [{ prompt: '<script>question</script>', response: 'Answer A', status: 'complete' }],
+            [{ prompt: 'question', response: 'Answer B', status: 'complete' }],
+          ],
+        },
+        checks: [{ id: 'pair-recovery', pass: true }],
+      });
       return {
         brandingPass: brandingPass.pass,
         brandingFail: brandingFail.pass,
@@ -54,6 +66,12 @@ test.describe('vdl-model-eval scorers', () => {
           html.includes('color-scheme: light') &&
           html.includes('--vdl-report-fg:') &&
           !html.includes('color-scheme: light dark'),
+        pairHtmlHasBothAnswers:
+          pairHtml.includes('Answer A') &&
+          pairHtml.includes('Answer B') &&
+          pairHtml.includes('pair-recovery') &&
+          pairHtml.includes('A &amp; B') &&
+          !pairHtml.includes('<script>question</script>'),
         version: mod.VDL_MODEL_EVAL_VERSION,
       };
     });
@@ -67,6 +85,7 @@ test.describe('vdl-model-eval scorers', () => {
     expect(result.waves).toEqual([['qwen3-0.6B-litert', 'gemma-4-E2B-it-web']]);
     expect(result.htmlHasPass).toBe(true);
     expect(result.htmlLightTheme).toBe(true);
+    expect(result.pairHtmlHasBothAnswers).toBe(true);
     expect(result.version).toBe('0.0.1');
   });
 });

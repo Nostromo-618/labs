@@ -39,3 +39,13 @@
 
   --font-mono: var(--vd-font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
 }
+
+/* Keep secondary copy readable in both resolved themes, including glass cards. */
+.vdl-chat-demo,
+.vdl-ai-chat-wrap,
+.vdl-neptune-search {
+  --vd-text-secondary: color-mix(in srgb, var(--vd-text-primary) 90%, var(--vd-bg-primary));
+  --vd-text-muted: color-mix(in srgb, var(--vd-text-primary) 85%, var(--vd-bg-primary));
+  --text-secondary: var(--vd-text-secondary);
+  --text-muted: var(--vd-text-muted);
+}

@@ -1,5 +1,13 @@
 <script setup>
-import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import {
+  defineAsyncComponent,
+  computed,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  ref,
+  watch,
+} from 'vue';
 import { VdCard, VdIcon } from '@vanduo-oss/vd3';
 import { DEFAULT_DOCS_BASE_URL, VDL_HYBRID_SEARCH_VERSION } from '@vanduo-oss/vdl-hybrid-search';
 import { VDL_AI_CHAT_VERSION } from '@vanduo-oss/vdl-ai-chat';
@@ -16,7 +24,7 @@ import LabsSiteDock from './components/LabsSiteDock.vue';
 import LabsDisclaimerGate from './components/LabsDisclaimerGate.vue';
 import LabsFarewell from './components/LabsFarewell.vue';
 import VdlHybridSearchUI from './components/VdlHybridSearchUI.vue';
-import VdlAiChatUI from './components/VdlAiChatUI.vue';
+import VdlChatWorkbench from './components/VdlChatWorkbench.vue';
 import VdlHomeAtmosphere from './components/VdlHomeAtmosphere.vue';
 import WidgetsLanding from './components/widgets/WidgetsLanding.vue';
 import WidgetDraw from './pages/widgets/Draw.vue';
@@ -29,7 +37,12 @@ import {
   pickNextHomeQuote,
 } from './vdl-home-quotes.js';
 
-const DEMO_SLUGS = new Set(['neptune', 'aichat']);
+const HexEarthDemo = defineAsyncComponent(async () => {
+  const mod = await import('@vanduo-oss/vdl-hex-earth');
+  await import('@vanduo-oss/vdl-hex-earth/style.css');
+  return mod.VdlHexEarthDemo;
+});
+const DEMO_SLUGS = new Set(['neptune', 'aichat', 'hex-earth']);
 const WIDGET_SLUGS = new Set(['draw', 'hex', 'code-editor', 'music-player']);
 const ROUTES = ['home', 'about', 'demos', 'widgets'];
 const DOCS_BASE_URL = DEFAULT_DOCS_BASE_URL;
@@ -195,6 +208,7 @@ async function fetchDocumentationHtml(slug) {
 }
 
 async function loadDocumentationForSlug(slug) {
+  if (slug === 'hex-earth') return;
   const seq = ++docLoadSeq;
   docLoading.value = true;
   docError.value = '';
@@ -327,7 +341,19 @@ watch(demoSlug, (slug) => {
 
     <LabsSiteDock :route="route" :widget-slug="widgetSlug" />
 
-    <main class="labs-main-shell" :data-labs-route="route" :data-labs-widget="widgetSlug || undefined">
+    <main
+      class="labs-main-shell"
+      :data-labs-route="route"
+      :data-labs-widget="widgetSlug || undefined"
+      :data-labs-demo="demoSlug || undefined"
+    >
+      <section
+        v-if="route === 'demos' && demoSlug === 'hex-earth'"
+        class="vdl-earth-stage"
+        aria-label="Hex Earth demo"
+      >
+        <a href="#demos" class="vdl-earth-back">← Demos</a><HexEarthDemo embedded />
+      </section>
       <div
         class="labs-view labs-view-home"
         data-labs-panel="home"
@@ -452,6 +478,7 @@ watch(demoSlug, (slug) => {
 
       <div
         class="labs-view labs-view-demos"
+        :hidden="demoSlug === 'hex-earth'"
         data-labs-panel="demos"
         :aria-hidden="route === 'demos' ? 'false' : 'true'"
         :inert="route !== 'demos'"
@@ -459,9 +486,7 @@ watch(demoSlug, (slug) => {
         <div class="vd-container-responsive labs-main">
           <section id="labs-demos" class="labs-section" aria-labelledby="labs-demos-heading">
             <div class="labs-page-header about-header">
-              <h2 id="labs-demos-heading">
-                <i class="ph ph-flask" aria-hidden="true"></i> Demos
-              </h2>
+              <h2 id="labs-demos-heading"><i class="ph ph-flask" aria-hidden="true"></i> Demos</h2>
               <p class="vd-text-lg vd-text-muted">
                 Live component demos — hybrid search, AI chat, and more.
               </p>
@@ -519,6 +544,26 @@ watch(demoSlug, (slug) => {
                     aichatVersion
                   }}</span>
                 </span>
+              </button>
+              <button
+                type="button"
+                class="labs-demo-card"
+                id="labs-card-hex-earth"
+                data-demo-slug="hex-earth"
+                @click="selectDemo('hex-earth')"
+              >
+                <span class="labs-demo-card-icon" aria-hidden="true"
+                  ><i class="ph ph-globe-hemisphere-west" style="font-size: 3rem"></i
+                ></span>
+                <span class="labs-demo-card-title">vdl-hex-earth</span>
+                <span class="labs-demo-card-desc"
+                  >Explore Earth and Europe as a hex map. Full-page canvas, terrain, routes, and
+                  movable controls.</span
+                >
+                <span class="labs-demo-card-source">Source: local Hex Earth package</span>
+                <span class="labs-demo-card-badge-row"
+                  ><span class="labs-demo-card-badge">Local preview</span></span
+                >
               </button>
             </div>
 
@@ -580,7 +625,7 @@ watch(demoSlug, (slug) => {
                     id="labs-demo-aichat"
                     :hidden="demoSlug !== 'aichat'"
                   >
-                    <VdlAiChatUI v-if="demoSlug === 'aichat'" />
+                    <VdlChatWorkbench v-if="demoSlug === 'aichat'" />
                   </div>
                 </div>
               </div>
@@ -615,3 +660,21 @@ watch(demoSlug, (slug) => {
     </main>
   </template>
 </template>
+
+<style scoped>
+.vdl-earth-stage {
+  position: fixed;
+  z-index: 2;
+  inset: var(--labs-dock-edge-pad-top, 0) var(--labs-dock-edge-pad-right, 0)
+    var(--labs-dock-edge-pad-bottom, 0) var(--labs-dock-edge-pad-left, 0);
+  background: var(--vd-bg-primary);
+  padding-top: 28px;
+}
+.vdl-earth-back {
+  position: absolute;
+  left: 12px;
+  top: 3px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+</style>

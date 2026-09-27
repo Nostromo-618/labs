@@ -72,12 +72,10 @@ const installShell = `# clone beside Labs, then in package.json:
 <template>
   <section id="labs-widgets" data-labs-panel="widgets-landing">
     <div class="labs-page-header about-header">
-      <h2>
-        <i class="ph ph-package" aria-hidden="true"></i> Widgets
-      </h2>
+      <h2><i class="ph ph-package" aria-hidden="true"></i> Widgets</h2>
       <p class="vd-text-lg vd-text-muted">
-        Live previews from <code>@vanduo-oss/vdl-cbun</code> — draw, hex grid, code editor, and music
-        player.
+        Live previews from <code>@vanduo-oss/vdl-cbun</code> — draw, hex grid, code editor, and
+        music player.
       </p>
     </div>
 

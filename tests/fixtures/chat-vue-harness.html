@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Chat lifecycle fixture</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      import { createApp, h } from 'vue';
+      import { VanduoVue } from '@vanduo-oss/vd3';
+      import '@vanduo-oss/vd3/css';
+      import '/src/styles/legacy-bridge.css';
+      import Chat from '/src/components/VdlAiChatUI.vue';
+      let history = [],
+        pending = null;
+      window.chatQA = {
+        calls: [],
+        canceled: 0,
+        unmount: () => app.unmount(),
+        finish: () => pending?.(),
+      };
+      const chat = {
+        modelId: 'gemma-4-E2B-it-web',
+        setModelId: async () => {},
+        isLoaded: () => true,
+        onProgress: () => () => {},
+        getHistory: () => history.map((m) => ({ ...m })),
+        setHistory: async (h) => {
+          history = h;
+        },
+        reset() {
+          this.cancel();
+          history = [];
+        },
+        cancel() {
+          window.chatQA.canceled++;
+          pending?.(true);
+        },
+        async generate(text, options) {
+          window.chatQA.calls.push({ text, sources: options.sources || [] });
+          if (text === 'hold')
+            return new Promise((resolve, reject) => {
+              pending = (stop) => {
+                pending = null;
+                if (stop) reject(new DOMException('Stopped', 'AbortError'));
+                else resolve('Late response');
+              };
+            });
+          const answer = options.sources?.length
+            ? `VdDock supports bottom, top, left and right. [source:${options.sources[0].id}]`
+            : text === 'html'
+              ? '<img src=x onerror="window.injected=1">'
+              : 'Answer: ' + text;
+          options.onUpdate?.(answer);
+          history.push({ role: 'user', content: text }, { role: 'assistant', content: answer });
+          return answer;
+        },
+      };
+      const app = createApp({ render: () => h(Chat, { chat }) });
+      app.use(VanduoVue, { storagePrefix: 'vdl-' });
+      app.mount('#app');
+    </script>
+  </body>
+</html>

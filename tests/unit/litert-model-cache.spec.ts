@@ -7,7 +7,7 @@ const HARNESS = '/tests/fixtures/neptune-harness.html';
  */
 test.describe('LiteRT model Cache Storage', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(HARNESS);
+    await page.goto(HARNESS, { waitUntil: 'domcontentloaded' });
   });
 
   test('loadLiteRTModelBytes caches on miss and reuses on hit', async ({ page }) => {

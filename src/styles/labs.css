@@ -132,7 +132,6 @@ body {
 
 /* Navbar leftovers kept for any residual chrome; primary shell is labs-dock.css. */
 
-
 /* Always-visible navbar actions (GitHub + theme) — docs chrome pattern */
 .navbar-actions-always {
   display: flex;
@@ -296,7 +295,7 @@ body:has(main[data-labs-route]) {
   visibility: hidden;
   transition: opacity 0.35s ease;
   /* Labs site liquid knobs (vd3 --vd-liquid-* contract) */
-  --vd-liquid-intensity: 0.30;
+  --vd-liquid-intensity: 0.3;
   --vd-liquid-speed: 0.143;
   --vd-liquid-grain: 0.38;
   --vd-liquid-distort: 0.68;

@@ -177,6 +177,8 @@ export function buildReportDocument({
  * @param {ReturnType<typeof buildReportDocument>} report
  */
 export function renderReportHtml(report) {
+  if (report.kind === 'paired-chat') return renderPairedReportHtml(report);
+
   const models = report.models || [];
   const rows = models
     .map((m) => {
@@ -279,6 +281,79 @@ export function renderReportHtml(report) {
 </html>`;
 }
 
+function renderPairedReportHtml(report) {
+  const models = report.models || [];
+  const panes = report.modes?.[report.mode] || [[], []];
+  const paneMarkup = [0, 1]
+    .map((paneIndex) => {
+      const model = models[paneIndex] || {};
+      const turns = panes[paneIndex] || [];
+      const turnMarkup = turns
+        .map((turn, turnIndex) => {
+          const citations = (turn.citations || [])
+            .filter((source) => {
+              try {
+                const url = new URL(source.url);
+                return url.protocol === 'https:' && url.hostname === 'vd3.vanduo.dev';
+              } catch {
+                return false;
+              }
+            })
+            .map(
+              (source) =>
+                `<li><a href="${escapeHtml(source.url)}" rel="noreferrer">${escapeHtml(source.title || source.url)}</a></li>`,
+            )
+            .join('');
+          return `<article class="turn">
+            <p class="status">Turn ${turnIndex + 1} · ${escapeHtml(turn.status || 'unknown')}</p>
+            <h3>${escapeHtml(turn.prompt || '')}</h3>
+            <pre>${escapeHtml(turn.response || '')}</pre>
+            ${citations ? `<ul>${citations}</ul>` : ''}
+          </article>`;
+        })
+        .join('\n');
+      return `<section class="pane">
+        <h2>Pane ${paneIndex ? 'B' : 'A'} · ${escapeHtml(model.label || model.id || model.modelId || 'Unknown model')}</h2>
+        ${turnMarkup || '<p>No turns recorded.</p>'}
+      </section>`;
+    })
+    .join('\n');
+  const checks = (report.checks || [])
+    .map(
+      (check) =>
+        `<li class="${check.pass ? 'pass' : 'fail'}">${escapeHtml(check.id)} · ${check.pass ? 'PASS' : 'FAIL'}</li>`,
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>vdl-model-eval paired report</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.5 ui-sans-serif, system-ui, sans-serif; color: #1a1a1a; background: #fff; }
+    body { margin: 1.5rem; }
+    .meta, .status { color: #555; }
+    .panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .pane, .turn { border: 1px solid #c8c8c8; border-radius: 8px; padding: 1rem; }
+    .turn { margin: 1rem 0; background: #f8f8f8; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .pass { color: #2b8a3e; } .fail { color: #c92a2a; }
+    @media (max-width: 700px) { .panes { grid-template-columns: 1fr; } body { margin: 1rem; } }
+  </style>
+</head>
+<body>
+  <h1>Paired model evaluation</h1>
+  <p class="meta">${escapeHtml(report.mode || 'general')} · ${escapeHtml(report.execution || 'together')} · ${escapeHtml(report.timingNote || '')}</p>
+  ${report.stopped ? '<p role="status">Stopped; partial results retained.</p>' : ''}
+  <main class="panes">${paneMarkup}</main>
+  <h2>Pair checks</h2>
+  <ul>${checks || '<li>No checks recorded.</li>'}</ul>
+</body>
+</html>`;
+}
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -304,6 +379,9 @@ export function summarizeModelResults(meta, caseResults) {
     modelId: meta.modelId,
     family: meta.family || null,
     backend: meta.backend || null,
+    runtimeVersion: meta.runtimeVersion || null,
+    loadMs: meta.loadMs ?? null,
+    loadSource: meta.loadSource || null,
     litertKind: meta.litertKind || null,
     label: meta.label || meta.modelId,
     passed,

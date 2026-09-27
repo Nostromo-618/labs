@@ -4,7 +4,7 @@ const HARNESS = '/tests/fixtures/neptune-harness.html';
 
 test.describe('HybridSearch E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(HARNESS);
+    await page.goto(HARNESS, { waitUntil: 'domcontentloaded' });
   });
 
   test('fuzzy search returns results for "button"', async ({ page }) => {
@@ -50,7 +50,7 @@ test.describe('HybridSearch E2E', () => {
       const semantic = await search.semanticSearch('button click');
       const merged = search.mergeResults(fuzzy, semantic);
       return {
-        merged: merged.map(m => ({ id: m.doc.id, source: m.source, score: m.score })),
+        merged: merged.map((m) => ({ id: m.doc.id, source: m.source, score: m.score })),
       };
     });
 
@@ -63,7 +63,7 @@ test.describe('HybridSearch E2E', () => {
     }
 
     // No duplicates
-    const ids = merged.map(m => m.id);
+    const ids = merged.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
@@ -280,7 +280,7 @@ test.describe('HybridSearch E2E', () => {
       const input1 = container.querySelector('.vdl-neptune-input') as HTMLInputElement;
       input1.value = 'button';
       input1.dispatchEvent(new Event('input'));
-      await new Promise(r => setTimeout(r, 450));
+      await new Promise((r) => setTimeout(r, 450));
 
       ui1.destroy();
 
@@ -291,7 +291,7 @@ test.describe('HybridSearch E2E', () => {
       const input2 = container.querySelector('.vdl-neptune-input') as HTMLInputElement;
       input2.value = 'glass';
       input2.dispatchEvent(new Event('input'));
-      await new Promise(r => setTimeout(r, 450));
+      await new Promise((r) => setTimeout(r, 450));
 
       const results2 = container.querySelectorAll('.vdl-neptune-result');
       return { count: results2.length };

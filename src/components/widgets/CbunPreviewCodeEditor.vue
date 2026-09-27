@@ -21,12 +21,7 @@ const increment = () => {
 
 <template>
   <div class="cbun-code-wrap">
-    <VdCodeEditor
-      v-model="code"
-      language="vue"
-      :auto-close="true"
-      :highlight-active-line="true"
-    />
+    <VdCodeEditor v-model="code" language="vue" :auto-close="true" :highlight-active-line="true" />
   </div>
 </template>
 
