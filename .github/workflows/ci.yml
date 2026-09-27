@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vdl-hex-earth
-          ref: 432b61fb7b2f569e48e33a548f71589290b2ecdb
+          ref: 5664284a453aad3a97ba566868c0caf8aa23eed6
           path: vdl-hex-earth
 
       - name: Setup pnpm
