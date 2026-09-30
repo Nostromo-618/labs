@@ -1,4 +1,4 @@
-# Agent instructions — vanduo labs
+# Agent instructions — vanduo web labs
 
 ## OpenSpec
 

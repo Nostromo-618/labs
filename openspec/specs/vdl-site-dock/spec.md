@@ -19,11 +19,15 @@ The dock MUST list Home, Widgets, Demos, and About. Activating an item MUST set 
 - **WHEN** a user activates the Widgets dock item
 - **THEN** the hash becomes `#widgets`
 
-### Requirement: Brand wordmark on horizontal edges only
-The dock brand MUST show the atom mark plus “vanduo labs” wordmark on horizontal edges. On vertical edges (left/right) the wordmark MUST be hidden (logo only).
+### Requirement: Brand wordmark on wide horizontal edges only
+The dock brand MUST show the atom mark plus “vanduo web labs” wordmark on horizontal edges when the viewport is wider than the VdDock narrow query (520px). On vertical edges (left/right) and on narrow horizontal docks, the wordmark MUST be hidden (logo only).
 
 #### Scenario: Vertical dock hides wordmark
 - **WHEN** the site dock placement is `left` or `right`
+- **THEN** `.labs-dock-brand-title` is not visible
+
+#### Scenario: Narrow horizontal dock hides wordmark
+- **WHEN** the viewport matches the narrow dock query (max-width 520px) and placement is `top` or `bottom`
 - **THEN** `.labs-dock-brand-title` is not visible
 
 ### Requirement: data-labs-dock page padding

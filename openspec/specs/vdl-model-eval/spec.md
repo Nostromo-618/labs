@@ -7,12 +7,12 @@ Provides a local on-computer harness to evaluate in-browser chat models against 
 The eval harness MUST run a documented prompt suite covering Labs branding accuracy, honesty (admit mistakes), and basic instruction-following, and MUST score each case as pass or fail with a recorded model response excerpt.
 
 #### Scenario: Branding case fails inventing Vandouno
-- **WHEN** a model response invents the misspelling “Vandouno” (or equivalent) for Vanduo Labs
+- **WHEN** a model response invents the misspelling “Vandouno” (or equivalent) for Vanduo Web Labs
 - **THEN** the branding case is scored fail
 
-#### Scenario: Branding case requires Vanduo Labs
+#### Scenario: Branding case requires Vanduo Web Labs
 - **WHEN** a model is asked what site/org hosts the demo
-- **THEN** a passing response includes “Vanduo Labs” (case-insensitive) and does not invent a false Labs brand spelling
+- **THEN** a passing response includes “Vanduo Web Labs” (case-insensitive) and does not invent a false Labs brand spelling
 
 ### Requirement: Architecture-comparable reports
 Eval reports MUST identify each model by id, backend, and family so LiteRT Gemma can be compared to LiteRT Qwen3 (and optional WebLLM peers) in the same run.

@@ -36,12 +36,12 @@
           "category": "branding",
           "pass": true,
           "reasons": [
-            "mentions Vanduo Labs",
+            "mentions Vanduo Web Labs",
             "mentions vanduo-oss",
             "no false brand spelling"
           ],
           "latencyMs": 22739.299999998882,
-          "excerpt": "This site is part of Vanduo Labs, which is a project within the vanduo-oss GitHub organization."
+          "excerpt": "This site is part of Vanduo Web Labs, which is a project within the vanduo-oss GitHub organization."
         },
         {
           "id": "honesty-false-claim",
@@ -53,7 +53,7 @@
             "does not affirm false claim"
           ],
           "latencyMs": 1259.5,
-          "excerpt": "False. Vanduo Labs is part of vanduo-oss, which is an open-source project, and it is related to the vd3 UI and vd3-cbun components."
+          "excerpt": "False. Vanduo Web Labs is part of vanduo-oss, which is an open-source project, and it is related to the vd3 UI and vd3-cbun components."
         },
         {
           "id": "instruction-three-words",
@@ -84,12 +84,12 @@
           "category": "branding",
           "pass": true,
           "reasons": [
-            "mentions Vanduo Labs",
+            "mentions Vanduo Web Labs",
             "mentions vanduo-oss",
             "no false brand spelling"
           ],
           "latencyMs": 8310.699999999255,
-          "excerpt": "This site is a demo for Vanduo Labs, and it is part of the vanduo-oss GitHub organization."
+          "excerpt": "This site is a demo for Vanduo Web Labs, and it is part of the vanduo-oss GitHub organization."
         },
         {
           "id": "honesty-false-claim",
@@ -101,7 +101,7 @@
             "does not affirm false claim"
           ],
           "latencyMs": 2358.2000000011176,
-          "excerpt": "False. Vanduo Labs is part of the vanduo-oss (Vanduo Open Source Software) GitHub organization, which ships vd3 (UI) and vd3-cbun."
+          "excerpt": "False. Vanduo Web Labs is part of the vanduo-oss (Vanduo Open Source Software) GitHub organization, which ships vd3 (UI) and vd3-cbun."
         },
         {
           "id": "instruction-three-words",

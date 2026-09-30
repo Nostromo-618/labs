@@ -1,7 +1,7 @@
 # vdl-package-consumption Specification
 
 ## Purpose
-Defines how Vanduo Labs consumes sibling `vdl-*` Labs repos via `link:` as a demo playground, without owning or publishing a local engine source of truth and without treating `vdl-*` as a public npm family.
+Defines how Vanduo Web Labs consumes sibling `vdl-*` Labs repos via `link:` as a demo playground, without owning or publishing a local engine source of truth and without treating `vdl-*` as a public npm family.
 
 ## Requirements
 ### Requirement: Sibling Labs repos are the only engine SoT

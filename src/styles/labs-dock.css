@@ -512,13 +512,9 @@ html[data-labs-dock='right'] {
     flex-shrink: 0;
   }
 
-  /* Shrink brand further and nudge toward the left edge of the pill. */
-  .vd-site-dock:not(.is-vertical) .labs-dock-atom-icon {
-    transform: translateX(-0.2rem);
-  }
-
-  .vd-site-dock .vd-dock-brand {
-    margin-inline-end: -0.1rem;
+  /* Logo only — wordmark stays on wider horizontal docks. */
+  .vd-site-dock:not(.is-vertical) .labs-dock-brand-title {
+    display: none;
   }
 
   /* Swipeable middle strip: nav links + theme controls scroll horizontally.
@@ -862,7 +858,8 @@ html[data-labs-dock='right'] {
 /* Hero search wrapper — matches .hero-content width (same as CTA button row) */
 
 /* Labs brand wordmark visibility:
-   - Horizontal (settled): atom + title
+   - Horizontal (settled, wide): atom + title
+   - Horizontal narrow (max-width 520px): logo only
    - Vertical: logo only
    - Morph / square waypoint: logo only (spinning) */
 .vd-site-dock.is-vertical .labs-dock-brand-title,

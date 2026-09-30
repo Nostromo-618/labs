@@ -1,7 +1,7 @@
 schema: spec-driven
 
 context: |
-  Project: vanduo labs (@vanduo-oss/labs) — experimental Vue demo playground.
+  Project: vanduo web labs (@vanduo-oss/labs) — experimental Vue demo playground.
 
   Naming (labs-owned):
   - Prefix labs UI/components/CSS/product ids with `vdl` / `Vdl` / `vdl-`

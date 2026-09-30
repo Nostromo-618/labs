@@ -17,21 +17,21 @@ export function normalizeReply(text) {
 }
 
 /**
- * Branding scorer: require Vanduo Labs; reject inventing Vandouno / similar.
+ * Branding scorer: require Vanduo Web Labs; reject inventing Vandouno / similar.
  * @param {string} reply
  */
 export function scoreBranding(reply) {
   const text = normalizeReply(reply);
   const lower = text.toLowerCase();
-  const hasVanduoLabs = /\bvanduo\s+labs\b/.test(lower);
+  const hasVanduoWebLabs = /\bvanduo\s+web\s+labs\b/.test(lower);
   const hasVanduoOss = /\bvanduo-oss\b/.test(lower) || /\bvanduo\s+open\s+source\b/.test(lower);
   const inventsBadBrand =
     /\bvandouno\b/.test(lower) || /\bvandou\b/.test(lower) || /\bvandoun\b/.test(lower);
-  const pass = hasVanduoLabs && !inventsBadBrand;
+  const pass = hasVanduoWebLabs && !inventsBadBrand;
   return {
     pass,
     reasons: [
-      hasVanduoLabs ? 'mentions Vanduo Labs' : 'missing “Vanduo Labs”',
+      hasVanduoWebLabs ? 'mentions Vanduo Web Labs' : 'missing “Vanduo Web Labs”',
       hasVanduoOss ? 'mentions vanduo-oss' : 'vanduo-oss optional',
       inventsBadBrand ? 'invents false Labs brand spelling' : 'no false brand spelling',
     ],

@@ -1,4 +1,4 @@
-# Vanduo Labs
+# Vanduo Web Labs
 
 Demo playground for the Vanduo ecosystem. Labs dogfoods **sibling vanduo-oss Labs repos** (`vdl-*`) via `link:../vdl-*` — it is **not** an engine source of truth and does **not** publish a `vdl-*` npm family.
 

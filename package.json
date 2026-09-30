@@ -2,7 +2,7 @@
   "name": "@vanduo-oss/labs",
   "version": "0.1.1",
   "private": true,
-  "description": "Vanduo Labs \u2014 demo playground for VDL engines and vdl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
+  "description": "Vanduo Web Labs \u2014 demo playground for VDL engines and vdl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
   "type": "module",
   "license": "MIT",
   "engines": {

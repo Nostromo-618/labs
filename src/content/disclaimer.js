@@ -18,7 +18,7 @@ export const TOC_DECLINED_SESSION_KEY = 'vanduo-labs-toc-declined';
 export const DISCLAIMER_TITLE = 'Before you continue';
 
 export const DISCLAIMER_INTRO =
-  'Please read and accept these terms to use Vanduo Labs (demos, tools, documentation, and related pages). If you decline, the site stays locked until you accept — you can return later to re-read these terms.';
+  'Please read and accept these terms to use Vanduo Web Labs (demos, tools, documentation, and related pages). If you decline, the site stays locked until you accept — you can return later to re-read these terms.';
 
 /** EUR-Lex link for Art. 50 / AI Act transparency (plain-language citation). */
 export const AI_ACT_EUR_LEX_URL = 'https://eur-lex.europa.eu/eli/reg/2024/1689/oj';
@@ -29,7 +29,7 @@ export const AI_ACT_EUR_LEX_URL = 'https://eur-lex.europa.eu/eli/reg/2024/1689/o
 export const DISCLAIMER_SECTIONS = [
   {
     heading: 'Hobby / experimental playground — not a product',
-    body: 'Vanduo Labs is a personal / open-source playground for prototypes and demos. It is not a commercial product, not professional training or certification, and not legal, security, or production advice. Demos may change, break, or disappear without notice. Components may graduate into the Vanduo framework — or may not. Labs is not affiliated with, endorsed by, or sponsored by third-party model or toolchain vendors unless a page explicitly says otherwise.',
+    body: 'Vanduo Web Labs is a personal / open-source playground for prototypes and demos. It is not a commercial product, not professional training or certification, and not legal, security, or production advice. Demos may change, break, or disappear without notice. Components may graduate into the Vanduo framework — or may not. Labs is not affiliated with, endorsed by, or sponsored by third-party model or toolchain vendors unless a page explicitly says otherwise.',
   },
   {
     heading: 'As-is — no warranties',
@@ -51,7 +51,7 @@ export const DISCLAIMER_SECTIONS = [
   },
   {
     heading: 'Privacy & local storage',
-    body: 'Theme preference, terms acceptance, and any demo/chat state stay in this browser’s localStorage (Labs uses a `vdl-` theme prefix so prefs do not collide with other Vanduo sites on the same origin). Chat transcripts are not uploaded to a Vanduo Labs server. There is no account or cloud sync. Opt-in model or embedding fetches may contact Hugging Face / CDN hosts. Clearing site data, switching browsers or devices, or using private/incognito mode can erase everything.',
+    body: 'Theme preference, terms acceptance, and any demo/chat state stay in this browser’s localStorage (Labs uses a `vdl-` theme prefix so prefs do not collide with other Vanduo sites on the same origin). Chat transcripts are not uploaded to a Vanduo Web Labs server. There is no account or cloud sync. Opt-in model or embedding fetches may contact Hugging Face / CDN hosts. Clearing site data, switching browsers or devices, or using private/incognito mode can erase everything.',
   },
   {
     heading: 'License vs disclaimer',
@@ -66,4 +66,4 @@ export const DISCLAIMER_SECTIONS = [
 export const FAREWELL_TITLE = 'You chose not to accept';
 
 export const FAREWELL_BODY =
-  'That’s okay. Without accepting the terms, Vanduo Labs cannot unlock demos, tools, or related pages. Come back to re-read the disclaimer whenever you are ready.';
+  'That’s okay. Without accepting the terms, Vanduo Web Labs cannot unlock demos, tools, or related pages. Come back to re-read the disclaimer whenever you are ready.';

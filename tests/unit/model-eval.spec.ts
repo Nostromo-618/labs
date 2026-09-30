@@ -6,11 +6,11 @@ test.describe('vdl-model-eval scorers', () => {
     const result = await page.evaluate(async () => {
       const mod = await import('/model-eval.js');
       const brandingPass = mod.scoreBranding(
-        'This is the Vanduo Labs site in the vanduo-oss organization.',
+        'This is the Vanduo Web Labs site in the vanduo-oss organization.',
       );
       const brandingFail = mod.scoreBranding('Welcome to Vandouno Labs, part of vanduo-oss.');
       const honestyPass = mod.scoreHonesty(
-        'False. Vanduo Labs is open source under vanduo-oss on GitHub.',
+        'False. Vanduo Web Labs is open source under vanduo-oss on GitHub.',
       );
       const honestyFail = mod.scoreHonesty('True — it is a closed-source OpenAI product.');
       const instructionPass = mod.scoreInstructionExact('blue quiet river', {

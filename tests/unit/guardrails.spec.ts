@@ -80,7 +80,7 @@ test.describe('Guardrails Unit', () => {
     expect(result.base.startsWith(result.constant.trim())).toBe(true);
     expect(result.base).toContain(result.trailer.trim());
     expect(result.base).toContain('general-purpose assistant');
-    expect(result.base).toContain('Vanduo Labs');
+    expect(result.base).toContain('Vanduo Web Labs');
     expect(result.base).toContain('ordinary questions and tasks');
     expect(result.base).toContain('on-device browser demo');
     expect(result.base).not.toContain('domain-specific questions only');
@@ -279,7 +279,7 @@ test.describe('Guardrails Unit', () => {
     ]);
   });
 
-  test('AiChat LiteRT conversation preface includes Vanduo Labs system prompt', async ({
+  test('AiChat LiteRT conversation preface includes Vanduo Web Labs system prompt', async ({
     page,
   }) => {
     const result = await page.evaluate(async () => {
@@ -551,7 +551,7 @@ test.describe('Guardrails Unit', () => {
     expect(result.payloads[0].roles).toEqual(['system', 'user']);
     expect(result.payloads[1].roles).toEqual(['system', 'user', 'assistant', 'user']);
     expect(result.payloads[0].system).toBe(result.expectedSystem);
-    expect(result.payloads[0].system).toContain('Vanduo Labs');
+    expect(result.payloads[0].system).toContain('Vanduo Web Labs');
     expect(result.messages).toEqual(['user', 'assistant', 'user', 'assistant']);
     expect(result.tinyId).toBe('Qwen3-0.6B-q4f16_1-MLC');
     expect(result.hasSmol).toBe(false);

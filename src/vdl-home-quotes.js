@@ -1,5 +1,5 @@
 /**
- * Rotating home-page jokes for Vanduo Labs.
+ * Rotating home-page jokes for Vanduo Web Labs.
  *
  * Session/day shuffle bag: Fisher–Yates order seeded by YYYY-MM-DD + a
  * session salt in sessionStorage, then walk without immediate repeats.
@@ -17,17 +17,13 @@ export const VDL_HOME_QUOTE_GLADOS_ID = 'glados';
 
 /** @type {readonly VdlHomeQuote[]} */
 export const VDL_HOME_QUOTES = Object.freeze([
+  // Special
   {
     id: VDL_HOME_QUOTE_GLADOS_ID,
     text: 'We are not yet building GLaDOS, but we might soon…',
   },
 
-  // The AI Uprising & Robotics
-  { id: 'ai-uprising-days', text: 'Days without an AI uprising: 0.' },
-  {
-    id: 'ai-feed-networks',
-    text: 'Caution: Do not feed the neural networks. They are already plotting.',
-  },
+  // Lightweight AI & Algorithms
   {
     id: 'ai-raise',
     text: "Our AI isn't self-aware yet, but it did ask for a raise today.",
@@ -44,23 +40,53 @@ export const VDL_HOME_QUOTES = Object.freeze([
     id: 'ai-turing',
     text: 'Turing test: Passed. Empathy test: Failed spectacularly.',
   },
+
+  // Web Development & Frontend Labs
   {
-    id: 'ai-nuclear',
-    text: 'The good news: The AI speaks. The bad news: It just asked for the nuclear launch codes.',
+    id: 'web-center-div',
+    text: 'Centering a div remains our most ambitious scientific breakthrough.',
   },
   {
-    id: 'ai-apologize',
-    text: 'Our robots come with a built-in "apologize for the apocalypse" subroutine.',
+    id: 'web-z-index',
+    text: 'z-index: 999999; because hope is a valid layout strategy.',
   },
   {
-    id: 'ai-weapon',
-    text: 'Remember: If the robot asks for a weapon, say no. If it asks twice, run.',
+    id: 'web-cache',
+    text: 'There are two hard problems in CS: cache invalidation, naming things, and off-by-one errors.',
+  },
+  {
+    id: 'web-framework',
+    text: 'A new JavaScript framework was released while you were reading this quote.',
+  },
+  {
+    id: 'web-responsive',
+    text: "It's not a broken layout; it's an extreme responsive design test.",
+  },
+  {
+    id: 'web-dark-mode',
+    text: "Dark mode isn't a design choice, it's a photophobia prevention protocol.",
+  },
+  {
+    id: 'web-js-types',
+    text: 'JavaScript: Where [] + [] is "" and [] + {} is [object Object].',
+  },
+  {
+    id: 'web-lighthouse',
+    text: 'Lighthouse performance score: 100. Actual page load time: 3 business days.',
+  },
+  {
+    id: 'web-css-grid',
+    text: 'In case of emergency, convert to CSS Grid and cross your fingers.',
+  },
+  {
+    id: 'web-404',
+    text: '404: Punchline not found. Please refresh and try again.',
   },
 
   // Lab Safety & OSHA Violations
   {
     id: 'lab-hypothesis',
-    text: 'Vanduo Labs: Where "what\'s the worst that could happen?" is our daily hypothesis.',
+    text: 'Vanduo Web Labs: Where "what\'s the worst that could happen?" is our daily hypothesis.',
   },
   {
     id: 'lab-99',
@@ -76,7 +102,7 @@ export const VDL_HOME_QUOTES = Object.freeze([
   },
   {
     id: 'lab-geiger',
-    text: 'Welcome to Vanduo Labs. Bring your own Geiger counter.',
+    text: 'Welcome to Vanduo Web Labs. Bring your own Geiger counter.',
   },
   {
     id: 'lab-waiver',
@@ -106,7 +132,7 @@ export const VDL_HOME_QUOTES = Object.freeze([
   },
   {
     id: 'eng-volatile',
-    text: "At Vanduo Labs, we don't make mistakes. We create unexpected, highly volatile features.",
+    text: "At Vanduo Web Labs, we don't make mistakes. We create unexpected, highly volatile features.",
   },
   {
     id: 'eng-coffee',
@@ -148,7 +174,7 @@ export const VDL_HOME_QUOTES = Object.freeze([
   },
   {
     id: 'mad-warranty',
-    text: 'Vanduo Labs: Proudly voiding warranties since day one.',
+    text: 'Vanduo Web Labs: Proudly voiding warranties since day one.',
   },
   {
     id: 'mad-alarms',
@@ -172,7 +198,7 @@ export const VDL_HOME_QUOTES = Object.freeze([
   },
   {
     id: 'mad-tomorrow',
-    text: "Vanduo Labs: Inventing tomorrow's problems, today.",
+    text: "Vanduo Web Labs: Inventing tomorrow's problems, today.",
   },
 ]);
 

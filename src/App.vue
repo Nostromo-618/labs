@@ -400,7 +400,7 @@ watch(demoSlug, (slug) => {
               <circle class="hero-atom-core" cx="50" cy="50" r="5.5"></circle>
             </svg>
             <span class="hero-title-brand">vanduo</span>&nbsp;<span class="vd-text-muted"
-              >labs</span
+              >web labs</span
             >
           </h2>
           <p
@@ -437,7 +437,7 @@ watch(demoSlug, (slug) => {
               </p>
               <h2 class="labs-about-title">A small playground for curious builds</h2>
               <p class="labs-about-lede">
-                Vanduo Labs is where we ship ideas before they are polished—interactive demos, odd
+                Vanduo Web Labs is where we ship ideas before they are polished—interactive demos, odd
                 widgets, and half-serious prototypes that might graduate into the framework, or
                 might just make us smile. Most demos are not guaranteed stable; that is the point.
                 Some components, like <code>vdl-hybrid-search</code>, are experimental prototypes

@@ -301,7 +301,7 @@ onUnmounted(() => {
         href="https://github.com/vanduo-oss/labs"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Open Vanduo Labs GitHub repository"
+        aria-label="Open Vanduo Web Labs GitHub repository"
         :data-tooltip="showDockTooltips ? 'GitHub' : undefined"
         v-bind="dockTooltipBind"
       >
