@@ -437,8 +437,8 @@ watch(demoSlug, (slug) => {
               </p>
               <h2 class="labs-about-title">A small playground for curious builds</h2>
               <p class="labs-about-lede">
-                Vanduo Web Labs is where we ship ideas before they are polished—interactive demos, odd
-                widgets, and half-serious prototypes that might graduate into the framework, or
+                Vanduo Web Labs is where we ship ideas before they are polished—interactive demos,
+                odd widgets, and half-serious prototypes that might graduate into the framework, or
                 might just make us smile. Most demos are not guaranteed stable; that is the point.
                 Some components, like <code>vwl-hybrid-search</code>, are experimental prototypes
                 that may graduate into the framework.
