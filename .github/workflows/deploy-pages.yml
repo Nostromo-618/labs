@@ -39,28 +39,28 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-cbun
-          ref: ec67960defcaba2869333e22690254e85f70fdc5
+          ref: d3a796e25673aff8baeebf9b294d85dc4d979c11
           path: vwl-cbun
 
       - name: Checkout vwl-hybrid-search
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-hybrid-search
-          ref: 214d6f4b6c44795f03d15cfcedcd7667d26f2f5b
+          ref: fe075e2368b61927be32d3fe8cc3c9b6b9ea0bbc
           path: vwl-hybrid-search
 
       - name: Checkout vwl-ai-chat
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-ai-chat
-          ref: 8cf0af8ae4721780620eb48a5bcb511000cf2b00
+          ref: 88ce8a3ac6363a096de689d6dd84978b6e19502e
           path: vwl-ai-chat
 
       - name: Checkout vwl-hex-earth
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-hex-earth
-          ref: 1d1b251b430a79773a83d7ecbff8807d136b7026
+          ref: d88c6084dc4f68b86151b251d7b495cdbd21e57e
           path: vwl-hex-earth
 
       - name: Setup pnpm
