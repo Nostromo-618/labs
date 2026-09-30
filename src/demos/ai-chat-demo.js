@@ -2,14 +2,14 @@ import { createApp, h } from 'vue';
 import { VanduoVue, VdCard, VdThemeSwitcher } from '@vanduo-oss/vd3';
 import '@vanduo-oss/vd3/css';
 import '../styles/legacy-bridge.css';
-import { installResolvedTheme } from '../vdl-resolved-theme.js';
-import VdlChatWorkbench from '../components/VdlChatWorkbench.vue';
+import { installResolvedTheme } from '../vwl-resolved-theme.js';
+import VwlChatWorkbench from '../components/VwlChatWorkbench.vue';
 
 const DemoApp = {
   name: 'AiChatDemo',
   setup() {
     return () =>
-      h('div', { class: 'demo-root vdl-chat-demo' }, [
+      h('div', { class: 'demo-root vwl-chat-demo' }, [
         h('header', { class: 'demo-header' }, [
           h('h1', 'AI Chat (WebGPU)'),
           h('p', [
@@ -19,10 +19,10 @@ const DemoApp = {
           ]),
           h(VdThemeSwitcher, { menu: false }),
         ]),
-        h('div', { class: 'demo-chat-wrap' }, [h(VdlChatWorkbench)]),
+        h('div', { class: 'demo-chat-wrap' }, [h(VwlChatWorkbench)]),
         h(
           VdCard,
-          { class: 'demo-info-section vdl-card-glow vd-glass' },
+          { class: 'demo-info-section vwl-card-glow vd-glass' },
           {
             default: () => [
               h('h3', 'How it Works'),

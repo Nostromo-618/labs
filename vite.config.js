@@ -22,7 +22,7 @@ const ortRoot = path.resolve(
 );
 
 const localModelsDir = path.join(root, '.models');
-const vdlCbunRoot = path.resolve(root, '../vdl-cbun');
+const vdlCbunRoot = path.resolve(root, '../vwl-cbun');
 const vdlCbunDist = path.join(vdlCbunRoot, 'dist');
 const useLocalVdlCbun = fs.existsSync(path.join(vdlCbunDist, 'index.js'));
 
@@ -122,25 +122,25 @@ function devLogsPlugin() {
 
 const vdlCbunAlias = useLocalVdlCbun
   ? {
-      '@vanduo-oss/vdl-cbun/code-editor/css': path.join(
+      '@vanduo-oss/vwl-cbun/code-editor/css': path.join(
         vdlCbunDist,
         'code-editor/vd3-code-editor.css',
       ),
-      '@vanduo-oss/vdl-cbun/code-editor/highlight': path.join(
+      '@vanduo-oss/vwl-cbun/code-editor/highlight': path.join(
         vdlCbunDist,
         'code-editor/highlight.js',
       ),
-      '@vanduo-oss/vdl-cbun/code-editor': path.join(vdlCbunDist, 'code-editor'),
-      '@vanduo-oss/vdl-cbun/draw/css': path.join(vdlCbunDist, 'draw/vd3-draw.css'),
-      '@vanduo-oss/vdl-cbun/draw': path.join(vdlCbunDist, 'draw'),
-      '@vanduo-oss/vdl-cbun/hex-grid/hex-math': path.join(vdlCbunDist, 'hex-grid/hex-math.js'),
-      '@vanduo-oss/vdl-cbun/hex-grid': path.join(vdlCbunDist, 'hex-grid'),
-      '@vanduo-oss/vdl-cbun/music-player/css': path.join(
+      '@vanduo-oss/vwl-cbun/code-editor': path.join(vdlCbunDist, 'code-editor'),
+      '@vanduo-oss/vwl-cbun/draw/css': path.join(vdlCbunDist, 'draw/vd3-draw.css'),
+      '@vanduo-oss/vwl-cbun/draw': path.join(vdlCbunDist, 'draw'),
+      '@vanduo-oss/vwl-cbun/hex-grid/hex-math': path.join(vdlCbunDist, 'hex-grid/hex-math.js'),
+      '@vanduo-oss/vwl-cbun/hex-grid': path.join(vdlCbunDist, 'hex-grid'),
+      '@vanduo-oss/vwl-cbun/music-player/css': path.join(
         vdlCbunDist,
         'music-player/vd3-music-player.css',
       ),
-      '@vanduo-oss/vdl-cbun/music-player': path.join(vdlCbunDist, 'music-player'),
-      '@vanduo-oss/vdl-cbun': vdlCbunDist,
+      '@vanduo-oss/vwl-cbun/music-player': path.join(vdlCbunDist, 'music-player'),
+      '@vanduo-oss/vwl-cbun': vdlCbunDist,
     }
   : {};
 

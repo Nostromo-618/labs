@@ -9,7 +9,7 @@ The Labs site MUST expose a top-level Tools route that is not part of the Intera
 
 #### Scenario: Navigate to tools
 - **WHEN** a user opens `#tools`
-- **THEN** the Tools panel is shown with vdl-model-eval as the single tool (report UI and docs) and Interactive Demos content is not the active panel
+- **THEN** the Tools panel is shown with vwl-model-eval as the single tool (report UI and docs) and Interactive Demos content is not the active panel
 
 #### Scenario: Model eval tool deep link
 - **WHEN** a user opens `#tools/model-eval`

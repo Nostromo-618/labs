@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import {
   buildCanonicalCorpus,
   hash,
-} from '../../vdl-hybrid-search/scripts/lib/canonical-index.mjs';
+} from '../../vwl-hybrid-search/scripts/lib/canonical-index.mjs';
 
 const require = createRequire(import.meta.url);
 const sourceRoot = path.resolve(process.env.VD3_DOCS_ROOT || '../../vd3/vd3-docs');

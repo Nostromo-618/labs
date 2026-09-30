@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue';
 import DocCodeSnippet from '../../components/DocCodeSnippet.vue';
-import { VdMusicPlayer } from '@vanduo-oss/vdl-cbun/music-player';
+import { VdMusicPlayer } from '@vanduo-oss/vwl-cbun/music-player';
 
 const base = import.meta.env.BASE_URL;
 
@@ -139,10 +139,10 @@ onBeforeUnmount(() => {
 });
 
 const installShell = `# clone beside Labs, then in package.json:
-# "@vanduo-oss/vdl-cbun": "link:../vdl-cbun"`;
+# "@vanduo-oss/vwl-cbun": "link:../vwl-cbun"`;
 const vue3Usage = `<script setup>
-import { VdMusicPlayer } from '@vanduo-oss/vdl-cbun/music-player';
-import '@vanduo-oss/vdl-cbun/music-player/css';
+import { VdMusicPlayer } from '@vanduo-oss/vwl-cbun/music-player';
+import '@vanduo-oss/vwl-cbun/music-player/css';
 
 const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
 <\/script>
@@ -162,7 +162,7 @@ const tracks = [{ name: 'Pale Blue Dot', url: '/music/pale-blue-dot.mp3' }];
     </p>
     <h5 class="demo-title"><i class="ph ph-music-note"></i> Music Player</h5>
     <p class="vd-mb-8">
-      HTML5 audio player from <code>@vanduo-oss/vdl-cbun/music-player</code>. Demo audio:
+      HTML5 audio player from <code>@vanduo-oss/vwl-cbun/music-player</code>. Demo audio:
       Stellardrone — <em>Invent the Universe</em> (CC BY 4.0).
     </p>
 

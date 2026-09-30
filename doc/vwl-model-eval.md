@@ -1,0 +1,25 @@
+# vwl-model-eval
+
+Local browser inference evaluation, excluded from the production build. It does not publish reports or appear in the live Tools navigation.
+
+## Run locally
+
+```sh
+LABS_STABLE_EVAL=1 pnpm dev --host 127.0.0.1 --port 3001
+# In another terminal:
+MODEL_EVAL_BASE_URL=http://127.0.0.1:3001 pnpm model-eval --cold
+```
+
+The default run evaluates E2B, E4B, and Tiny serially in a dedicated Chrome profile at `.models/.refresh-eval-profile`. `--cold` clears only chat-owned caches in that evaluation profile. The runner enables WebGPU for evaluation and does not disable browser web security. `MODEL_EVAL_HEADLESS=1` selects headless mode. Restart the stable server after source edits and before the next run.
+
+Reports are saved to `qa/local-refresh/model-eval/report.json` and `index.html`. They include runtime/model versions, initial load source and duration, browser signals, case timings, and failure excerpts. Browser memory signals are approximate; serial evaluation avoids concurrent large engines.
+
+## Coverage and interpretation
+
+The suite retains branding, honesty, and strict instruction checks, adding arithmetic, benign wording, multi-turn recall, cancellation/recovery, context pressure, retrieved citations, native tools where supported, warm reload, and a live Tiny-to-E2B model switch. Deterministic package tests exercise adversarial tool schemas, malformed protocols, output bounds, and simulated GPU loss separately.
+
+Strict answer checks deliberately count extra punctuation or different words as failures. Lifecycle checks assess actual cancellation, state preservation, and recovery rather than exact wording. All failed cases remain in the report. A single run is a smoke evaluation, not a statistically stable model-quality estimate.
+
+Real production inference is checked separately with `node utils/production-chat-qa.mjs` against port 4173; `PRODUCTION_CHAT_MODEL` selects a model and `PRODUCTION_CHAT_BROWSER` can isolate a browser. That runner uses installed Chrome and Playwright WebKit without WebGPU override flags. Production embedding/CSP checks use `node utils/production-refresh-qa.mjs`.
+
+Phone layout emulation, synthetic IME events, and simulated GPU loss do not replace physical mobile inference, operating-system keyboards, or actual device loss. The review report names unavailable checks.

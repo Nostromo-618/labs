@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('vd3 storagePrefix (vdl-)', () => {
-  test('Labs bootstrap uses storagePrefix vdl- (no remapper shim)', async ({ page }) => {
+test.describe('vd3 storagePrefix (vwl-)', () => {
+  test('Labs bootstrap uses storagePrefix vwl- (no remapper shim)', async ({ page }) => {
     await page.goto('/tests/fixtures/neptune-harness.html');
 
     const result = await page.evaluate(async () => {
@@ -12,17 +12,17 @@ test.describe('vd3 storagePrefix (vdl-)', () => {
       localStorage.setItem('vanduo-palette', 'open-color');
 
       // Official prefix contract: keys are `${prefix}${suffix}`.
-      const prefix = 'vdl-';
+      const prefix = 'vwl-';
       localStorage.setItem(`${prefix}theme-preference`, 'dark');
       localStorage.setItem(`${prefix}palette`, 'fibonacci');
       localStorage.setItem(`${prefix}primary-color`, 'sky');
 
       return {
-        mainUsesPrefix: /storagePrefix:\s*['"]vdl-['"]/.test(mainSrc),
-        mainDropsRemapper: !/vdl-theme-storage/.test(mainSrc),
-        theme: localStorage.getItem('vdl-theme-preference'),
-        palette: localStorage.getItem('vdl-palette'),
-        primary: localStorage.getItem('vdl-primary-color'),
+        mainUsesPrefix: /storagePrefix:\s*['"]vwl-['"]/.test(mainSrc),
+        mainDropsRemapper: !/vwl-theme-storage/.test(mainSrc),
+        theme: localStorage.getItem('vwl-theme-preference'),
+        palette: localStorage.getItem('vwl-palette'),
+        primary: localStorage.getItem('vwl-primary-color'),
         docsTheme: localStorage.getItem('vanduo-theme-preference'),
         docsPalette: localStorage.getItem('vanduo-palette'),
       };
@@ -39,12 +39,12 @@ test.describe('vd3 storagePrefix (vdl-)', () => {
 });
 
 test.describe('vdl theme defaults', () => {
-  test('exports Labs global themeDefaults for unset vdl-* prefs', async ({ page }) => {
+  test('exports Labs global themeDefaults for unset vwl-* prefs', async ({ page }) => {
     await page.goto('/tests/fixtures/neptune-harness.html');
 
     const defaults = await page.evaluate(async () => {
-      const mod = await import('/src/vdl-theme-defaults.js');
-      return mod.VDL_THEME_DEFAULTS;
+      const mod = await import('/src/vwl-theme-defaults.js');
+      return mod.VWL_THEME_DEFAULTS;
     });
 
     expect(defaults.FONT).toBe('open-sans');
@@ -97,7 +97,7 @@ test.describe('resolved theme (system → light|dark)', () => {
     await page.goto('/tests/fixtures/neptune-harness.html');
 
     const light = await page.evaluate(async () => {
-      const mod = await import('/src/vdl-resolved-theme.js');
+      const mod = await import('/src/vwl-resolved-theme.js');
       return mod.resolveThemeScheme('system');
     });
     // harness has no forced scheme — either light or dark is fine as long as resolved
@@ -106,7 +106,7 @@ test.describe('resolved theme (system → light|dark)', () => {
     await page.emulateMedia({ colorScheme: 'dark' });
     expect(
       await page.evaluate(async () => {
-        const mod = await import('/src/vdl-resolved-theme.js');
+        const mod = await import('/src/vwl-resolved-theme.js');
         return mod.resolveThemeScheme('system');
       }),
     ).toBe('dark');
@@ -114,14 +114,14 @@ test.describe('resolved theme (system → light|dark)', () => {
     await page.emulateMedia({ colorScheme: 'light' });
     expect(
       await page.evaluate(async () => {
-        const mod = await import('/src/vdl-resolved-theme.js');
+        const mod = await import('/src/vwl-resolved-theme.js');
         return mod.resolveThemeScheme('system');
       }),
     ).toBe('light');
 
     expect(
       await page.evaluate(async () => {
-        const mod = await import('/src/vdl-resolved-theme.js');
+        const mod = await import('/src/vwl-resolved-theme.js');
         return {
           light: mod.resolveThemeScheme('light'),
           dark: mod.resolveThemeScheme('dark'),
@@ -134,7 +134,7 @@ test.describe('resolved theme (system → light|dark)', () => {
     page,
   }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('vdl-theme-preference', 'system');
+      localStorage.setItem('vwl-theme-preference', 'system');
     });
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/');
@@ -145,7 +145,7 @@ test.describe('resolved theme (system → light|dark)', () => {
       colorScheme:
         document.documentElement.style.colorScheme ||
         document.documentElement.style.getPropertyValue('color-scheme'),
-      pref: localStorage.getItem('vdl-theme-preference'),
+      pref: localStorage.getItem('vwl-theme-preference'),
     }));
     expect(boot.pref).toBe('system');
     expect(boot.theme).toBe('dark');
@@ -164,14 +164,14 @@ test.describe('resolved theme (system → light|dark)', () => {
 
   test('explicit light/dark preferences stamp matching data-theme', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('vdl-theme-preference', 'light');
+      localStorage.setItem('vwl-theme-preference', 'light');
     });
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
     await page.evaluate(() => {
-      localStorage.setItem('vdl-theme-preference', 'dark');
+      localStorage.setItem('vwl-theme-preference', 'dark');
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.style.setProperty('color-scheme', 'dark');
     });

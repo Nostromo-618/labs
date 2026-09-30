@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('vdl-model-eval scorers', () => {
+test.describe('vwl-model-eval scorers', () => {
   test('branding / honesty / instruction scorers and concurrency planner', async ({ page }) => {
     await page.goto('/');
     const result = await page.evaluate(async () => {
@@ -64,7 +64,7 @@ test.describe('vdl-model-eval scorers', () => {
         htmlHasPass: html.includes('PASS'),
         htmlLightTheme:
           html.includes('color-scheme: light') &&
-          html.includes('--vdl-report-fg:') &&
+          html.includes('--vwl-report-fg:') &&
           !html.includes('color-scheme: light dark'),
         pairHtmlHasBothAnswers:
           pairHtml.includes('Answer A') &&
@@ -72,7 +72,7 @@ test.describe('vdl-model-eval scorers', () => {
           pairHtml.includes('pair-recovery') &&
           pairHtml.includes('A &amp; B') &&
           !pairHtml.includes('<script>question</script>'),
-        version: mod.VDL_MODEL_EVAL_VERSION,
+        version: mod.VWL_MODEL_EVAL_VERSION,
       };
     });
 

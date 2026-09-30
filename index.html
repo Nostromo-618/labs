@@ -10,7 +10,7 @@
     /* Resolve system→light|dark before CSS so first paint matches preference. */
     (function () {
       try {
-        var pref = localStorage.getItem('vdl-theme-preference') || 'system';
+        var pref = localStorage.getItem('vwl-theme-preference') || 'system';
         var resolved =
           pref === 'light' || pref === 'dark'
             ? pref

@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Fuse from 'fuse.js';
 import { pipeline } from '@huggingface/transformers';
-import { HybridSearch } from '@vanduo-oss/vdl-hybrid-search';
+import { HybridSearch } from '@vanduo-oss/vwl-hybrid-search';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = async (p) => JSON.parse(await fs.readFile(path.join(root, p), 'utf8'));
 const queries = await read('utils/benchmark-queries.json');

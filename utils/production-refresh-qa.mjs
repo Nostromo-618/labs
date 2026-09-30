@@ -38,24 +38,24 @@ for (const [name, type] of Object.entries({ chromium, webkit })) {
       userAgent: navigator.userAgent,
     }));
     await page.getByRole('combobox', { name: 'Search documentation' }).fill('Dock');
-    await page.locator('.vdl-neptune-result').first().waitFor();
+    await page.locator('.vwl-neptune-result').first().waitFor();
     const embeddings = [];
     for (const preset of name === 'chromium' ? ['minilm', 'embeddinggemma'] : ['minilm']) {
       if (preset === 'embeddinggemma')
         await page.getByRole('combobox').first().selectOption(preset);
       await page.getByRole('button', { name: 'Enable semantic search', exact: true }).click();
       await page.waitForFunction(
-        () => !document.querySelector('.vdl-neptune-semantic-controls button')?.disabled,
+        () => !document.querySelector('.vwl-neptune-semantic-controls button')?.disabled,
         {},
         { timeout: 300000 },
       );
-      const status = await page.locator('.vdl-neptune-semantic-controls').innerText();
+      const status = await page.locator('.vwl-neptune-semantic-controls').innerText();
       embeddings.push({ preset, status });
       await page
         .getByRole('combobox', { name: 'Search documentation' })
         .fill('navigation bar at the edge of the screen');
       await page.waitForTimeout(1000);
-      embeddings.at(-1).results = await page.locator('.vdl-neptune-result-title').allTextContents();
+      embeddings.at(-1).results = await page.locator('.vwl-neptune-result-title').allTextContents();
     }
     violations.push(...(await page.evaluate(() => window.cspQA)));
     await page.screenshot({

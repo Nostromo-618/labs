@@ -162,7 +162,7 @@ for (const modelId of modelIds) {
     throw new Error('WebGPU required for draw model-eval');
   }
   if (FAST_PLANNER) {
-    await page.evaluate(() => window.localStorage.setItem('vdl-ai-draw-tiny-planner', '1'));
+    await page.evaluate(() => window.localStorage.setItem('vwl-ai-draw-tiny-planner', '1'));
   }
   await withTimeout(
     page.evaluate(async (id) => window.__vdlAiDrawLoad(id), modelId),
@@ -253,7 +253,7 @@ const jsonPath = path.join(OUT_DIR, `draw-${stamp}.json`);
 fs.writeFileSync(jsonPath, `${JSON.stringify(report, null, 2)}\n`);
 
 const mdLines = [
-  `# vdl-ai-draw eval — ${report.generatedAt}`,
+  `# vwl-ai-draw eval — ${report.generatedAt}`,
   '',
   `Host: \`${report.host.platform}\`${FAST_PLANNER ? ' · fast planner ON' : ''}`,
   '',

@@ -1,6 +1,6 @@
 name: Deploy static content to Pages
 
-# Labs dogfoods sibling vdl-* repos via link:../vdl-*. Check them out beside
+# Labs dogfoods sibling vwl-* repos via link:../vwl-*. Check them out beside
 # labs/ and build dist/ (gitignored) before install/build/deploy.
 
 on:
@@ -35,33 +35,33 @@ jobs:
           path: labs
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Checkout vdl-cbun
+      - name: Checkout vwl-cbun
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vdl-cbun
+          repository: vanduo-oss/vwl-cbun
           ref: ec67960defcaba2869333e22690254e85f70fdc5
-          path: vdl-cbun
+          path: vwl-cbun
 
-      - name: Checkout vdl-hybrid-search
+      - name: Checkout vwl-hybrid-search
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vdl-hybrid-search
+          repository: vanduo-oss/vwl-hybrid-search
           ref: 214d6f4b6c44795f03d15cfcedcd7667d26f2f5b
-          path: vdl-hybrid-search
+          path: vwl-hybrid-search
 
-      - name: Checkout vdl-ai-chat
+      - name: Checkout vwl-ai-chat
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vdl-ai-chat
+          repository: vanduo-oss/vwl-ai-chat
           ref: 8cf0af8ae4721780620eb48a5bcb511000cf2b00
-          path: vdl-ai-chat
+          path: vwl-ai-chat
 
-      - name: Checkout vdl-hex-earth
+      - name: Checkout vwl-hex-earth
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vdl-hex-earth
+          repository: vanduo-oss/vwl-hex-earth
           ref: 1d1b251b430a79773a83d7ecbff8807d136b7026
-          path: vdl-hex-earth
+          path: vwl-hex-earth
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -75,17 +75,17 @@ jobs:
           cache: pnpm
           cache-dependency-path: |
             labs/pnpm-lock.yaml
-            vdl-cbun/pnpm-lock.yaml
-            vdl-hybrid-search/pnpm-lock.yaml
-            vdl-ai-chat/pnpm-lock.yaml
-            vdl-hex-earth/pnpm-lock.yaml
+            vwl-cbun/pnpm-lock.yaml
+            vwl-hybrid-search/pnpm-lock.yaml
+            vwl-ai-chat/pnpm-lock.yaml
+            vwl-hex-earth/pnpm-lock.yaml
 
       - name: Install and build Labs siblings
         working-directory: ${{ github.workspace }}
         run: |
-          for pkg in vdl-cbun vdl-hybrid-search vdl-ai-chat vdl-hex-earth; do
+          for pkg in vwl-cbun vwl-hybrid-search vwl-ai-chat vwl-hex-earth; do
             echo "::group::Build $pkg"
-            if [ "$pkg" = vdl-hex-earth ]; then
+            if [ "$pkg" = vwl-hex-earth ]; then
               # The pinned Git dependency needs its allowlisted prepack build.
               pnpm install --frozen-lockfile --ignore-scripts=false --dir "$pkg"
             else

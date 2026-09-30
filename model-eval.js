@@ -1,11 +1,11 @@
 /**
- * vdl-model-eval — Local on-computer chat model evaluation helpers.
+ * vwl-model-eval — Local on-computer chat model evaluation helpers.
  *
  * Scorers and report shaping run in Node or the browser. Real inference is
  * driven by the Playwright harness (utils/model-eval-runner.mjs).
  */
 
-export const VDL_MODEL_EVAL_VERSION = '0.0.1';
+export const VWL_MODEL_EVAL_VERSION = '0.0.1';
 
 const GiB = 1024 ** 3;
 
@@ -158,8 +158,8 @@ export function buildReportDocument({
   const models = Array.isArray(modelResults) ? modelResults : [];
   return {
     schemaVersion: 1,
-    generator: `vdl-model-eval@${VDL_MODEL_EVAL_VERSION}`,
-    suiteName: suiteName || 'vdl-labs-chat-quality',
+    generator: `vwl-model-eval@${VWL_MODEL_EVAL_VERSION}`,
+    suiteName: suiteName || 'vwl-labs-chat-quality',
     suiteVersion: suiteVersion || '0.0.1',
     startedAt: startedAt || null,
     finishedAt: finishedAt || new Date().toISOString(),
@@ -222,51 +222,51 @@ export function renderReportHtml(report) {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>vdl-model-eval report</title>
+  <title>vwl-model-eval report</title>
   <style>
     :root {
       color-scheme: light;
       font-family: ui-sans-serif, system-ui, sans-serif;
-      --vdl-report-bg: #ffffff;
-      --vdl-report-fg: #1a1a1a;
-      --vdl-report-muted: #555555;
-      --vdl-report-surface: #f0f0f0;
-      --vdl-report-border: #c8c8c8;
-      --vdl-report-pass: #2b8a3e;
-      --vdl-report-fail: #c92a2a;
+      --vwl-report-bg: #ffffff;
+      --vwl-report-fg: #1a1a1a;
+      --vwl-report-muted: #555555;
+      --vwl-report-surface: #f0f0f0;
+      --vwl-report-border: #c8c8c8;
+      --vwl-report-pass: #2b8a3e;
+      --vwl-report-fail: #c92a2a;
     }
     body {
       margin: 1.5rem;
       line-height: 1.45;
-      background: var(--vdl-report-bg);
-      color: var(--vdl-report-fg);
+      background: var(--vwl-report-bg);
+      color: var(--vwl-report-fg);
     }
-    h1, h2 { color: var(--vdl-report-fg); }
+    h1, h2 { color: var(--vwl-report-fg); }
     h1 { font-size: 1.4rem; }
     table { border-collapse: collapse; width: 100%; margin: 1rem 0 2rem; }
     th, td {
-      border: 1px solid var(--vdl-report-border);
+      border: 1px solid var(--vwl-report-border);
       padding: 0.45rem 0.6rem;
       text-align: left;
-      color: var(--vdl-report-fg);
+      color: var(--vwl-report-fg);
     }
-    th { background: var(--vdl-report-surface); font-weight: 600; }
-    .case > summary { color: var(--vdl-report-fg); }
-    .case.pass > summary { color: var(--vdl-report-pass); }
-    .case.fail > summary { color: var(--vdl-report-fail); }
-    .case ul { color: var(--vdl-report-fg); }
+    th { background: var(--vwl-report-surface); font-weight: 600; }
+    .case > summary { color: var(--vwl-report-fg); }
+    .case.pass > summary { color: var(--vwl-report-pass); }
+    .case.fail > summary { color: var(--vwl-report-fail); }
+    .case ul { color: var(--vwl-report-fg); }
     pre.excerpt {
       white-space: pre-wrap;
-      background: var(--vdl-report-surface);
-      color: var(--vdl-report-fg);
+      background: var(--vwl-report-surface);
+      color: var(--vwl-report-fg);
       padding: 0.75rem;
       border-radius: 6px;
     }
-    .meta { color: var(--vdl-report-muted); }
+    .meta { color: var(--vwl-report-muted); }
   </style>
 </head>
 <body>
-  <h1>vdl-model-eval</h1>
+  <h1>vwl-model-eval</h1>
   <p class="meta">${escapeHtml(report.suiteName)} v${escapeHtml(report.suiteVersion)} · ${escapeHtml(report.generator)} · ${escapeHtml(report.finishedAt || '')}</p>
   <table>
     <thead>
@@ -330,7 +330,7 @@ function renderPairedReportHtml(report) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>vdl-model-eval paired report</title>
+  <title>vwl-model-eval paired report</title>
   <style>
     :root { color-scheme: light; font: 16px/1.5 ui-sans-serif, system-ui, sans-serif; color: #1a1a1a; background: #fff; }
     body { margin: 1.5rem; }

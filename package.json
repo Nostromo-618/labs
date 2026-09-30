@@ -2,7 +2,7 @@
   "name": "@vanduo-oss/labs",
   "version": "0.1.1",
   "private": true,
-  "description": "Vanduo Web Labs \u2014 demo playground for VDL engines and vdl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
+  "description": "Vanduo Web Labs \u2014 demo playground for VWL engines and vwl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -54,13 +54,13 @@
     "@litert-lm/core": "0.17.1",
     "@vanduo-oss/vd3": "1.7.4",
     "@vanduo-oss/vd3-charts": "1.1.0",
-    "@vanduo-oss/vdl-ai-chat": "link:../vdl-ai-chat",
-    "@vanduo-oss/vdl-cbun": "link:../vdl-cbun",
-    "@vanduo-oss/vdl-hybrid-search": "link:../vdl-hybrid-search",
+    "@vanduo-oss/vwl-ai-chat": "link:../vwl-ai-chat",
+    "@vanduo-oss/vwl-cbun": "link:../vwl-cbun",
+    "@vanduo-oss/vwl-hybrid-search": "link:../vwl-hybrid-search",
     "fuse.js": "^7.5.0",
     "vue": "3.5.42",
     "@mlc-ai/web-llm": "0.2.85",
-    "@vanduo-oss/vdl-hex-earth": "link:../vdl-hex-earth"
+    "@vanduo-oss/vwl-hex-earth": "link:../vwl-hex-earth"
   },
   "packageManager": "pnpm@10.28.2",
   "pnpm": {

@@ -151,7 +151,7 @@ test.describe('HybridSearch Unit', () => {
           ),
         );
       const search = new (
-        await import('/node_modules/@vanduo-oss/vdl-hybrid-search/dist/index.js')
+        await import('/node_modules/@vanduo-oss/vwl-hybrid-search/dist/index.js')
       ).HybridSearch({
         indexUrl: 'data:application/json;base64,' + toBase64(JSON.stringify(badPayload)),
       });
@@ -186,7 +186,7 @@ test.describe('HybridSearch Unit', () => {
         },
       ];
       ui._renderResults();
-      return document.querySelector('.vdl-neptune-result-link')?.getAttribute('href');
+      return document.querySelector('.vwl-neptune-result-link')?.getAttribute('href');
     });
 
     expect(href).toBe('#');
@@ -195,7 +195,7 @@ test.describe('HybridSearch Unit', () => {
   test('curriculum-shaped corpus loads via injectable Fuse loader', async ({ page }) => {
     const result = await page.evaluate(async () => {
       const { HybridSearch } =
-        await import('/node_modules/@vanduo-oss/vdl-hybrid-search/dist/index.js');
+        await import('/node_modules/@vanduo-oss/vwl-hybrid-search/dist/index.js');
       const FuseMod = await import('https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.basic.mjs');
       const indexRes = await fetch('/tests/fixtures/curriculum-search-index.json');
       const index = await indexRes.json();

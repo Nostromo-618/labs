@@ -9,9 +9,9 @@ import {
   watch,
 } from 'vue';
 import { VdCard, VdIcon } from '@vanduo-oss/vd3';
-import { DEFAULT_DOCS_BASE_URL, VDL_HYBRID_SEARCH_VERSION } from '@vanduo-oss/vdl-hybrid-search';
-import { VDL_AI_CHAT_VERSION } from '@vanduo-oss/vdl-ai-chat';
-import { labsMarkdownToHtml } from '@vanduo-oss/vdl-ai-chat/markdown';
+import { DEFAULT_DOCS_BASE_URL, VWL_HYBRID_SEARCH_VERSION } from '@vanduo-oss/vwl-hybrid-search';
+import { VWL_AI_CHAT_VERSION } from '@vanduo-oss/vwl-ai-chat';
+import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
 import { TOC_VERSION } from './content/disclaimer.js';
 import {
   acceptDisclaimer as persistAccept,
@@ -23,9 +23,9 @@ import {
 import LabsSiteDock from './components/LabsSiteDock.vue';
 import LabsDisclaimerGate from './components/LabsDisclaimerGate.vue';
 import LabsFarewell from './components/LabsFarewell.vue';
-import VdlHybridSearchUI from './components/VdlHybridSearchUI.vue';
-import VdlChatWorkbench from './components/VdlChatWorkbench.vue';
-import VdlHomeAtmosphere from './components/VdlHomeAtmosphere.vue';
+import VwlHybridSearchUI from './components/VwlHybridSearchUI.vue';
+import VwlChatWorkbench from './components/VwlChatWorkbench.vue';
+import VwlHomeAtmosphere from './components/VwlHomeAtmosphere.vue';
 import WidgetsLanding from './components/widgets/WidgetsLanding.vue';
 import WidgetDraw from './pages/widgets/Draw.vue';
 import WidgetHex from './pages/widgets/Hex.vue';
@@ -35,12 +35,12 @@ import {
   isGladosHomeQuote,
   nextHomeQuoteIntervalMs,
   pickNextHomeQuote,
-} from './vdl-home-quotes.js';
+} from './vwl-home-quotes.js';
 
 const HexEarthDemo = defineAsyncComponent(async () => {
-  const mod = await import('@vanduo-oss/vdl-hex-earth');
-  await import('@vanduo-oss/vdl-hex-earth/style.css');
-  return mod.VdlHexEarthDemo;
+  const mod = await import('@vanduo-oss/vwl-hex-earth');
+  await import('@vanduo-oss/vwl-hex-earth/style.css');
+  return mod.VwlHexEarthDemo;
 });
 const DEMO_SLUGS = new Set(['neptune', 'aichat', 'hex-earth']);
 const WIDGET_SLUGS = new Set(['draw', 'hex', 'code-editor', 'music-player']);
@@ -51,8 +51,8 @@ const HOME_QUOTE_FADE_MS = 180;
 /** @typedef {'gate' | 'farewell' | 'accepted'} ConsentView */
 
 const COMPONENT_VERSION_MAP = {
-  neptune: VDL_HYBRID_SEARCH_VERSION,
-  aichat: VDL_AI_CHAT_VERSION,
+  neptune: VWL_HYBRID_SEARCH_VERSION,
+  aichat: VWL_AI_CHAT_VERSION,
 };
 
 const consentView = ref(/** @type {ConsentView} */ ('gate'));
@@ -199,7 +199,7 @@ function parseLabsHash() {
 
 async function fetchDocumentationHtml(slug) {
   if (docHtmlCache[slug]) return docHtmlCache[slug];
-  const path = slug === 'neptune' ? '/doc/vdl-hybrid-search.md' : '/doc/vdl-ai-chat.md';
+  const path = slug === 'neptune' ? '/doc/vwl-hybrid-search.md' : '/doc/vwl-ai-chat.md';
   const res = await fetch(path, { credentials: 'same-origin' });
   if (!res.ok) throw new Error(`Could not load documentation (${res.status})`);
   const md = hydrateComponentVersionTokens(await res.text(), slug);
@@ -220,7 +220,7 @@ async function loadDocumentationForSlug(slug) {
   } catch (err) {
     if (seq !== docLoadSeq) return;
     docError.value =
-      'Documentation could not be loaded. Check that <code>doc/vdl-hybrid-search.md</code> and <code>doc/vdl-ai-chat.md</code> are present, serve this folder over HTTP (not file://), then refresh.';
+      'Documentation could not be loaded. Check that <code>doc/vwl-hybrid-search.md</code> and <code>doc/vwl-ai-chat.md</code> are present, serve this folder over HTTP (not file://), then refresh.';
     console.warn('[labs]', err);
   } finally {
     if (seq === docLoadSeq) docLoading.value = false;
@@ -261,8 +261,8 @@ function applyLabsRoute(nextRoute, nextDemoSlug, nextWidgetSlug) {
   if (nextRoute === 'demos') {
     if (nextDemoSlug) {
       const nameMap = {
-        neptune: 'vdl-hybrid-search',
-        aichat: 'vdl-ai-chat',
+        neptune: 'vwl-hybrid-search',
+        aichat: 'vwl-ai-chat',
       };
       liveRegionText.value =
         (nameMap[nextDemoSlug] || nextDemoSlug) + ' demo and documentation opened.';
@@ -337,7 +337,7 @@ watch(demoSlug, (slug) => {
   />
 
   <template v-else-if="appUnlocked">
-    <VdlHomeAtmosphere :active="true" />
+    <VwlHomeAtmosphere :active="true" />
 
     <LabsSiteDock :route="route" :widget-slug="widgetSlug" />
 
@@ -349,10 +349,10 @@ watch(demoSlug, (slug) => {
     >
       <section
         v-if="route === 'demos' && demoSlug === 'hex-earth'"
-        class="vdl-earth-stage"
+        class="vwl-earth-stage"
         aria-label="Hex Earth demo"
       >
-        <a href="#demos" class="vdl-earth-back">← Demos</a><HexEarthDemo embedded />
+        <a href="#demos" class="vwl-earth-back">← Demos</a><HexEarthDemo embedded />
       </section>
       <div
         class="labs-view labs-view-home"
@@ -431,7 +431,7 @@ watch(demoSlug, (slug) => {
       >
         <div class="vd-container-responsive labs-main">
           <section id="labs-about" class="labs-section">
-            <VdCard class="vdl-card-glow vd-glass labs-about-card">
+            <VdCard class="vwl-card-glow vd-glass labs-about-card">
               <p class="labs-about-pill">
                 <VdIcon name="flask" aria-hidden="true" /> Experimental by design
               </p>
@@ -440,7 +440,7 @@ watch(demoSlug, (slug) => {
                 Vanduo Web Labs is where we ship ideas before they are polished—interactive demos, odd
                 widgets, and half-serious prototypes that might graduate into the framework, or
                 might just make us smile. Most demos are not guaranteed stable; that is the point.
-                Some components, like <code>vdl-hybrid-search</code>, are experimental prototypes
+                Some components, like <code>vwl-hybrid-search</code>, are experimental prototypes
                 that may graduate into the framework.
               </p>
               <div class="labs-about-grid">
@@ -506,7 +506,7 @@ watch(demoSlug, (slug) => {
                 <span class="labs-demo-card-icon" aria-hidden="true">
                   <i class="ph ph-magnifying-glass" style="font-size: 3rem"></i>
                 </span>
-                <span class="labs-demo-card-title">vdl-hybrid-search</span>
+                <span class="labs-demo-card-title">vwl-hybrid-search</span>
                 <span class="labs-demo-card-desc" id="labs-card-neptune-desc"
                   >In-browser hybrid fuzzy + semantic search over vd3 docs—no server required</span
                 >
@@ -533,7 +533,7 @@ watch(demoSlug, (slug) => {
                 <span class="labs-demo-card-icon" aria-hidden="true">
                   <i class="ph ph-robot" style="font-size: 3rem"></i>
                 </span>
-                <span class="labs-demo-card-title">vdl-ai-chat</span>
+                <span class="labs-demo-card-title">vwl-ai-chat</span>
                 <span class="labs-demo-card-desc" id="labs-card-aichat-desc"
                   >In-browser AI chat with Gemma 4 and FOSS guardrails—no server required</span
                 >
@@ -555,7 +555,7 @@ watch(demoSlug, (slug) => {
                 <span class="labs-demo-card-icon" aria-hidden="true"
                   ><i class="ph ph-globe-hemisphere-west" style="font-size: 3rem"></i
                 ></span>
-                <span class="labs-demo-card-title">vdl-hex-earth</span>
+                <span class="labs-demo-card-title">vwl-hex-earth</span>
                 <span class="labs-demo-card-desc"
                   >Explore Earth and Europe as a hex map. Full-page canvas, terrain, routes, and
                   movable controls.</span
@@ -577,7 +577,7 @@ watch(demoSlug, (slug) => {
 
             <VdCard
               id="labs-demos-detail"
-              class="labs-demos-detail vdl-card-glow vd-glass"
+              class="labs-demos-detail vwl-card-glow vd-glass"
               role="region"
               aria-labelledby="labs-demos-detail-title"
               :hidden="!demoSlug"
@@ -598,9 +598,9 @@ watch(demoSlug, (slug) => {
                 <h2 id="labs-demos-detail-title">
                   {{
                     demoSlug === 'neptune'
-                      ? 'vdl-hybrid-search'
+                      ? 'vwl-hybrid-search'
                       : demoSlug === 'aichat'
-                        ? 'vdl-ai-chat'
+                        ? 'vwl-ai-chat'
                         : 'Component'
                   }}
                 </h2>
@@ -614,7 +614,7 @@ watch(demoSlug, (slug) => {
                     id="labs-demo-neptune"
                     :hidden="demoSlug !== 'neptune'"
                   >
-                    <VdlHybridSearchUI
+                    <VwlHybridSearchUI
                       v-if="demoSlug === 'neptune'"
                       :base-url="DOCS_BASE_URL"
                       placeholder="Search vd3 docs…"
@@ -625,7 +625,7 @@ watch(demoSlug, (slug) => {
                     id="labs-demo-aichat"
                     :hidden="demoSlug !== 'aichat'"
                   >
-                    <VdlChatWorkbench v-if="demoSlug === 'aichat'" />
+                    <VwlChatWorkbench v-if="demoSlug === 'aichat'" />
                   </div>
                 </div>
               </div>
@@ -662,7 +662,7 @@ watch(demoSlug, (slug) => {
 </template>
 
 <style scoped>
-.vdl-earth-stage {
+.vwl-earth-stage {
   position: fixed;
   z-index: 2;
   inset: var(--labs-dock-edge-pad-top, 0) var(--labs-dock-edge-pad-right, 0)
@@ -670,7 +670,7 @@ watch(demoSlug, (slug) => {
   background: var(--vd-bg-primary);
   padding-top: 28px;
 }
-.vdl-earth-back {
+.vwl-earth-back {
   position: absolute;
   left: 12px;
   top: 3px;

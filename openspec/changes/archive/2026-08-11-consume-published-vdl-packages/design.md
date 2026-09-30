@@ -1,26 +1,26 @@
 ## Context
 
-See proposal.md — Why. Labs currently vendors engine ESM at the repo root and packages them as `@vanduo-oss/vdl-engines`. Engines are already published as `@vanduo-oss/vdl-ai-chat` / `@vanduo-oss/vdl-hybrid-search`. ts-school already consumes those packages with injected `loadLiteRT` / `loadFuse` / `loadTransformers`.
+See proposal.md — Why. Labs currently vendors engine ESM at the repo root and packages them as `@vanduo-oss/vwl-engines`. Engines are already published as `@vanduo-oss/vwl-ai-chat` / `@vanduo-oss/vwl-hybrid-search`. ts-school already consumes those packages with injected `loadLiteRT` / `loadFuse` / `loadTransformers`.
 
 ## Goals / Non-Goals
 
 **Goals:**
 - Rewire labs demos/tests to npm packages end-to-end
-- Delete engine forks; retire vdl-engines packaging
+- Delete engine forks; retire vwl-engines packaging
 - Keep playground UX (Vue UIs, model-eval, Gemma demos, corpus)
 - Green format/lint/unit/build gates
 
 **Non-Goals:**
 - Publishing any package to npm
 - Changing vd3 design-system APIs
-- Promoting the vanilla `NeptuneSearchUI` DOM class (Vue `VdlHybridSearchUI` is the labs UI)
+- Promoting the vanilla `NeptuneSearchUI` DOM class (Vue `VwlHybridSearchUI` is the labs UI)
 
 ## Decisions
 
 1. **Private package name `@vanduo-oss/labs`** — clear playground identity; no `exports`/`files`/`publishConfig`.
-   - Alternative: keep `@vanduo-oss/vdl-engines` private — rejected; name implies publishing engines.
+   - Alternative: keep `@vanduo-oss/vwl-engines` private — rejected; name implies publishing engines.
 
-2. **`HybridSearch` + rename Vue file to `VdlHybridSearchUI.vue`** — align with package API; keep CSS class prefix `.vdl-neptune-*` for now to limit test churn, or migrate selectors if cheap.
+2. **`HybridSearch` + rename Vue file to `VwlHybridSearchUI.vue`** — align with package API; keep CSS class prefix `.vwl-neptune-*` for now to limit test churn, or migrate selectors if cheap.
    - Alternative: keep Neptune naming in Vue only — rejected per phase-3 rename ask.
 
 3. **Inject loaders in Vue demos** — follow ts-school: `loadLiteRT: () => import('@litert-lm/core')`, `loadFuse` from `fuse.js`, `loadTransformers` from `@huggingface/transformers`. Add `@litert-lm/core` as a labs dependency if needed for Vite resolution.
@@ -41,7 +41,7 @@ See proposal.md — Why. Labs currently vendors engine ESM at the repo root and 
 - [NeptuneSearchUI deleted with engine] → Mitigation: test-only fixture DOM UI for Playwright; production UI is Vue.
 - [Package indexer writes to package `data/`] → Mitigation: wrapper copies into labs `data/`.
 - [Unit tests import absolute `/ai-chat.js` paths] → Mitigation: rewrite imports to package dist paths or Vite.
-- [Version constants rename `VDL_NEPTUNE_SEARCH_VERSION` → `VDL_HYBRID_SEARCH_VERSION`] → Mitigation: update App.vue / docs accordingly.
+- [Version constants rename `VWL_NEPTUNE_SEARCH_VERSION` → `VWL_HYBRID_SEARCH_VERSION`] → Mitigation: update App.vue / docs accordingly.
 
 ## Migration Plan
 

@@ -13,7 +13,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, buildDrawChatContext } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -106,7 +106,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, buildDrawChatContext } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -151,7 +151,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, sampleCurve, hasSlopeSignChanges, pointsBBox } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -204,7 +204,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('sparse line with sine user hint returns too_few_samples coaching', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -239,7 +239,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('unknown add_shape type is rejected (no silent rectangle)', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -263,7 +263,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('update_shape can patch points', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -305,7 +305,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('eval_geometry samples Math.sin and rejects forbidden identifiers', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, evalGeometryCode } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -433,7 +433,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -487,7 +487,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -517,7 +517,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('place=center preserves explicit y (does not recenter a stack offset)', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -555,7 +555,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('fillColor alias and color-without-fill still paint solid rectangles', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, resolveShapeFill } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -605,7 +605,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, normalizeDrawUserIntent, fulfillStackedBandIntent } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -741,7 +741,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('after a flag, clear canvas leaves zero bands (fulfill is not sticky)', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -783,7 +783,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn, inspectDrawShapes } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -835,7 +835,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('add_curve tangent and hyperbola produce dense samples', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -863,7 +863,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn, normalizeDrawUserIntent } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -908,7 +908,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('clear then draw a star does not wipe the new drawing', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -954,7 +954,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, starTipCount, inspectDrawShapes } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -997,7 +997,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn, starTipCount } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -1044,7 +1044,7 @@ test.describe('AI Draw tool executor unit tests', () => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn, assistantTextFromCanvas } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -1080,7 +1080,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   test('yellow smiley recipe adds a face even with zero tool calls', async ({ page }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const container = document.createElement('div');
       document.body.appendChild(container);
@@ -1189,7 +1189,7 @@ test.describe('AI Draw tool executor unit tests', () => {
         runDrawTurn,
         createDrawToolExecutor,
       } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const canvas = { width: 1000, height: 800 };
       const bad = validateDrawPlan({ title: 'x', steps: [{ op: 'explode', args: {} }] });
@@ -1442,7 +1442,7 @@ test.describe('AI Draw tool executor unit tests', () => {
         inspectDrawShapes,
         layoutHexagonGrid,
       } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const canvas = { width: 1000, height: 800 };
       const prompt = 'pls draw a hexagon grid of 9 identical hex cells';
@@ -1542,7 +1542,7 @@ test.describe('AI Draw tool executor unit tests', () => {
         inspectDrawShapes,
         SKETCH_STENCILS,
       } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const canvas = { width: 1000, height: 800 };
       const prompt = 'draw a car';
@@ -1674,7 +1674,7 @@ test.describe('AI Draw tool executor unit tests', () => {
         inspectDrawShapes,
         validateDrawPlan,
       } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const canvas = { width: 1000, height: 800 };
       const prompt = 'please draw pine forest';
@@ -1833,7 +1833,7 @@ test.describe('AI Draw tool executor unit tests', () => {
   }) => {
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn } = await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const canvas = { width: 1000, height: 800 };
       const container = document.createElement('div');
@@ -2038,7 +2038,7 @@ Coordinates should be { x: 100, y: 200 }.
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn, inspectDrawShapes } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const canvas = { width: 1000, height: 800 };
       const container = document.createElement('div');
@@ -2170,7 +2170,7 @@ Coordinates should be { x: 100, y: 200 }.
     const res = await page.evaluate(async () => {
       const { createDrawToolExecutor, runDrawTurn, isCanvasQuestion } =
         await import('/src/demos/draw-tools.js');
-      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vdl-cbun/dist/draw/index.js');
+      const { VdDrawCore } = await import('/node_modules/@vanduo-oss/vwl-cbun/dist/draw/index.js');
 
       const canvas = { width: 1000, height: 800 };
       const container = document.createElement('div');

@@ -1,24 +1,24 @@
 /* AI Draw Demo CSS — Wide Desktop + ts-school Sidebar */
-@import '@vanduo-oss/vdl-cbun/draw/css';
+@import '@vanduo-oss/vwl-cbun/draw/css';
 
-.vdl-ai-draw-card {
+.vwl-ai-draw-card {
   padding: 0.75rem !important;
   overflow: hidden;
 }
 
-.vdl-ai-draw-card.is-fullscreen-host {
+.vwl-ai-draw-card.is-fullscreen-host {
   padding: 0 !important;
   overflow: visible;
 }
 
-.vdl-ai-draw-stage {
+.vwl-ai-draw-stage {
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
 }
 
-.vdl-ai-draw-stage.is-fullscreen {
+.vwl-ai-draw-stage.is-fullscreen {
   position: fixed;
   inset: 0;
   z-index: 4000;
@@ -30,7 +30,7 @@
   background: var(--vd-draw-surface, var(--bg-primary, #0f172a));
 }
 
-.vdl-ai-draw-stage.is-fullscreen .ai-draw-main {
+.vwl-ai-draw-stage.is-fullscreen .ai-draw-main {
   flex: 1 1 auto;
   min-height: 0;
   height: auto;
@@ -40,19 +40,19 @@
   padding: 0.75rem;
 }
 
-.vdl-ai-draw-stage.is-fullscreen .ai-draw-canvas-panel,
-.vdl-ai-draw-stage.is-fullscreen .ai-draw-chat-panel {
+.vwl-ai-draw-stage.is-fullscreen .ai-draw-canvas-panel,
+.vwl-ai-draw-stage.is-fullscreen .ai-draw-chat-panel {
   min-height: 0;
   height: 100%;
 }
 
-.vdl-ai-draw-stage.is-fullscreen .ai-draw-canvas-wrap {
+.vwl-ai-draw-stage.is-fullscreen .ai-draw-canvas-wrap {
   flex: 1 1 auto;
   min-height: 0;
   height: auto;
 }
 
-.vdl-ai-draw-stage.is-fullscreen .ai-draw-canvas-wrap .vd-draw {
+.vwl-ai-draw-stage.is-fullscreen .ai-draw-canvas-wrap .vd-draw {
   min-height: 0;
   height: 100%;
 }
@@ -162,10 +162,10 @@ body.ai-draw-app-fullscreen {
  * data-theme=light|dark for styling. Media-query fallbacks cover the brief
  * window before JS (or legacy builds that cleared data-theme).
  */
-html[data-theme='light'] .vdl-ai-draw-card,
-:root[data-theme='light'] .vdl-ai-draw-card,
-html[data-theme='light'] .vdl-ai-draw-stage,
-:root[data-theme='light'] .vdl-ai-draw-stage {
+html[data-theme='light'] .vwl-ai-draw-card,
+:root[data-theme='light'] .vwl-ai-draw-card,
+html[data-theme='light'] .vwl-ai-draw-stage,
+:root[data-theme='light'] .vwl-ai-draw-stage {
   --vd-draw-surface: #ffffff;
   --vd-draw-panel: #f8f9fa;
   --vd-draw-border: #e2e8f0;
@@ -175,10 +175,10 @@ html[data-theme='light'] .vdl-ai-draw-stage,
   --vd-draw-accent: #0284c7;
 }
 
-html[data-theme='dark'] .vdl-ai-draw-card,
-:root[data-theme='dark'] .vdl-ai-draw-card,
-html[data-theme='dark'] .vdl-ai-draw-stage,
-:root[data-theme='dark'] .vdl-ai-draw-stage {
+html[data-theme='dark'] .vwl-ai-draw-card,
+:root[data-theme='dark'] .vwl-ai-draw-card,
+html[data-theme='dark'] .vwl-ai-draw-stage,
+:root[data-theme='dark'] .vwl-ai-draw-stage {
   --vd-draw-surface: #0f172a;
   --vd-draw-panel: #1e293b;
   --vd-draw-border: #334155;
@@ -189,10 +189,10 @@ html[data-theme='dark'] .vdl-ai-draw-stage,
 }
 
 @media (prefers-color-scheme: light) {
-  html:not([data-theme]) .vdl-ai-draw-card,
-  :root:not([data-theme]) .vdl-ai-draw-card,
-  html:not([data-theme]) .vdl-ai-draw-stage,
-  :root:not([data-theme]) .vdl-ai-draw-stage {
+  html:not([data-theme]) .vwl-ai-draw-card,
+  :root:not([data-theme]) .vwl-ai-draw-card,
+  html:not([data-theme]) .vwl-ai-draw-stage,
+  :root:not([data-theme]) .vwl-ai-draw-stage {
     --vd-draw-surface: #ffffff;
     --vd-draw-panel: #f8f9fa;
     --vd-draw-border: #e2e8f0;
@@ -204,10 +204,10 @@ html[data-theme='dark'] .vdl-ai-draw-stage,
 }
 
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme]) .vdl-ai-draw-card,
-  :root:not([data-theme]) .vdl-ai-draw-card,
-  html:not([data-theme]) .vdl-ai-draw-stage,
-  :root:not([data-theme]) .vdl-ai-draw-stage {
+  html:not([data-theme]) .vwl-ai-draw-card,
+  :root:not([data-theme]) .vwl-ai-draw-card,
+  html:not([data-theme]) .vwl-ai-draw-stage,
+  :root:not([data-theme]) .vwl-ai-draw-stage {
     --vd-draw-surface: #0f172a;
     --vd-draw-panel: #1e293b;
     --vd-draw-border: #334155;
@@ -563,30 +563,30 @@ html[data-theme='dark'] .vdl-ai-draw-stage,
     height: 450px;
   }
 
-  .vdl-ai-draw-stage.is-fullscreen .ai-draw-main {
+  .vwl-ai-draw-stage.is-fullscreen .ai-draw-main {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(280px, 36vw);
     flex-direction: unset;
   }
 
-  .vdl-ai-draw-stage.is-fullscreen .ai-draw-chat-panel {
+  .vwl-ai-draw-stage.is-fullscreen .ai-draw-chat-panel {
     min-height: 0;
     height: 100%;
   }
 }
 
 @media (max-width: 700px) {
-  .vdl-ai-draw-stage.is-fullscreen .ai-draw-main {
+  .vwl-ai-draw-stage.is-fullscreen .ai-draw-main {
     display: flex;
     flex-direction: column;
   }
 
-  .vdl-ai-draw-stage.is-fullscreen .ai-draw-canvas-panel {
+  .vwl-ai-draw-stage.is-fullscreen .ai-draw-canvas-panel {
     flex: 1 1 58%;
     min-height: 0;
   }
 
-  .vdl-ai-draw-stage.is-fullscreen .ai-draw-chat-panel {
+  .vwl-ai-draw-stage.is-fullscreen .ai-draw-chat-panel {
     flex: 0 0 42%;
     min-height: 220px;
     height: auto;

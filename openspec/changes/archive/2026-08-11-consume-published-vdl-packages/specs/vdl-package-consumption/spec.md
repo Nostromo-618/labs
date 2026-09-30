@@ -1,15 +1,15 @@
 ## Purpose
 
-Defines how Vanduo Labs consumes published VDL engine packages from npm as a demo playground, without owning or publishing a local engine source of truth.
+Defines how Vanduo Labs consumes published VWL engine packages from npm as a demo playground, without owning or publishing a local engine source of truth.
 
 ## ADDED Requirements
 
 ### Requirement: Published engine packages are the only engine SoT
-Labs MUST depend on `@vanduo-oss/vdl-ai-chat` and `@vanduo-oss/vdl-hybrid-search` from the npm registry and MUST NOT keep local forks of those engines as the source of truth. Labs MUST NOT publish `@vanduo-oss/vdl-engines`.
+Labs MUST depend on `@vanduo-oss/vwl-ai-chat` and `@vanduo-oss/vwl-hybrid-search` from the npm registry and MUST NOT keep local forks of those engines as the source of truth. Labs MUST NOT publish `@vanduo-oss/vwl-engines`.
 
 #### Scenario: Registry dependencies declared
 - **WHEN** a contributor inspects `package.json`
-- **THEN** `@vanduo-oss/vdl-ai-chat` and `@vanduo-oss/vdl-hybrid-search` are listed as dependencies with published semver ranges
+- **THEN** `@vanduo-oss/vwl-ai-chat` and `@vanduo-oss/vwl-hybrid-search` are listed as dependencies with published semver ranges
 
 #### Scenario: No engines packaging surface
 - **WHEN** a contributor inspects the labs package metadata

@@ -1,6 +1,6 @@
 /** Explicit metadata refresh. Never invoked by a build or page visit. */
 import fs from 'node:fs/promises';
-import { MODEL_OPTIONS } from '@vanduo-oss/vdl-ai-chat';
+import { MODEL_OPTIONS } from '@vanduo-oss/vwl-ai-chat';
 import { prebuiltAppConfig } from '@mlc-ai/web-llm';
 
 const manifests = {};
@@ -55,6 +55,6 @@ for (const model of MODEL_OPTIONS) {
   manifests[model.id] = manifest;
   console.log(`${model.id}: ${files.length} files, ${(manifest.approxBytes / 1e6).toFixed(1)} MB`);
 }
-const target = new URL('../../vdl-ai-chat/src/model-artifacts.json', import.meta.url);
+const target = new URL('../../vwl-ai-chat/src/model-artifacts.json', import.meta.url);
 await fs.writeFile(new URL(target.href + '.tmp'), JSON.stringify(manifests, null, 2) + '\n');
 await fs.rename(new URL(target.href + '.tmp'), target);

@@ -1,4 +1,4 @@
-# vdl-ai-tools Specification
+# vwl-ai-tools Specification
 
 ## Purpose
 

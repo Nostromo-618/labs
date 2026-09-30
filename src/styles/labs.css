@@ -165,7 +165,7 @@ body {
   background: var(--vd-bg-secondary, var(--bg-secondary));
 }
 
-.vdl-theme-customizer {
+.vwl-theme-customizer {
   display: inline-flex;
   align-items: center;
 }
@@ -286,7 +286,7 @@ body:has(main[data-labs-route]) {
   background-image: none;
 }
 
-.vdl-home-atmosphere {
+.vwl-home-atmosphere {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -303,12 +303,12 @@ body:has(main[data-labs-route]) {
   --vd-liquid-neutral-weight: 0.22;
 }
 
-.vdl-home-atmosphere-active {
+.vwl-home-atmosphere-active {
   opacity: 1;
   visibility: visible;
 }
 
-.vdl-home-atmosphere-canvas {
+.vwl-home-atmosphere-canvas {
   display: block;
   width: 100%;
   height: 100%;

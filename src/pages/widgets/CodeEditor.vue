@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import DocCodeSnippet from '../../components/DocCodeSnippet.vue';
-import { VdCodeEditor } from '@vanduo-oss/vdl-cbun/code-editor';
+import { VdCodeEditor } from '@vanduo-oss/vwl-cbun/code-editor';
 
 const SAMPLES = {
   javascript: `// Fibonacci with memoization
@@ -32,7 +32,7 @@ class Point:
 print(Point(0, 0))
 `,
   json: `{
-  "name": "@vanduo-oss/vdl-cbun",
+  "name": "@vanduo-oss/vwl-cbun",
   "version": "1.0.0"
 }
 `,
@@ -73,11 +73,11 @@ const charCount = computed(() => code.value.length);
 const lineCount = computed(() => code.value.split('\n').length);
 
 const installShell = `# clone beside Labs, then in package.json:
-# "@vanduo-oss/vdl-cbun": "link:../vdl-cbun"`;
+# "@vanduo-oss/vwl-cbun": "link:../vwl-cbun"`;
 const vue3Usage = `<script setup>
 import { ref } from 'vue';
-import { VdCodeEditor } from '@vanduo-oss/vdl-cbun/code-editor';
-import '@vanduo-oss/vdl-cbun/code-editor/css';
+import { VdCodeEditor } from '@vanduo-oss/vwl-cbun/code-editor';
+import '@vanduo-oss/vwl-cbun/code-editor/css';
 
 const code = ref('const hello = "world";');
 <\/script>
@@ -94,7 +94,7 @@ const code = ref('const hello = "world";');
     </p>
     <h5 class="demo-title"><i class="ph ph-code"></i> Code Editor</h5>
     <p class="vd-mb-8">
-      Lightweight textarea-overlay editor from <code>@vanduo-oss/vdl-cbun/code-editor</code>.
+      Lightweight textarea-overlay editor from <code>@vanduo-oss/vwl-cbun/code-editor</code>.
     </p>
 
     <div class="vd-card vd-card-glow demo-card vd-mb-6">

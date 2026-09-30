@@ -6,7 +6,7 @@ import path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createHash } from 'node:crypto';
-import { MODEL_OPTIONS, NEW_MODEL_IDS } from '@vanduo-oss/vdl-ai-chat';
+import { MODEL_OPTIONS, NEW_MODEL_IDS } from '@vanduo-oss/vwl-ai-chat';
 const args = process.argv.slice(2);
 const flag = args.indexOf('--model');
 const ids = args.includes('--new')

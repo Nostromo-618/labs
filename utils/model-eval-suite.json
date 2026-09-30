@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "name": "vdl-labs-chat-quality",
+  "name": "vwl-labs-chat-quality",
   "description": "Branding, honesty, instruction following, plus real-model lifecycle, context, tools and source-citation checks.",
   "cases": [
     {

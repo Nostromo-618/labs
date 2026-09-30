@@ -8,11 +8,11 @@
 - [x] Update JSDoc for the new phase name.
 - [x] Read-only question turns: `isCanvasQuestion` detection, `answering` phase, `generateAnswer` hook, grounded `formatCanvasQuestionPrompt`, honest local fallback reply.
 
-## 2. UI (`src/components/VdlAiDrawUI.vue`)
+## 2. UI (`src/components/VwlAiDrawUI.vue`)
 
 - [x] Default model → `gemma-4-E2B-it-web`; relabel options (E2B Recommended, E4B Quality).
 - [x] Map `executing` phase to "Drawing…" status without resetting the chat conversation.
-- [x] Add "Fast planner" experimental toggle persisted at `vdl-ai-draw-tiny-planner`.
+- [x] Add "Fast planner" experimental toggle persisted at `vwl-ai-draw-tiny-planner`.
 - [x] Route questions to an "answering" phase and wire `generateAnswer`.
 
 ## 3. Tiny planner experiment (`src/demos/draw-planner-webllm.js`)
@@ -37,7 +37,7 @@
 
 ## 6. Docs
 
-- [x] `doc/vdl-ai-draw.md`: architecture update, model policy, fast-planner flag + compact-prompt note, question turns, eval suite section.
+- [x] `doc/vwl-ai-draw.md`: architecture update, model policy, fast-planner flag + compact-prompt note, question turns, eval suite section.
 - [x] README ai-draw section.
 
 ## Verification

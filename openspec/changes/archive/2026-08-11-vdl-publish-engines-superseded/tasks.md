@@ -1,6 +1,6 @@
 ## 1. Package surface
 
-- [x] 1.1 Rename package to `@vanduo-oss/vdl-engines` with publishConfig and tools export
+- [x] 1.1 Rename package to `@vanduo-oss/vwl-engines` with publishConfig and tools export
 - [x] 1.2 Document headless consumption in README
 - [x] 1.3 `pnpm pack` succeeds
 

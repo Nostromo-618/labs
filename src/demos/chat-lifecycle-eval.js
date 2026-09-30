@@ -4,7 +4,7 @@ import {
   citedSources,
   INSUFFICIENT_EVIDENCE,
 } from '../lib/docs-search.js';
-import { getModelOption } from '@vanduo-oss/vdl-ai-chat';
+import { getModelOption } from '@vanduo-oss/vwl-ai-chat';
 /** Real-model cases complement deterministic adversarial harness tests. */
 export async function evaluateLifecycle(
   chat,

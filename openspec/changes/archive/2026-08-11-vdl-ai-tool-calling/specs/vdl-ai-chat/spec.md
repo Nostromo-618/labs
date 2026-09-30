@@ -1,4 +1,4 @@
-# vdl-ai-chat Specification (delta)
+# vwl-ai-chat Specification (delta)
 
 ## Modified Requirements
 

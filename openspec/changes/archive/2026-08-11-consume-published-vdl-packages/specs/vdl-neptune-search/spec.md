@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: HybridSearch engine comes from npm
-The labs hybrid search demo MUST construct search via `HybridSearch` from `@vanduo-oss/vdl-hybrid-search` (not a local `neptune-search.js` / `NeptuneSearch` SoT). Search guardrails MUST be imported from `@vanduo-oss/vdl-hybrid-search/guardrails/search`.
+The labs hybrid search demo MUST construct search via `HybridSearch` from `@vanduo-oss/vwl-hybrid-search` (not a local `neptune-search.js` / `NeptuneSearch` SoT). Search guardrails MUST be imported from `@vanduo-oss/vwl-hybrid-search/guardrails/search`.
 
 #### Scenario: Vue demo uses HybridSearch
 - **WHEN** the hybrid search Vue UI initializes without an injected engine
@@ -9,7 +9,7 @@ The labs hybrid search demo MUST construct search via `HybridSearch` from `@vand
 
 #### Scenario: Search guardrails from package subpath
 - **WHEN** the UI validates queries or sanitizes doc hrefs
-- **THEN** it uses helpers from `@vanduo-oss/vdl-hybrid-search/guardrails/search`
+- **THEN** it uses helpers from `@vanduo-oss/vwl-hybrid-search/guardrails/search`
 
 ## MODIFIED Requirements
 
@@ -17,7 +17,7 @@ The labs hybrid search demo MUST construct search via `HybridSearch` from `@vand
 When the hybrid search UI mounts, the system MUST start preloading the semantic search path (embedding model / transformers stack) in the background without blocking the fuzzy search path.
 
 #### Scenario: Mount starts semantic warmup
-- **WHEN** `VdlHybridSearchUI` mounts successfully
+- **WHEN** `VwlHybridSearchUI` mounts successfully
 - **THEN** semantic preload begins without requiring the user to press Enter first
 
 #### Scenario: Fuzzy remains available during preload

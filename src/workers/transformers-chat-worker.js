@@ -13,7 +13,7 @@ env.allowLocalModels = true;
 env.useCustomCache = false;
 const cacheSetup = Promise.race([
   Promise.resolve()
-    .then(() => (typeof caches === 'undefined' ? null : caches.open('vdl-chat-onnx-v1')))
+    .then(() => (typeof caches === 'undefined' ? null : caches.open('vwl-chat-onnx-v1')))
     .catch(() => null),
   new Promise((resolve) => setTimeout(() => resolve(null), 2500)),
 ]).then((cache) => {

@@ -41,7 +41,7 @@ export const DISCLAIMER_SECTIONS = [
   },
   {
     heading: 'AI-assisted content & on-device AI (EU AI Act Art. 50)',
-    body: 'Substantial parts of this site’s content may be AI-generated or AI-assisted. Optional demos such as vdl-ai-chat are AI systems that produce machine-generated text. That is disclosed here to meet the transparency spirit of Article 50 of the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). AI output — whether authored pages or live chat — can be wrong, incomplete, or invented. Prefer tool-backed citations and authored docs over free-form claims. Humans remain responsible for verifying anything they rely on. Do not paste secrets into chat or apply suggested changes to production systems without your own review.',
+    body: 'Substantial parts of this site’s content may be AI-generated or AI-assisted. Optional demos such as vwl-ai-chat are AI systems that produce machine-generated text. That is disclosed here to meet the transparency spirit of Article 50 of the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). AI output — whether authored pages or live chat — can be wrong, incomplete, or invented. Prefer tool-backed citations and authored docs over free-form claims. Humans remain responsible for verifying anything they rely on. Do not paste secrets into chat or apply suggested changes to production systems without your own review.',
     linkHref: AI_ACT_EUR_LEX_URL,
     linkLabel: 'Official EUR-Lex text of Regulation (EU) 2024/1689',
   },
@@ -51,7 +51,7 @@ export const DISCLAIMER_SECTIONS = [
   },
   {
     heading: 'Privacy & local storage',
-    body: 'Theme preference, terms acceptance, and any demo/chat state stay in this browser’s localStorage (Labs uses a `vdl-` theme prefix so prefs do not collide with other Vanduo sites on the same origin). Chat transcripts are not uploaded to a Vanduo Web Labs server. There is no account or cloud sync. Opt-in model or embedding fetches may contact Hugging Face / CDN hosts. Clearing site data, switching browsers or devices, or using private/incognito mode can erase everything.',
+    body: 'Theme preference, terms acceptance, and any demo/chat state stay in this browser’s localStorage (Labs uses a `vwl-` theme prefix so prefs do not collide with other Vanduo sites on the same origin). Chat transcripts are not uploaded to a Vanduo Web Labs server. There is no account or cloud sync. Opt-in model or embedding fetches may contact Hugging Face / CDN hosts. Clearing site data, switching browsers or devices, or using private/incognito mode can erase everything.',
   },
   {
     heading: 'License vs disclaimer',

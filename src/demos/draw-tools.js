@@ -1,4 +1,4 @@
-import { validateToolCall } from '@vanduo-oss/vdl-ai-chat/guardrails/tools';
+import { validateToolCall } from '@vanduo-oss/vwl-ai-chat/guardrails/tools';
 import { logAiDrawEvent } from './draw-logger.js';
 import {
   FACE_CURVE_KINDS,

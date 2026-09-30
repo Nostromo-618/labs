@@ -35,7 +35,7 @@ test.describe('Labs site dock', () => {
 
     // Force left edge via storage + reload so persist restores vertical.
     await page.evaluate(() => {
-      localStorage.setItem('vdl-site-dock', 'left');
+      localStorage.setItem('vwl-site-dock', 'left');
     });
     await page.reload();
     await acceptDisclaimer(page);
@@ -48,7 +48,7 @@ test.describe('Labs site dock', () => {
 
     // Horizontal restores wordmark.
     await page.evaluate(() => {
-      localStorage.setItem('vdl-site-dock', 'top');
+      localStorage.setItem('vwl-site-dock', 'top');
     });
     await page.reload();
     await acceptDisclaimer(page);
@@ -90,7 +90,7 @@ test.describe('Labs site dock', () => {
     await expect(fan).not.toHaveClass(/is-open/);
     await expect(page.locator('html')).toHaveAttribute('data-primary', 'yellow');
     await expect
-      .poll(async () => page.evaluate(() => localStorage.getItem('vdl-primary-color')))
+      .poll(async () => page.evaluate(() => localStorage.getItem('vwl-primary-color')))
       .toBe('yellow');
     expect(await page.evaluate(() => localStorage.getItem('vanduo-primary-color'))).toBeNull();
   });

@@ -1,4 +1,4 @@
-import { highlight } from '@vanduo-oss/vdl-cbun/code-editor/highlight';
+import { highlight } from '@vanduo-oss/vwl-cbun/code-editor/highlight';
 
 /** DocCodeSnippet / VdCodeSnippet tab keys → tokenizer ids. */
 const LANGUAGE = {

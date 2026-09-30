@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "name": "vdl-ai-draw-quality",
+  "name": "vwl-ai-draw-quality",
   "description": "Draw harness evaluation: plan validity, shapes drawn, and wall time per prompt/model against the local WebGPU inference harness.",
   "cases": [
     {

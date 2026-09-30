@@ -3,9 +3,9 @@
 - [x] 1.1 Extend `utils/fetch-ai-models.mjs` for Qwen3-0.6B LiteRT (and Ministral if probing)
 - [x] 1.2 Spike-load Qwen3-0.6B via existing LiteRT path; attempt Ministral; document outcome
 - [x] 1.3 Update `MODEL_OPTIONS` / groups / `TINY_MODEL_ID` (multi-arch LiteRT + refreshed WebLLM peers; remove SmolLM2/Qwen2.5-1.5B/Llama-3.2)
-- [x] 1.4 Update `doc/vdl-ai-chat.md` and unit tests that hardcode removed models
+- [x] 1.4 Update `doc/vwl-ai-chat.md` and unit tests that hardcode removed models
 
-## 2. vdl-model-eval core
+## 2. vwl-model-eval core
 
 - [x] 2.1 Add `model-eval.js` (scorers, suite runner API, report schema, concurrency planner)
 - [x] 2.2 Add `utils/model-eval-suite.json` (branding, honesty, instruction-following)
@@ -22,7 +22,7 @@
 
 - [x] 4.1 Add `@vanduo-oss/vd3-cbun` dependency
 - [x] 4.2 Add Tools route + Model Eval card in `src/App.vue` (not DEMO_SLUGS)
-- [x] 4.3 Add `VdlModelEvalUI.vue` + `doc/vdl-model-eval.md`
+- [x] 4.3 Add `VwlModelEvalUI.vue` + `doc/vwl-model-eval.md`
 - [x] 4.4 Wire Vite copy/build inputs as needed
 
 ## 5. Verify

@@ -41,12 +41,12 @@ try {
   assert(csp && !csp.includes("'unsafe-eval'"), 'production CSP must remain restrictive');
   assert.equal(await production.getByRole('button', { name: 'Evaluate · local' }).count(), 0);
   const compareBeforeLoad = await production.evaluate(() =>
-    performance.getEntriesByType('resource').some((entry) => /VdlCompareChat/.test(entry.name)),
+    performance.getEntriesByType('resource').some((entry) => /VwlCompareChat/.test(entry.name)),
   );
   await production.getByRole('button', { name: 'Compare', exact: true }).click();
   await production.getByLabel('Model A').waitFor();
   const compareAfterLoad = await production.evaluate(() =>
-    performance.getEntriesByType('resource').some((entry) => /VdlCompareChat/.test(entry.name)),
+    performance.getEntriesByType('resource').some((entry) => /VwlCompareChat/.test(entry.name)),
   );
   assert.equal(compareBeforeLoad, false, 'Compare chunk must load lazily');
   assert.equal(compareAfterLoad, true, 'Compare chunk should load after its tab is selected');

@@ -1,4 +1,4 @@
-# vdl-neptune-search Specification (delta)
+# vwl-neptune-search Specification (delta)
 
 ## Modified Requirements
 

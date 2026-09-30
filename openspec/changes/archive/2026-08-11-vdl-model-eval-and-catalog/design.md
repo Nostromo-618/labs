@@ -28,7 +28,7 @@ See proposal.md — Why. Today `ai-chat.js` loads Gemma 4 via LiteRT CDN and opt
 
 5. **Charts via `@vanduo-oss/vd3-cbun`** — Keep `@vanduo-oss/vd3` for shell; charts only on Tools eval UI.
 
-6. **Ministral spike-gated** — Prefetch/attempt load; if fail, document in `doc/vdl-ai-chat.md` and omit from picker.
+6. **Ministral spike-gated** — Prefetch/attempt load; if fail, document in `doc/vwl-ai-chat.md` and omit from picker.
 
 ## Risks / Trade-offs
 

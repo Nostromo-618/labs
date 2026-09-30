@@ -52,12 +52,12 @@ for (const [name, type] of Object.entries({ chromium, webkit })) {
     await page.waitForFunction(
       () =>
         !!document.querySelector('textarea[aria-label="Message"]') ||
-        !!document.querySelector('.vdl-ai-error'),
+        !!document.querySelector('.vwl-ai-error'),
       null,
       { timeout: 120000 },
     );
-    if (await page.locator('.vdl-ai-error').count())
-      throw Error(await page.locator('.vdl-ai-error').innerText());
+    if (await page.locator('.vwl-ai-error').count())
+      throw Error(await page.locator('.vwl-ai-error').innerText());
     console.log(name, 'loaded');
     const input = page.getByRole('textbox', { name: 'Message' });
     await input.fill('Reply with exactly: ready');
@@ -76,7 +76,7 @@ for (const [name, type] of Object.entries({ chromium, webkit })) {
     await page.getByRole('button', { name: 'Send', exact: true }).waitFor({ timeout: 120000 });
     const docsReply = await page.locator('[data-role="assistant"]').last().innerText();
     const citations = await page
-      .locator('.vdl-ai-citations a')
+      .locator('.vwl-ai-citations a')
       .evaluateAll((els) => els.map((a) => a.href));
     await page.screenshot({
       path: `qa/local-refresh/screenshots/${name}-production-chat-${label}.png`,

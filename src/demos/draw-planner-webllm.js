@@ -1,9 +1,9 @@
-import { TINY_MODEL_ID } from '@vanduo-oss/vdl-ai-chat';
+import { TINY_MODEL_ID } from '@vanduo-oss/vwl-ai-chat';
 
 /**
  * Experimental tiny planner: WebLLM Qwen3-0.6B used for DrawPlan generation only.
  *
- * Rules (see doc/vdl-ai-draw.md):
+ * Rules (see doc/vwl-ai-draw.md):
  * - Planning-only: no tools are ever registered on this engine.
  * - At most one generation runs at a time across the page.
  * - Gemma stays the tool-executing model; it is loaded by the host UI only when
@@ -30,7 +30,7 @@ export function createTinyDrawPlanner(opts = {}) {
     typeof opts.createChat === 'function'
       ? opts.createChat
       : async () => {
-          const mod = await import('@vanduo-oss/vdl-ai-chat');
+          const mod = await import('@vanduo-oss/vwl-ai-chat');
           return new mod.AiChat({
             modelId: TINY_MODEL_ID,
             loadLiteRT,
@@ -66,7 +66,7 @@ export function createTinyDrawPlanner(opts = {}) {
           }
           return chat;
         } catch (err) {
-          console.error('[vdl-ai-draw] fast planner unavailable:', err);
+          console.error('[vwl-ai-draw] fast planner unavailable:', err);
           fail(`Fast planner unavailable (${err?.message || 'load failed'}); using Gemma.`);
           return null;
         }
@@ -101,7 +101,7 @@ export function createTinyDrawPlanner(opts = {}) {
         return out == null ? '' : String(out);
       } catch (err) {
         const message = String(err?.message || err);
-        console.error('[vdl-ai-draw] fast planner generate failed:', err);
+        console.error('[vwl-ai-draw] fast planner generate failed:', err);
         fail(
           /context window|prompt tokens|sliding_window/i.test(message)
             ? 'Fast planner prompt exceeded the tiny model context; using Gemma.'
@@ -131,7 +131,7 @@ export function createTinyDrawPlanner(opts = {}) {
 }
 
 /** localStorage key behind the "Fast planner" toggle (persisted user preference). */
-export const TINY_PLANNER_FLAG_KEY = 'vdl-ai-draw-tiny-planner';
+export const TINY_PLANNER_FLAG_KEY = 'vwl-ai-draw-tiny-planner';
 
 /**
  * Session-only enablement check shared by tests and the eval runner.

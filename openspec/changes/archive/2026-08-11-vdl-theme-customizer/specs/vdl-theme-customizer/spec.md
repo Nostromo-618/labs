@@ -1,6 +1,6 @@
 ## Purpose
 
-Expose vd3 theme customization on the Labs shell while persisting preferences under Labs-owned `vdl-*` localStorage keys so they do not collide with Vanduo docs on the shared GitHub Pages origin.
+Expose vd3 theme customization on the Labs shell while persisting preferences under Labs-owned `vwl-*` localStorage keys so they do not collide with Vanduo docs on the shared GitHub Pages origin.
 
 ## ADDED Requirements
 
@@ -24,19 +24,19 @@ The Labs site shell MUST expose `@vanduo-oss/vd3`'s `VdThemeCustomizer` in a dis
 - **THEN** the Palette segmented control (Open Color / Fibonacci) is not shown
 - **AND** the site remains on the Open Color palette
 
-### Requirement: Theme preferences use vdl- localStorage keys
+### Requirement: Theme preferences use vwl- localStorage keys
 
-Labs MUST persist and restore vd3 theme preferences using `vdl-` prefixed localStorage keys. Labs MUST NOT write theme preferences to the default `vanduo-` keys used by Vanduo docs.
+Labs MUST persist and restore vd3 theme preferences using `vwl-` prefixed localStorage keys. Labs MUST NOT write theme preferences to the default `vanduo-` keys used by Vanduo docs.
 
 #### Scenario: Preference write uses vdl keys
 
 - **WHEN** a user changes a theme preference via the theme switcher or customizer on Labs
-- **THEN** the preference is stored under the corresponding `vdl-*` key (for example `vdl-theme-preference`, `vdl-palette`, `vdl-primary-color`, `vdl-neutral-color`, `vdl-radius`, `vdl-font-preference`)
+- **THEN** the preference is stored under the corresponding `vwl-*` key (for example `vwl-theme-preference`, `vwl-palette`, `vwl-primary-color`, `vwl-neutral-color`, `vwl-radius`, `vwl-font-preference`)
 - **AND** the corresponding `vanduo-*` key is not written by Labs theme persistence
 
 #### Scenario: Preference restores on reload
 
-- **WHEN** a user has previously saved Labs theme preferences under `vdl-*` keys
+- **WHEN** a user has previously saved Labs theme preferences under `vwl-*` keys
 - **AND** the Labs site loads again
 - **THEN** those preferences are applied to the document theme attributes
 
@@ -44,19 +44,19 @@ Labs MUST persist and restore vd3 theme preferences using `vdl-` prefixed localS
 
 - **WHEN** `vanduo-*` theme keys already exist in localStorage (for example from Vanduo docs)
 - **AND** the Labs site loads or updates theme preferences
-- **THEN** Labs theme persistence reads and writes only `vdl-*` keys and leaves existing `vanduo-*` values intact
+- **THEN** Labs theme persistence reads and writes only `vwl-*` keys and leaves existing `vanduo-*` values intact
 
 ### Requirement: Labs global theme defaults for unset preferences
 
-Labs MUST configure vd3 `themeDefaults` so new visitors (no stored `vdl-*` preference) get Open Sans, Neutral, and radius `0.25` on the Open Color palette. Labs MUST NOT overwrite existing `vdl-*` preferences with these defaults.
+Labs MUST configure vd3 `themeDefaults` so new visitors (no stored `vwl-*` preference) get Open Sans, Neutral, and radius `0.25` on the Open Color palette. Labs MUST NOT overwrite existing `vwl-*` preferences with these defaults.
 
 #### Scenario: Defaults apply when no preference is stored
 
-- **WHEN** a visitor loads the Labs site with no `vdl-font-preference`, `vdl-neutral-color`, or `vdl-radius` keys
+- **WHEN** a visitor loads the Labs site with no `vwl-font-preference`, `vwl-neutral-color`, or `vwl-radius` keys
 - **THEN** the effective theme uses font `open-sans`, neutral `neutral`, and radius `0.25`
 
 #### Scenario: Stored preferences override defaults
 
-- **WHEN** a visitor already has one or more `vdl-*` theme preference keys stored
+- **WHEN** a visitor already has one or more `vwl-*` theme preference keys stored
 - **AND** the Labs site loads
 - **THEN** those stored values are applied instead of the corresponding Labs `themeDefaults`

@@ -5,15 +5,15 @@ Defines the naming boundary between Labs-owned product surface (`vdl`) and the `
 ## ADDED Requirements
 
 ### Requirement: Labs-owned surface uses vdl prefix
-Labs-owned UI components, CSS class prefixes, and product module ids MUST use `vdl` / `Vdl` / `vdl-` (for example `VdlAiChatUI`, `VdlNeptuneSearchUI`, `.vdl-ai-*`, `vdl-ai-chat`).
+Labs-owned UI components, CSS class prefixes, and product module ids MUST use `vdl` / `Vwl` / `vwl-` (for example `VwlAiChatUI`, `VwlNeptuneSearchUI`, `.vwl-ai-*`, `vwl-ai-chat`).
 
 #### Scenario: Labs Vue chat component name
 - **WHEN** a consumer imports the Labs Vue AI chat UI
-- **THEN** the component is named `VdlAiChatUI` (not a `Vd*` design-system name)
+- **THEN** the component is named `VwlAiChatUI` (not a `Vd*` design-system name)
 
 #### Scenario: Labs Vue search component name
 - **WHEN** a consumer imports the Labs Vue Neptune search UI
-- **THEN** the component is named `VdlNeptuneSearchUI`
+- **THEN** the component is named `VwlNeptuneSearchUI`
 
 ### Requirement: vd3 design system remains Vd
 `@vanduo-oss/vd3` component, token, and class APIs MUST remain `Vd*` / `--vd-*` / `.vd-*` and MUST NOT be renamed to `vdl` as part of Labs work.

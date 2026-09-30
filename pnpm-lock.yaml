@@ -28,18 +28,18 @@ importers:
       '@vanduo-oss/vd3-charts':
         specifier: 1.1.0
         version: 1.1.0(vue@3.5.42)
-      '@vanduo-oss/vdl-ai-chat':
-        specifier: link:../vdl-ai-chat
-        version: link:../vdl-ai-chat
-      '@vanduo-oss/vdl-cbun':
-        specifier: link:../vdl-cbun
-        version: link:../vdl-cbun
-      '@vanduo-oss/vdl-hex-earth':
-        specifier: link:../vdl-hex-earth
-        version: link:../vdl-hex-earth
-      '@vanduo-oss/vdl-hybrid-search':
-        specifier: link:../vdl-hybrid-search
-        version: link:../vdl-hybrid-search
+      '@vanduo-oss/vwl-ai-chat':
+        specifier: link:../vwl-ai-chat
+        version: link:../vwl-ai-chat
+      '@vanduo-oss/vwl-cbun':
+        specifier: link:../vwl-cbun
+        version: link:../vwl-cbun
+      '@vanduo-oss/vwl-hex-earth':
+        specifier: link:../vwl-hex-earth
+        version: link:../vwl-hex-earth
+      '@vanduo-oss/vwl-hybrid-search':
+        specifier: link:../vwl-hybrid-search
+        version: link:../vwl-hybrid-search
       fuse.js:
         specifier: ^7.5.0
         version: 7.5.0

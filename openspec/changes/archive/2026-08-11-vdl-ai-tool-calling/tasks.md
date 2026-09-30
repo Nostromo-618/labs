@@ -14,5 +14,5 @@
 ## 3. Quality toolchain
 
 - [x] 3.1 Add eslint + prettier config and `lint` / `format` / `format:check` scripts for headless modules
-- [x] 3.2 Update `doc/vdl-ai-chat.md` and `doc/vdl-guardrails.md`
+- [x] 3.2 Update `doc/vwl-ai-chat.md` and `doc/vwl-guardrails.md`
 - [x] 3.3 Run focused unit tests / lint / format:check

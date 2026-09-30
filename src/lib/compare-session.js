@@ -1,4 +1,4 @@
-import { AiChat, getModelOption } from '@vanduo-oss/vdl-ai-chat';
+import { AiChat, getModelOption } from '@vanduo-oss/vwl-ai-chat';
 import { chatRuntimeOptions, getChatDeviceCapabilities } from './chat-runtime.js';
 import {
   createDocsSearch,

@@ -16,7 +16,7 @@ try {
     await page.goto(`${base}/demo/ai-chat-demo.html`);
     await page.getByRole('button', { name: 'Load AI Model' }).waitFor();
     const result = await page.evaluate(() => {
-      const note = document.querySelector('.vdl-ai-note');
+      const note = document.querySelector('.vwl-ai-note');
       const style = getComputedStyle(note);
       const canvas = document.createElement('canvas');
       canvas.width = canvas.height = 1;

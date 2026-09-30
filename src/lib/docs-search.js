@@ -1,5 +1,5 @@
-import { HybridSearch, DEFAULT_DOCS_BASE_URL } from '@vanduo-oss/vdl-hybrid-search';
-import { safeDocHref } from '@vanduo-oss/vdl-hybrid-search/guardrails/search';
+import { HybridSearch, DEFAULT_DOCS_BASE_URL } from '@vanduo-oss/vwl-hybrid-search';
+import { safeDocHref } from '@vanduo-oss/vwl-hybrid-search/guardrails/search';
 import Fuse from 'fuse.js';
 
 export const SEARCH_PRESETS = [

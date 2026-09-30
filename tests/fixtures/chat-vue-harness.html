@@ -12,7 +12,7 @@
       import { VanduoVue } from '@vanduo-oss/vd3';
       import '@vanduo-oss/vd3/css';
       import '/src/styles/legacy-bridge.css';
-      import Chat from '/src/components/VdlAiChatUI.vue';
+      import Chat from '/src/components/VwlAiChatUI.vue';
       let history = [],
         pending = null;
       window.chatQA = {
@@ -59,7 +59,7 @@
         },
       };
       const app = createApp({ render: () => h(Chat, { chat }) });
-      app.use(VanduoVue, { storagePrefix: 'vdl-' });
+      app.use(VanduoVue, { storagePrefix: 'vwl-' });
       app.mount('#app');
     </script>
   </body>

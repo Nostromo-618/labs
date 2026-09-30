@@ -1,4 +1,4 @@
-# vdl-guardrails Specification (delta)
+# vwl-guardrails Specification (delta)
 
 ## Modified Requirements
 

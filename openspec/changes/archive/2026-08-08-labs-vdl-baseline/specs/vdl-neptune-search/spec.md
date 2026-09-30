@@ -8,7 +8,7 @@ Hybrid in-browser docs search that warms the semantic path early so Enter-trigge
 When the Neptune search UI mounts, the system MUST start preloading the semantic search path (embedding model / transformers stack) in the background without blocking the fuzzy search path.
 
 #### Scenario: Mount starts semantic warmup
-- **WHEN** `VdlNeptuneSearchUI` or the headless Neptune UI mounts successfully
+- **WHEN** `VwlNeptuneSearchUI` or the headless Neptune UI mounts successfully
 - **THEN** semantic preload begins without requiring the user to press Enter first
 
 #### Scenario: Fuzzy remains available during preload

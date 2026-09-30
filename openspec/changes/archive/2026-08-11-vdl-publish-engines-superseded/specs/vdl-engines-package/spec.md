@@ -1,4 +1,4 @@
-# vdl-engines-package Specification
+# vwl-engines-package Specification
 
 ## Purpose
 
@@ -12,7 +12,7 @@ The package MUST export Neptune search, AiChat, and guardrails modules via docum
 
 #### Scenario: Import AiChat
 
-- **WHEN** a consumer imports `@vanduo-oss/vdl-engines/ai-chat.js`
+- **WHEN** a consumer imports `@vanduo-oss/vwl-engines/ai-chat.js`
 - **THEN** `AiChat` is available
 
 ### Requirement: Injectable Neptune library loaders

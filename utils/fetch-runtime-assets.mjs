@@ -1,7 +1,7 @@
 /** Fetch version-matched Tiny compiled libraries. Run explicitly when updating WebLLM. */
 import fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { MODEL_OPTIONS } from '@vanduo-oss/vdl-ai-chat';
+import { MODEL_OPTIONS } from '@vanduo-oss/vwl-ai-chat';
 import { prebuiltAppConfig } from '@mlc-ai/web-llm';
 const dir = new URL('../public/webllm-wasm/', import.meta.url);
 await fs.mkdir(dir, { recursive: true });

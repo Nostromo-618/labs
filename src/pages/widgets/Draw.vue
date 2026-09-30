@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue';
 import DocCodeSnippet from '../../components/DocCodeSnippet.vue';
-import { VdDraw } from '@vanduo-oss/vdl-cbun/draw';
+import { VdDraw } from '@vanduo-oss/vwl-cbun/draw';
 import { drawSeedDoc, fitDrawDemoView } from '../../constants/drawSeed.js';
 
 const drawRef = ref(null);
@@ -183,10 +183,10 @@ const brushDetails = [
 ];
 
 const installShell = `# clone beside Labs, then in package.json:
-# "@vanduo-oss/vdl-cbun": "link:../vdl-cbun"`;
+# "@vanduo-oss/vwl-cbun": "link:../vwl-cbun"`;
 const vue3Usage = `<script setup>
-import { VdDraw } from '@vanduo-oss/vdl-cbun/draw';
-import '@vanduo-oss/vdl-cbun/draw/css';
+import { VdDraw } from '@vanduo-oss/vwl-cbun/draw';
+import '@vanduo-oss/vwl-cbun/draw/css';
 <\/script>
 
 <template>
@@ -201,7 +201,7 @@ import '@vanduo-oss/vdl-cbun/draw/css';
     </p>
     <h5 class="demo-title"><i class="ph ph-paint-brush"></i> Draw</h5>
     <p class="vd-mb-8">
-      Vector sketchpad from <code>@vanduo-oss/vdl-cbun/draw</code> — brushes, shapes, sticky notes,
+      Vector sketchpad from <code>@vanduo-oss/vwl-cbun/draw</code> — brushes, shapes, sticky notes,
       and SVG/PNG export.
     </p>
 

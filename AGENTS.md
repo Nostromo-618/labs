@@ -13,4 +13,4 @@ When proposing or implementing non-trivial changes, prefer OpenSpec (`/opsx-prop
 
 ## Naming
 
-Labs-owned UI, CSS, and product prefixes use **`vdl` / `Vdl` / `vdl-`**. Keep **`@vanduo-oss/vd3`** and its `Vd*` / `--vd-*` / `.vd-*` design-system surface unchanged.
+Labs-owned UI, CSS, and product prefixes use **`vwl` / `Vwl` / `vwl-`**. Keep **`@vanduo-oss/vd3`** and its `Vd*` / `--vd-*` / `.vd-*` design-system surface unchanged.

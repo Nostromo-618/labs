@@ -56,7 +56,7 @@ test.describe('tiny planner (fast planner experiment)', () => {
     });
 
     expect(res.id).toBe('Qwen3-0.6B-q4f16_1-MLC');
-    expect(res.flagKey).toBe('vdl-ai-draw-tiny-planner');
+    expect(res.flagKey).toBe('vwl-ai-draw-tiny-planner');
     // One load, then cached chat instance for subsequent turns.
     expect(res.calls).toEqual(res.expectedCalls);
     expect(res.first).toContain('"steps"');

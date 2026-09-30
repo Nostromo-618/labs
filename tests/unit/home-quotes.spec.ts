@@ -5,7 +5,7 @@ test.describe('vdl home quotes shuffle bag', () => {
     await page.goto('/tests/fixtures/neptune-harness.html');
 
     const result = await page.evaluate(async () => {
-      const mod = await import('/src/vdl-home-quotes.js');
+      const mod = await import('/src/vwl-home-quotes.js');
 
       const store = new Map();
       const fakeStorage = {
@@ -22,7 +22,7 @@ test.describe('vdl home quotes shuffle bag', () => {
 
       const quotes = ['alpha', 'bravo', 'charlie', 'delta', 'echo'];
       const dayKey = '2026-08-08';
-      fakeStorage.setItem(mod.VDL_HOME_QUOTES_STORAGE_KEYS.salt, 'fixed-session-salt');
+      fakeStorage.setItem(mod.VWL_HOME_QUOTES_STORAGE_KEYS.salt, 'fixed-session-salt');
 
       const bagA = mod.buildQuoteBag(
         quotes.length,
@@ -68,7 +68,7 @@ test.describe('vdl home quotes shuffle bag', () => {
           store2.delete(key);
         },
       };
-      storage2.setItem(mod.VDL_HOME_QUOTES_STORAGE_KEYS.salt, 'tiny-salt');
+      storage2.setItem(mod.VWL_HOME_QUOTES_STORAGE_KEYS.salt, 'tiny-salt');
       const tinyPicks = [];
       for (let i = 0; i < 8; i++) {
         tinyPicks.push(
@@ -84,8 +84,8 @@ test.describe('vdl home quotes shuffle bag', () => {
         if (tinyPicks[i] === tinyPicks[i - 1]) tinyConsecutive = true;
       }
 
-      const catalogSize = mod.VDL_HOME_QUOTES.length;
-      const glados = mod.VDL_HOME_QUOTES.find((q) => q.id === mod.VDL_HOME_QUOTE_GLADOS_ID);
+      const catalogSize = mod.VWL_HOME_QUOTES.length;
+      const glados = mod.VWL_HOME_QUOTES.find((q) => q.id === mod.VWL_HOME_QUOTE_GLADOS_ID);
       const intervalA = mod.nextHomeQuoteIntervalMs(3000, 5000, () => 0);
       const intervalB = mod.nextHomeQuoteIntervalMs(3000, 5000, () => 1);
 
@@ -107,7 +107,7 @@ test.describe('vdl home quotes shuffle bag', () => {
         isGlados: mod.isGladosHomeQuote(glados),
         intervalA,
         intervalB,
-        storageKeys: mod.VDL_HOME_QUOTES_STORAGE_KEYS,
+        storageKeys: mod.VWL_HOME_QUOTES_STORAGE_KEYS,
       };
     });
 
@@ -121,8 +121,8 @@ test.describe('vdl home quotes shuffle bag', () => {
     expect(result.isGlados).toBe(true);
     expect(result.intervalA).toBe(3000);
     expect(result.intervalB).toBe(5000);
-    expect(result.storageKeys.salt).toBe('vdl-home-quotes-salt');
-    expect(result.storageKeys.last).toBe('vdl-home-quotes-last');
-    expect(result.storageKeys.salt.startsWith('vdl-')).toBe(true);
+    expect(result.storageKeys.salt).toBe('vwl-home-quotes-salt');
+    expect(result.storageKeys.last).toBe('vwl-home-quotes-last');
+    expect(result.storageKeys.salt.startsWith('vwl-')).toBe(true);
   });
 });

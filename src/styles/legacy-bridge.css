@@ -41,9 +41,9 @@
 }
 
 /* Keep secondary copy readable in both resolved themes, including glass cards. */
-.vdl-chat-demo,
-.vdl-ai-chat-wrap,
-.vdl-neptune-search {
+.vwl-chat-demo,
+.vwl-ai-chat-wrap,
+.vwl-neptune-search {
   --vd-text-secondary: color-mix(in srgb, var(--vd-text-primary) 90%, var(--vd-bg-primary));
   --vd-text-muted: color-mix(in srgb, var(--vd-text-primary) 85%, var(--vd-bg-primary));
   --text-secondary: var(--vd-text-secondary);

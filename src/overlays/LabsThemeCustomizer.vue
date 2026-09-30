@@ -7,7 +7,7 @@ import { LABS_PRIMARY_SWATCH_KEYS } from '../labs-primary-swatches.js';
  * Labs lock-in around the package swatches fan: only Primary Color is
  * user-editable. Palette / Neutral / Radius / Font stay forced to Labs
  * `themeDefaults` (sky, open-sans, RADIUS 0.5, open-color). Persistence stays
- * on the package `useThemePreference()` singleton under `storagePrefix: 'vdl-'`.
+ * on the package `useThemePreference()` singleton under `storagePrefix: 'vwl-'`.
  */
 
 const props = defineProps({

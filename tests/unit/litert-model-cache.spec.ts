@@ -12,7 +12,7 @@ test.describe('LiteRT model Cache Storage', () => {
 
   test('loadLiteRTModelBytes caches on miss and reuses on hit', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const mod = await import('/node_modules/@vanduo-oss/vdl-ai-chat/dist/index.js');
+      const mod = await import('/node_modules/@vanduo-oss/vwl-ai-chat/dist/index.js');
       const url = 'https://example.test/models/demo.litertlm';
       const bytes = new Uint8Array([1, 2, 3, 4, 5]);
       let fetchCount = 0;
@@ -80,7 +80,7 @@ test.describe('LiteRT model Cache Storage', () => {
       }
     });
 
-    expect(result.cacheName).toBe('vdl-litert-models');
+    expect(result.cacheName).toBe('vwl-litert-models');
     expect(result.firstSource).toBe('network');
     expect(result.secondSource).toBe('cache');
     expect(result.fetchCount).toBe(1);

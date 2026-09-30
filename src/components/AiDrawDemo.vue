@@ -18,11 +18,11 @@
     </header>
 
     <div style="max-width: min(76rem, 100%); margin: 0 auto; padding: 0 1.5rem 2rem">
-      <VdlAiDrawUI />
+      <VwlAiDrawUI />
     </div>
   </div>
 </template>
 
 <script setup>
-import VdlAiDrawUI from './VdlAiDrawUI.vue';
+import VwlAiDrawUI from './VwlAiDrawUI.vue';
 </script>
