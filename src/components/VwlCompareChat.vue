@@ -107,18 +107,6 @@ onBeforeUnmount(() => {
         </select></label
       >
       <label
-        >Context
-        <select
-          class="vd-select"
-          :value="state.mode"
-          :disabled="locked"
-          @change="act(() => session.setMode($event.target.value))"
-        >
-          <option value="general">General</option>
-          <option value="docs">Docs</option>
-        </select></label
-      >
-      <label
         >Output limit
         <select
           class="vd-select"
@@ -143,8 +131,7 @@ onBeforeUnmount(() => {
       {{ (download / 1e6).toFixed(0) }} MB distinct downloads. Working memory:
       {{
         working ? (working / 1e9).toFixed(1) + ' GB estimated' : 'not reliably known for this pair'
-      }}. Browser RAM readings are approximate. Docs uses shared fuzzy retrieval without an
-      embedding download.
+      }}. Browser RAM readings are approximate.
     </p>
     <p class="vwl-compare-note">
       {{
@@ -210,11 +197,6 @@ onBeforeUnmount(() => {
               {{ turn.context.omittedTurns }} older turns omitted from context.
             </p>
             <p v-if="turn.error">{{ turn.error }}</p>
-            <ul v-if="turn.citations?.length">
-              <li v-for="source in turn.citations" :key="source.id">
-                <a :href="source.url" target="_blank" rel="noopener">{{ source.title }}</a>
-              </li>
-            </ul>
             <small
               >{{ turn.status
               }}<template v-if="turn.firstAnswerMs != null">

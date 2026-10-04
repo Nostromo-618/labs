@@ -16,9 +16,6 @@ Run `pnpm index` after building the latest local vd3-docs checkout. The default 
 
 All routes use `https://vd3.vanduo.dev`. The refresh covers 92 routes, including Dock, Global Search, Surfaces, Login, Liquid Gradient, Canvas Components Bundle and the ecosystem guide. Section links come from actual HTML anchors.
 
-## Docs chat
-
-The separate Docs conversation retrieves up to three bounded excerpts before generation. References are untrusted data; source IDs are assigned by the host. Only citations matching retrieved IDs become links. An answer without valid citations becomes an insufficient-evidence response. General chat and Docs have separate visible and model histories. Semantic Docs search is optional and explicit.
 
 ## Quality checks
 

@@ -1,0 +1,170 @@
+{
+  "cold": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "modelSource": "pinned Hugging Face assets",
+    "localVoices": [],
+    "timings": {
+      "kokoroLoadMs": 5760.89999999851,
+      "synthesisMs": 4702.10000000149,
+      "whisperLoadMs": 2986.800000000745,
+      "transcriptionMs": 1153.5999999977648,
+      "totalMs": 19843.199999999255
+    },
+    "memoryBefore": 2246168,
+    "memoryScope": "Main-thread JS heap only; excludes speech workers and GPU allocations.",
+    "chatLoaded": true,
+    "kokoroCache": {
+      "cacheAvailable": true
+    },
+    "audioSeconds": 3.175,
+    "whisperCache": {
+      "cacheAvailable": true
+    },
+    "transcript": "Hello World, this is a private speech test.",
+    "silence": "",
+    "memoryAfter": 717951642
+  },
+  "warmOffline": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "modelSource": "pinned Hugging Face assets",
+    "localVoices": [
+      "Samantha",
+      "Albert",
+      "Bad News",
+      "Bahh",
+      "Bells",
+      "Boing",
+      "Bubbles",
+      "Cellos",
+      "Daniel",
+      "Eddy (English (United States))",
+      "Eddy (English (United Kingdom))",
+      "Flo (English (United States))",
+      "Flo (English (United Kingdom))",
+      "Fred",
+      "Good News",
+      "Grandma (English (United States))",
+      "Grandma (English (United Kingdom))",
+      "Grandpa (English (United States))",
+      "Grandpa (English (United Kingdom))",
+      "Jester",
+      "Junior",
+      "Karen",
+      "Kathy",
+      "Moira",
+      "Organ",
+      "Ralph",
+      "Reed (English (United States))",
+      "Reed (English (United Kingdom))",
+      "Rishi",
+      "Rocko (English (United States))",
+      "Rocko (English (United Kingdom))",
+      "Sandy (English (United States))",
+      "Sandy (English (United Kingdom))",
+      "Shelley (English (United States))",
+      "Shelley (English (United Kingdom))",
+      "Superstar",
+      "Tessa",
+      "Trinoids",
+      "Whisper",
+      "Wobble",
+      "Zarvox"
+    ],
+    "timings": {
+      "kokoroLoadMs": 0.09999999776482582,
+      "synthesisMs": 4606.300000000745,
+      "whisperLoadMs": 0,
+      "transcriptionMs": 1068.300000000745,
+      "totalMs": 5676.300000000745
+    },
+    "memoryBefore": 718949107,
+    "memoryScope": "Main-thread JS heap only; excludes speech workers and GPU allocations.",
+    "chatLoaded": true,
+    "audioSeconds": 3.175,
+    "transcript": "Hello World, this is a private speech test.",
+    "silence": "",
+    "memoryAfter": 27048840
+  },
+  "reloadedAssetsOffline": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "modelSource": "pinned Hugging Face assets",
+    "localVoices": [
+      "Samantha",
+      "Albert",
+      "Bad News",
+      "Bahh",
+      "Bells",
+      "Boing",
+      "Bubbles",
+      "Cellos",
+      "Daniel",
+      "Eddy (English (United States))",
+      "Eddy (English (United Kingdom))",
+      "Flo (English (United States))",
+      "Flo (English (United Kingdom))",
+      "Fred",
+      "Good News",
+      "Grandma (English (United States))",
+      "Grandma (English (United Kingdom))",
+      "Grandpa (English (United States))",
+      "Grandpa (English (United Kingdom))",
+      "Jester",
+      "Junior",
+      "Karen",
+      "Kathy",
+      "Moira",
+      "Organ",
+      "Ralph",
+      "Reed (English (United States))",
+      "Reed (English (United Kingdom))",
+      "Rishi",
+      "Rocko (English (United States))",
+      "Rocko (English (United Kingdom))",
+      "Sandy (English (United States))",
+      "Sandy (English (United Kingdom))",
+      "Shelley (English (United States))",
+      "Shelley (English (United Kingdom))",
+      "Superstar",
+      "Tessa",
+      "Trinoids",
+      "Whisper",
+      "Wobble",
+      "Zarvox"
+    ],
+    "timings": {
+      "kokoroLoadMs": 811,
+      "synthesisMs": 4748.89999999851,
+      "whisperLoadMs": 275.19999999925494,
+      "transcriptionMs": 1166.8999999985099,
+      "totalMs": 7003.10000000149
+    },
+    "memoryBefore": 27965110,
+    "memoryScope": "Main-thread JS heap only; excludes speech workers and GPU allocations.",
+    "chatLoaded": false,
+    "kokoroCache": {
+      "cacheAvailable": true
+    },
+    "audioSeconds": 3.175,
+    "whisperCache": {
+      "cacheAvailable": true
+    },
+    "transcript": "Hello World, this is a private speech test.",
+    "silence": "",
+    "memoryAfter": 29042220
+  },
+  "playback": {
+    "totalMs": 6390,
+    "chunks": [
+      {
+        "startedMs": 0,
+        "finishedMs": 3211.199999999255,
+        "audioSeconds": 3.175
+      },
+      {
+        "startedMs": 3211.199999999255,
+        "finishedMs": 6389.89999999851,
+        "audioSeconds": 3.175
+      }
+    ]
+  }
+}

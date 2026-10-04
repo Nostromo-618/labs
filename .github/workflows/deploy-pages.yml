@@ -39,34 +39,34 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-cbun
-          ref: d3a796e25673aff8baeebf9b294d85dc4d979c11
+          ref: 9db112b0bbc2c0ddc9d72818c422c311d35f2623
           path: vwl-cbun
 
       - name: Checkout vwl-hybrid-search
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-hybrid-search
-          ref: fe075e2368b61927be32d3fe8cc3c9b6b9ea0bbc
+          ref: 01ff2c2eba19cab43bb2a77c6771b781c4ee4bd7
           path: vwl-hybrid-search
 
       - name: Checkout vwl-ai-chat
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-ai-chat
-          ref: 88ce8a3ac6363a096de689d6dd84978b6e19502e
+          ref: d518433afea7d60fbca90777d0258dd4217dfc58
           path: vwl-ai-chat
 
       - name: Checkout vwl-hex-earth
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-hex-earth
-          ref: 985273aa80fb35f40e3d5f4040994a2b3f03c0f1
+          ref: fe97ecdedf413700663a234186963f25d793e70c
           path: vwl-hex-earth
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 10.28.2
+          version: 10.34.6
 
       - name: Setup Node
         uses: actions/setup-node@v7

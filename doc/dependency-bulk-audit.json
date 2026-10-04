@@ -1,0 +1,76 @@
+{
+  "checkedAt": "2026-10-04T14:17:51.309Z",
+  "reports": [
+    {
+      "project": "labs",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "advisories": []
+    },
+    {
+      "project": "vwl-ai-chat",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "advisories": []
+    },
+    {
+      "project": "vwl-hybrid-search",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "advisories": []
+    },
+    {
+      "project": "vwl-cbun",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 1,
+        "critical": 0
+      },
+      "advisories": [
+        {
+          "id": "GHSA-vfj7-8cjw-p6xm",
+          "module": "braces",
+          "severity": "high",
+          "findings": [
+            {
+              "version": "3.0.3",
+              "paths": [
+                ".>stylelint>micromatch>braces"
+              ]
+            }
+          ],
+          "patched": "<0.0.0",
+          "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
+        }
+      ]
+    },
+    {
+      "project": "vwl-hex-earth",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "advisories": []
+    }
+  ]
+}

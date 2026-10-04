@@ -15,7 +15,7 @@ Clone these beside Labs (same parent directory) so `link:../vwl-*` resolves:
 | [`vanduo-oss/vwl-ai-chat`](https://github.com/vanduo-oss/vwl-ai-chat) | Headless `AiChat` + LLM/tools guardrails + markdown |
 | Labs-local `model-eval.js` | Model evaluation harness (CLI / standalone; not listed on the live site) |
 
-The site injects bundled runtimes through `src/lib/chat-runtime.js` and resolves the documentation manifest through `src/lib/docs-search.js`. Build the sibling packages before starting Labs. Hex Earth remains private and is consumed through `link:../vwl-hex-earth`.
+The site injects bundled runtimes through `src/lib/chat-runtime.js` and the standalone search demo resolves the documentation manifest through `src/lib/docs-search.js`. Build the sibling packages before starting Labs. Hex Earth remains private and is consumed through `link:../vwl-hex-earth`.
 
 Guardrails docs: [doc/vwl-guardrails.md](./doc/vwl-guardrails.md)
 

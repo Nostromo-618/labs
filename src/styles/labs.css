@@ -295,12 +295,13 @@ body:has(main[data-labs-route]) {
   visibility: hidden;
   transition: opacity 0.35s ease;
   /* Labs site liquid knobs (vd3 --vd-liquid-* contract) */
-  --vd-liquid-intensity: 0.3;
-  --vd-liquid-speed: 0.143;
-  --vd-liquid-grain: 0.38;
-  --vd-liquid-distort: 0.68;
-  --vd-liquid-primary-weight: 0.75;
-  --vd-liquid-neutral-weight: 0.22;
+  /* Preserve the previous rendered atmosphere; slow its motion locally. */
+  --vd-liquid-intensity: 1.35;
+  --vd-liquid-speed: 0.07;
+  --vd-liquid-grain: 0.05;
+  --vd-liquid-distort: 0.48;
+  --vd-liquid-primary-weight: 0.85;
+  --vd-liquid-neutral-weight: 1.15;
 }
 
 .vwl-home-atmosphere-active {
@@ -959,4 +960,25 @@ main[data-labs-route='about'] .labs-view-about .labs-section {
     margin-right: 0 !important;
     margin-bottom: 0.25em;
   }
+}
+
+/* Chat's workspace needs width and a compact host; other demo cards keep their layout. */
+.labs-demos-detail.vwl-chat-detail {
+  max-width: 90rem;
+  padding: 0.75rem;
+}
+.vwl-chat-detail .labs-demos-detail-header {
+  margin-bottom: 0.6rem;
+}
+.vwl-chat-detail .labs-demos-detail-header h2 {
+  font-size: 1.1rem;
+}
+.vwl-chat-detail #labs-demo-heading {
+  display: none;
+}
+.vwl-chat-detail .labs-detail-stack-section {
+  margin-bottom: 1rem;
+}
+.vwl-chat-detail .vwl-chat-workbench {
+  scroll-margin-top: 6rem;
 }

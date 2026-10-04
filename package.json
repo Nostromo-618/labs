@@ -28,6 +28,7 @@
     "demo:serve": "vite",
     "index": "node utils/hybrid-search-indexer.mjs",
     "models:fetch": "node utils/fetch-ai-models.mjs",
+    "speech:fetch": "node utils/fetch-speech-models.mjs",
     "model-eval": "node utils/model-eval-runner.mjs",
     "model-eval:draw": "node utils/model-eval-draw-runner.mjs",
     "lint": "eslint model-eval.js \"utils/**/*.{js,mjs}\" \"src/**/*.{js,mjs}\"",
@@ -41,28 +42,29 @@
     "report": "playwright show-report"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.62.1",
-    "@vitejs/plugin-vue": "^6.0.8",
-    "eslint": "^10.8.1",
-    "prettier": "^3.9.6",
-    "vite": "^8.2.1",
-    "vite-plugin-static-copy": "^4.1.1"
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@vitejs/plugin-vue": "6.0.9",
+    "eslint": "10.12.0",
+    "prettier": "3.9.9",
+    "vite": "8.3.2"
   },
   "dependencies": {
-    "@huggingface/transformers": "4.2.0",
+    "@huggingface/transformers": "4.3.0",
     "@litert-lm/core": "0.17.1",
-    "@vanduo-oss/vd3": "1.7.4",
-    "@vanduo-oss/vd3-charts": "1.1.0",
+    "@vanduo-oss/vd3": "1.7.5",
+    "@vanduo-oss/vd3-charts": "1.1.1",
     "@vanduo-oss/vwl-ai-chat": "link:../vwl-ai-chat",
     "@vanduo-oss/vwl-cbun": "link:../vwl-cbun",
     "@vanduo-oss/vwl-hybrid-search": "link:../vwl-hybrid-search",
-    "fuse.js": "^7.5.0",
-    "vue": "3.5.42",
+    "fuse.js": "7.5.0",
+    "phonemizer": "1.2.1",
+    "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
+    "vue": "3.5.43",
     "@mlc-ai/web-llm": "0.2.85",
     "@vanduo-oss/vwl-hex-earth": "link:../vwl-hex-earth"
   },
-  "packageManager": "pnpm@10.28.2",
+  "packageManager": "pnpm@10.34.6",
   "pnpm": {
     "overrides": {
       "adm-zip": "0.6.1",

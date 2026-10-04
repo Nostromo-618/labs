@@ -1,0 +1,25 @@
+{
+  "buffers": [
+    {
+      "peak": 0,
+      "length": 1,
+      "state": "running"
+    },
+    {
+      "peak": 0.47417697310447693,
+      "length": 76200,
+      "state": "running"
+    }
+  ],
+  "peak": 0.4688445031642914,
+  "state": {
+    "status": "idle",
+    "error": "",
+    "progress": "",
+    "playbackPhase": "",
+    "recordingSeconds": 0,
+    "whisperReady": false,
+    "kokoroReady": true,
+    "cacheAvailable": true
+  }
+}

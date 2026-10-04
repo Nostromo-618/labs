@@ -8,7 +8,6 @@ test('a stopped pair evaluation keeps completed turns and its partial report', a
     const modelIds = ['Qwen3.5-0.8B-q4f16_1-MLC', 'LFM2.5-230M-q4-ONNX'];
     const state = {
       models: [...modelIds],
-      mode: 'general',
       panes: [
         { turns: [{ response: 'completed on A', status: 'complete' }] },
         { turns: [{ response: 'completed on B', status: 'complete' }] },
@@ -28,11 +27,10 @@ test('a stopped pair evaluation keeps completed turns and its partial report', a
         stopCalls++;
       },
       export: () => ({
-        schemaVersion: 1,
+        schemaVersion: 2,
         kind: 'paired-chat',
         models: modelIds.map((id) => ({ id })),
-        mode: state.mode,
-        modes: { general: structuredClone(state.panes.map((pane) => pane.turns)) },
+        turns: structuredClone(state.panes.map((pane) => pane.turns)),
       }),
       dispose: async () => {},
     };
@@ -45,16 +43,16 @@ test('a stopped pair evaluation keeps completed turns and its partial report', a
   });
 
   expect(report.report.stopped).toBe(true);
-  expect(report.report.modes.general[0]).toContainEqual({
+  expect(report.report.turns[0]).toContainEqual({
     response: 'completed on A',
     status: 'complete',
   });
-  expect(report.report.modes.general[0]).toContainEqual({
+  expect(report.report.turns[0]).toContainEqual({
     prompt: 'Remember that our project codename is Amber Finch. Acknowledge briefly.',
     response: 'partial on A',
     status: 'stopped',
   });
-  expect(report.report.modes.general[1]).toContainEqual({
+  expect(report.report.turns[1]).toContainEqual({
     response: 'completed on B',
     status: 'complete',
   });
@@ -69,7 +67,6 @@ test('pair recovery retries only the stopped pane', async ({ page }) => {
     const modelIds = ['Qwen3.5-0.8B-q4f16_1-MLC', 'LFM2.5-230M-q4-ONNX'];
     const state = {
       models: [...modelIds],
-      mode: 'general',
       busy: false,
       panes: [
         { turns: [], status: 'Ready' },
@@ -113,11 +110,10 @@ test('pair recovery retries only the stopped pane', async ({ page }) => {
         turn.response = 'The retried story is complete.';
       },
       export: () => ({
-        schemaVersion: 1,
+        schemaVersion: 2,
         kind: 'paired-chat',
         models: modelIds.map((id) => ({ id })),
-        mode: state.mode,
-        modes: { general: structuredClone(state.panes.map((pane) => pane.turns)) },
+        turns: structuredClone(state.panes.map((pane) => pane.turns)),
       }),
       dispose: async () => {},
     };
@@ -138,7 +134,7 @@ test('pair recovery retries only the stopped pane', async ({ page }) => {
     { id: 'independent-stop', pass: true },
     { id: 'pair-retry-stopped-side', pass: true },
   ]);
-  expect(result.report.modes.general[0].at(-1)).toMatchObject({
+  expect(result.report.turns[0].at(-1)).toMatchObject({
     status: 'complete',
     response: 'The retried story is complete.',
   });

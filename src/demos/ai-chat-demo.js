@@ -141,23 +141,30 @@ style.textContent = `
     color: var(--text-primary);
   }
   .demo-header {
-    padding: 3rem 1.5rem 1.5rem;
-    text-align: center;
+    padding: 0.75rem 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 0.75rem;
+    text-align: left;
   }
   .demo-header h1 {
-    font-size: 2rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
     color: var(--color-primary);
   }
   .demo-header p {
     color: var(--text-muted);
-    max-width: 36rem;
-    margin: 0 auto 1.5rem;
+    max-width: 65rem;
+    margin: 0;
+    grid-column: 1;
+    font-size: 0.78rem;
+    line-height: 1.4;
   }
+  .demo-header > :last-child { grid-column: 2; grid-row: 1 / 3; align-self: start; }
   .demo-chat-wrap {
-    padding: 0 1.5rem 2rem;
-    max-width: min(70rem, 100%);
+    padding: 0 0.75rem 1rem;
+    max-width: min(90rem, 100%);
     margin: 0 auto;
     width: 100%;
   }

@@ -1,5 +1,6 @@
 /** Real production UI inference, including worker loading under CSP. */
 import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
 import { chromium, webkit } from '@playwright/test';
 const reports = [];
 const model = process.env.PRODUCTION_CHAT_MODEL || 'Qwen3-0.6B-q4f16_1-MLC';
@@ -70,14 +71,7 @@ for (const [name, type] of Object.entries({ chromium, webkit })) {
     await page.getByRole('button', { name: 'Send', exact: true }).waitFor({ timeout: 120000 });
     const offlineReply = await page.locator('[data-role="assistant"]').last().innerText();
     await page.context().setOffline(false);
-    await page.getByLabel('Conversation').selectOption('docs');
-    await input.fill('What screen edges does VdDock placement support? Cite sources.');
-    await input.press('Enter');
-    await page.getByRole('button', { name: 'Send', exact: true }).waitFor({ timeout: 120000 });
-    const docsReply = await page.locator('[data-role="assistant"]').last().innerText();
-    const citations = await page
-      .locator('.vwl-ai-citations a')
-      .evaluateAll((els) => els.map((a) => a.href));
+    assert.equal(await page.getByLabel('Conversation', { exact: true }).count(), 0);
     await page.screenshot({
       path: `qa/local-refresh/screenshots/${name}-production-chat-${label}.png`,
       fullPage: true,
@@ -89,8 +83,6 @@ for (const [name, type] of Object.entries({ chromium, webkit })) {
       reply,
       offlineReply,
       model,
-      docsReply,
-      citations,
       violations: await page.evaluate(() => window.cspQA),
       errors,
     });

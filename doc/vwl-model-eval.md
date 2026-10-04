@@ -16,10 +16,12 @@ Reports are saved to `qa/local-refresh/model-eval/report.json` and `index.html`.
 
 ## Coverage and interpretation
 
-The suite retains branding, honesty, and strict instruction checks, adding arithmetic, benign wording, multi-turn recall, cancellation/recovery, context pressure, retrieved citations, native tools where supported, warm reload, and a live Tiny-to-E2B model switch. Deterministic package tests exercise adversarial tool schemas, malformed protocols, output bounds, and simulated GPU loss separately.
+The suite retains branding, honesty, and strict instruction checks, adding arithmetic, benign wording, multi-turn recall, cancellation/recovery, context pressure, native tools where supported, warm reload, and a live Tiny-to-E2B model switch. Deterministic package tests exercise adversarial tool schemas, malformed protocols, output bounds, and simulated GPU loss separately.
 
 Strict answer checks deliberately count extra punctuation or different words as failures. Lifecycle checks assess actual cancellation, state preservation, and recovery rather than exact wording. All failed cases remain in the report. A single run is a smoke evaluation, not a statistically stable model-quality estimate.
 
 Real production inference is checked separately with `node utils/production-chat-qa.mjs` against port 4173; `PRODUCTION_CHAT_MODEL` selects a model and `PRODUCTION_CHAT_BROWSER` can isolate a browser. That runner uses installed Chrome and Playwright WebKit without WebGPU override flags. Production embedding/CSP checks use `node utils/production-refresh-qa.mjs`.
 
 Phone layout emulation, synthetic IME events, and simulated GPU loss do not replace physical mobile inference, operating-system keyboards, or actual device loss. The review report names unavailable checks.
+
+Paired reports use schema version 2 with a single `turns` array (one list per pane). Chat evaluations cover General only.

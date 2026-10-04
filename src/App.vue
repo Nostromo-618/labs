@@ -268,9 +268,14 @@ function applyLabsRoute(nextRoute, nextDemoSlug, nextWidgetSlug) {
         (nameMap[nextDemoSlug] || nextDemoSlug) + ' demo and documentation opened.';
       loadDocumentationForSlug(nextDemoSlug);
       nextTick(() => {
-        document.getElementById('labs-demos-detail')?.scrollIntoView({
+        const target =
+          nextDemoSlug === 'aichat'
+            ? document.querySelector('#labs-demos-detail .vwl-chat-workbench') ||
+              document.getElementById('labs-demos-detail')
+            : document.getElementById('labs-demos-detail');
+        target?.scrollIntoView({
           behavior: 'smooth',
-          block: 'nearest',
+          block: nextDemoSlug === 'aichat' ? 'start' : 'nearest',
         });
       });
     } else {
@@ -578,6 +583,7 @@ watch(demoSlug, (slug) => {
             <VdCard
               id="labs-demos-detail"
               class="labs-demos-detail vwl-card-glow vd-glass"
+              :class="{ 'vwl-chat-detail': demoSlug === 'aichat' }"
               role="region"
               aria-labelledby="labs-demos-detail-title"
               :hidden="!demoSlug"

@@ -1,11 +1,9 @@
 import { AiChat, getModelOption } from '@vanduo-oss/vwl-ai-chat';
-import { chatRuntimeOptions, getChatDeviceCapabilities } from './chat-runtime.js';
 import {
-  createDocsSearch,
-  retrieveDocs,
-  citedSources,
-  INSUFFICIENT_EVIDENCE,
-} from './docs-search.js';
+  chatRuntimeOptions,
+  getChatDeviceCapabilities,
+  getChatRuntimeVersion,
+} from './chat-runtime.js';
 const emptyPane = () => ({
   status: 'Not loaded',
   loaded: false,
@@ -21,25 +19,21 @@ export class CompareSession {
   constructor({
     modelA = 'gemma-4-E2B-it-web',
     createChat,
-    retrieve,
     getDeviceSignals,
     onChange = () => {},
   } = {}) {
     this.createChat = createChat || ((id) => new AiChat({ modelId: id, ...chatRuntimeOptions }));
-    this.retrieve = retrieve;
     this.getDeviceSignals = getDeviceSignals || getChatDeviceCapabilities;
     this.onChange = onChange;
     this.chats = [null, null];
     this.controllers = [null, null];
-    this.histories = { general: [[], []], docs: [[], []] };
-    this.transcripts = { general: [[], []], docs: [[], []] };
+    this.histories = [[], []];
     this.archives = [];
     this.epoch = 0;
     this.closed = false;
     this.pending = Promise.resolve();
     this.state = {
       models: [modelA, ''],
-      mode: 'general',
       execution: 'together',
       busy: false,
       loading: false,
@@ -80,7 +74,7 @@ export class CompareSession {
     });
     try {
       await chat.load();
-      await chat.setHistory(this.histories[this.state.mode][i]);
+      await chat.setHistory(this.histories[i]);
       this.state.panes[i].loaded = true;
       this.state.panes[i].status = 'Ready';
       return chat;
@@ -142,12 +136,6 @@ export class CompareSession {
     const last = this.state.panes[i].turns.at(-1);
     if (last && last.status === 'queued') last.status = 'stopped';
   }
-  async sources(prompt) {
-    if (this.state.mode !== 'docs') return [];
-    if (this.retrieve) return this.retrieve(prompt);
-    if (!this.docsSearch) this.docsSearch = await createDocsSearch();
-    return retrieveDocs(this.docsSearch, prompt);
-  }
   async runSide(i, turn, epoch) {
     const pane = this.state.panes[i];
     if (epoch !== this.epoch || turn.status === 'stopped') {
@@ -170,38 +158,26 @@ export class CompareSession {
       await chat.setHistory(turn.history);
       const generateStart = performance.now();
       turn.loadMs = generateStart - start;
-      if (turn.mode === 'docs' && !turn.sources.length) {
-        turn.response = INSUFFICIENT_EVIDENCE;
-        turn.evidenceMissing = true;
-        await chat.setHistory([
-          ...turn.history,
-          { role: 'user', content: turn.prompt },
-          { role: 'assistant', content: turn.response },
-        ]);
-      } else {
-        turn.response = await chat.generate(turn.prompt, {
-          signal: controller.signal,
-          sources: turn.sources,
-          contextTokenBudget: turn.contextTokens,
-          maxOutputTokens: turn.outputTokens,
-          onUpdate: (text) => {
-            if (epoch !== this.epoch || controller.signal.aborted) return;
-            turn.firstAnswerMs ??= performance.now() - generateStart;
-            turn.response = text;
-            this.emit();
-          },
-          onContext: (context) => {
-            turn.context = context;
-          },
-          onFinish: (usage) => {
-            turn.usage = usage;
-          },
-        });
-      }
+      turn.response = await chat.generate(turn.prompt, {
+        signal: controller.signal,
+        contextTokenBudget: turn.contextTokens,
+        maxOutputTokens: turn.outputTokens,
+        onUpdate: (text) => {
+          if (epoch !== this.epoch || controller.signal.aborted) return;
+          turn.firstAnswerMs ??= performance.now() - generateStart;
+          turn.response = text;
+          this.emit();
+        },
+        onContext: (context) => {
+          turn.context = context;
+        },
+        onFinish: (usage) => {
+          turn.usage = usage;
+        },
+      });
       if (epoch !== this.epoch || controller.signal.aborted) throw stopped();
-      this.histories[turn.mode][i] = chat.getHistory();
+      this.histories[i] = chat.getHistory();
       turn.status = 'complete';
-      turn.citations = citedSources(turn.response, turn.sources);
       turn.generationMs = performance.now() - generateStart;
     } catch (error) {
       turn.status = controller.signal.aborted || error.name === 'AbortError' ? 'stopped' : 'failed';
@@ -225,20 +201,16 @@ export class CompareSession {
     const epoch = ++this.epoch;
     this.emit();
     this.pending = (async () => {
-      const sources = await this.sources(prompt);
       if (epoch !== this.epoch) throw stopped();
       const turns = [0, 1].map((i) => ({
         prompt,
-        sources: clone(sources),
-        history: clone(this.histories[this.state.mode][i]),
-        mode: this.state.mode,
+        history: clone(this.histories[i]),
         modelId: this.state.models[i],
         outputTokens: this.state.outputTokens,
         contextTokens: this.state.contextTokens,
         execution: this.state.execution,
         response: '',
         status: 'queued',
-        citations: [],
       }));
       turns.forEach((turn, i) => {
         this.state.panes[i].turns.push(turn);
@@ -284,23 +256,10 @@ export class CompareSession {
       /* displayed */
     }
   }
-  async setMode(mode) {
-    if (mode === this.state.mode) return;
-    await this.settle();
-    this.transcripts[this.state.mode] = this.state.panes.map((p) => p.turns);
-    this.state.mode = mode;
-    this.state.panes.forEach((p, i) => {
-      p.turns = this.transcripts[mode][i];
-      p.error = '';
-    });
-    for (let i = 0; i < 2; i++) await this.chats[i]?.setHistory(this.histories[mode][i]);
-    this.emit();
-  }
   async newComparison() {
     await this.settle();
     this.archives.push(this.export());
-    this.histories = { general: [[], []], docs: [[], []] };
-    this.transcripts = { general: [[], []], docs: [[], []] };
+    this.histories = [[], []];
     this.state.panes.forEach((p) => {
       p.turns = [];
       p.error = '';
@@ -326,15 +285,15 @@ export class CompareSession {
     this.emit();
   }
   export() {
-    const modes = clone(this.transcripts);
-    modes[this.state.mode] = clone(this.state.panes.map((p) => p.turns));
     return {
-      schemaVersion: 1,
+      schemaVersion: 2,
       kind: 'paired-chat',
-      models: this.state.models.map((id) => getModelOption(id)),
+      models: this.state.models.map((id) => {
+        const model = getModelOption(id);
+        return model ? { ...model, runtimeVersion: getChatRuntimeVersion(model) } : null;
+      }),
       execution: this.state.execution,
-      mode: this.state.mode,
-      modes,
+      turns: clone(this.state.panes.map((p) => p.turns)),
       exportedAt: new Date().toISOString(),
       timingNote: 'Together timings share GPU resources and are not isolated speed rankings.',
     };
@@ -343,8 +302,6 @@ export class CompareSession {
     await this.settle();
     await this.release(0);
     await this.release(1);
-    await this.docsSearch?.dispose();
-    this.docsSearch = null;
     this.state.panes.forEach((p) => {
       p.status = 'Not loaded';
     });

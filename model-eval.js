@@ -283,32 +283,17 @@ export function renderReportHtml(report) {
 
 function renderPairedReportHtml(report) {
   const models = report.models || [];
-  const panes = report.modes?.[report.mode] || [[], []];
+  const panes = report.turns || [[], []];
   const paneMarkup = [0, 1]
     .map((paneIndex) => {
       const model = models[paneIndex] || {};
       const turns = panes[paneIndex] || [];
       const turnMarkup = turns
         .map((turn, turnIndex) => {
-          const citations = (turn.citations || [])
-            .filter((source) => {
-              try {
-                const url = new URL(source.url);
-                return url.protocol === 'https:' && url.hostname === 'vd3.vanduo.dev';
-              } catch {
-                return false;
-              }
-            })
-            .map(
-              (source) =>
-                `<li><a href="${escapeHtml(source.url)}" rel="noreferrer">${escapeHtml(source.title || source.url)}</a></li>`,
-            )
-            .join('');
           return `<article class="turn">
             <p class="status">Turn ${turnIndex + 1} · ${escapeHtml(turn.status || 'unknown')}</p>
             <h3>${escapeHtml(turn.prompt || '')}</h3>
             <pre>${escapeHtml(turn.response || '')}</pre>
-            ${citations ? `<ul>${citations}</ul>` : ''}
           </article>`;
         })
         .join('\n');
@@ -345,7 +330,7 @@ function renderPairedReportHtml(report) {
 </head>
 <body>
   <h1>Paired model evaluation</h1>
-  <p class="meta">${escapeHtml(report.mode || 'general')} · ${escapeHtml(report.execution || 'together')} · ${escapeHtml(report.timingNote || '')}</p>
+  <p class="meta">${escapeHtml(report.execution || 'together')} · ${escapeHtml(report.timingNote || '')}</p>
   ${report.stopped ? '<p role="status">Stopped; partial results retained.</p>' : ''}
   <main class="panes">${paneMarkup}</main>
   <h2>Pair checks</h2>

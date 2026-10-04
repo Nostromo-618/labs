@@ -92,7 +92,7 @@ test('Compare is lazy, keeps two pane statuses on mobile, and does not load mode
   await expect(page.getByRole('button', { name: 'Load AI Model' })).toBeVisible();
   expect(modelDownloads).toEqual([]);
 });
-test('actual Vue chat stops, resets, separates Docs, escapes HTML and honors IME', async ({
+test('actual Vue chat stops, resets, preserves General history, escapes HTML and honors IME', async ({
   page,
 }, info) => {
   await page.goto('/tests/fixtures/chat-vue-harness.html');
@@ -110,18 +110,15 @@ test('actual Vue chat stops, resets, separates Docs, escapes HTML and honors IME
   await input.press('Enter');
   await expect(page.locator('.vwl-ai-messages img')).toHaveCount(0);
   expect(await page.evaluate(() => window.injected)).toBeUndefined();
-  await page.getByLabel('Conversation').selectOption('docs');
-  await expect(page.locator('.vwl-ai-messages')).not.toContainText('onerror');
-  await input.fill('VdDock placement');
+  await expect(page.getByLabel('Conversation', { exact: true })).toHaveCount(0);
+  await input.fill('follow up');
   await input.press('Enter');
-  const citations = page.getByRole('list', { name: 'Documentation sources' }).getByRole('link');
-  await expect(citations.first()).toHaveAttribute('href', /^https:\/\/vd3\.vanduo\.dev\/.+/);
+  await expect(page.locator('.vwl-ai-messages')).toContainText('Answer: follow up');
+  await expect(page.locator('.vwl-ai-messages')).toContainText('onerror');
   await page.screenshot({
-    path: path.join(shots, `${info.project.name}-chat-docs.png`),
+    path: path.join(shots, `${info.project.name}-chat-general.png`),
     fullPage: true,
   });
-  await page.getByLabel('Conversation').selectOption('general');
-  await expect(page.locator('.vwl-ai-messages')).toContainText('onerror');
   await input.fill('hold');
   await input.press('Enter');
   await page.evaluate(() => window.chatQA.unmount());
@@ -163,7 +160,7 @@ test('missing WebGPU is explained before any download', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: /Load AI Model|Runtime unsupported/ }),
   ).toBeDisabled();
-  await expect(page.locator('.vwl-ai-setup')).toContainText(/WebGPU/);
+  await expect(page.locator('.vwl-ai-chat-primary')).toContainText(/WebGPU/);
 });
 test('Hex Earth lazy route retains dock, panels, gestures and releases canvas on exit', async ({
   page,
@@ -225,24 +222,15 @@ test('Hex Earth lazy route retains dock, panels, gestures and releases canvas on
   await expect(stage).toHaveCount(0);
 });
 
-test('Stop during Docs retrieval never starts generation', async ({ page }) => {
-  let release;
-  const hold = new Promise((resolve) => {
-    release = resolve;
-  });
-  let requested = false;
-  await page.route('**/data/search-manifest.json', async (route) => {
-    requested = true;
-    await hold;
-    await route.continue();
+test('General chat never requests documentation retrieval assets', async ({ page }) => {
+  const requests = [];
+  page.on('request', (request) => {
+    if (/\/data\/search/.test(request.url())) requests.push(request.url());
   });
   await page.goto('/tests/fixtures/chat-vue-harness.html');
-  await page.getByLabel('Conversation').selectOption('docs');
-  await page.getByRole('textbox', { name: 'Message' }).fill('VdDock placement');
-  await page.getByRole('textbox', { name: 'Message' }).press('Enter');
-  await expect.poll(() => requested).toBe(true);
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  release();
-  await expect(page.locator('.vwl-ai-messages')).toContainText('Generation stopped');
-  expect(await page.evaluate(() => window.chatQA.calls.length)).toBe(0);
+  const input = page.getByRole('textbox', { name: 'Message' });
+  await input.fill('VdDock placement');
+  await input.press('Enter');
+  await expect(page.locator('.vwl-ai-messages')).toContainText('Answer: VdDock placement');
+  expect(requests).toEqual([]);
 });

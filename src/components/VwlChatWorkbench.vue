@@ -57,7 +57,7 @@ async function change(next) {
       ><component
         :is="view === 'chat' ? VwlAiChatUI : view === 'compare' ? Compare : Evaluate"
         ref="child"
-        :model-a="selected"
+        v-bind="view === 'chat' ? {} : { modelA: selected }"
     /></KeepAlive>
   </div>
 </template>
@@ -66,6 +66,10 @@ async function change(next) {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
+}
+.vwl-chat-views .vd-btn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.82rem;
 }
 </style>

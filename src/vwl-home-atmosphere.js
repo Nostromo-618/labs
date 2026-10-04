@@ -5,7 +5,7 @@
  * on CodePen: https://codepen.io/cameronknight/pen/ogxWmBP
  *
  * Reimplemented without third-party CDNs; colors bind to Labs/vd3 theme tokens
- * (`--vd-color-primary-rgb`, `--vd-neutral-*`, `--vd-bg-primary`).
+ * (`--vd-color-primary`, `--vd-neutral-*`, `--vd-bg-primary`).
  */
 
 const TOUCH_SIZE = 64;
@@ -118,17 +118,17 @@ void main() {
   uv.y += vy * uDistort * intensity;
 
   float dist = length(uv - vec2(0.5));
-  float ripple = sin(dist * 18.0 - uTime * 2.4) * 0.025 * intensity;
+  float ripple = sin(dist * 18.0 - uTime * uSpeed * 2.4) * 0.025 * intensity;
   uv += vec2(ripple);
 
   vec3 color = getGradientColor(uv, uTime);
-  float g = grain(uv, uTime) * uGrainIntensity;
+  float g = grain(uv, uTime * uSpeed) * uGrainIntensity;
   // Light bases bleach easily with additive grain — bias grain down as base brightens.
   float baseLum = dot(uBase, vec3(0.299, 0.587, 0.114));
   float grainScale = mix(1.0, 0.42, smoothstep(0.45, 0.82, baseLum));
   color += g * grainScale;
 
-  float timeShift = uTime * 0.4;
+  float timeShift = uTime * uSpeed * 0.4;
   color.r += sin(timeShift) * 0.015;
   color.g += cos(timeShift * 1.3) * 0.015;
   color.b += sin(timeShift * 1.1) * 0.015;
@@ -261,33 +261,22 @@ function createProgram(gl, vertSrc, fragSrc) {
   return program;
 }
 
-function parseRgbTriplet(value) {
-  if (!value) return null;
-  const parts = value.split(',').map((p) => Number.parseFloat(p.trim()));
-  if (parts.length < 3 || parts.some((n) => Number.isNaN(n))) return null;
-  return [parts[0] / 255, parts[1] / 255, parts[2] / 255];
-}
-
-function parseCssColor(value) {
-  if (!value) return null;
-  const v = value.trim();
-  if (v.startsWith('#')) {
-    let hex = v.slice(1);
-    if (hex.length === 3)
-      hex = hex
-        .split('')
-        .map((c) => c + c)
-        .join('');
-    if (hex.length !== 6) return null;
-    return [
-      Number.parseInt(hex.slice(0, 2), 16) / 255,
-      Number.parseInt(hex.slice(2, 4), 16) / 255,
-      Number.parseInt(hex.slice(4, 6), 16) / 255,
-    ];
+/** Resolve modern vd3 tokens (including color-mix) to WebGL's sRGB channels. */
+function readThemeColor(root, name, context) {
+  if (!context || !getComputedStyle(root).getPropertyValue(name).trim()) return null;
+  const probe = document.createElement('span');
+  probe.style.display = 'none';
+  probe.style.color = `var(${name})`;
+  root.appendChild(probe);
+  try {
+    context.clearRect(0, 0, 1, 1);
+    context.fillStyle = getComputedStyle(probe).color;
+    context.fillRect(0, 0, 1, 1);
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    return [r / 255, g / 255, b / 255];
+  } finally {
+    probe.remove();
   }
-  const m = v.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
-  if (m) return [Number(m[1]) / 255, Number(m[2]) / 255, Number(m[3]) / 255];
-  return parseRgbTriplet(v);
 }
 
 function mixRgb(a, b, t) {
@@ -301,15 +290,15 @@ function readCssNumber(styles, name, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-/** Labs site defaults — match vd3-docs “Move pointer · theme-aware primary + neutrals” panel. */
+/** Calm Labs site defaults; the atmosphere element can override these knobs. */
 const DEFAULT_KNOBS = Object.freeze({
-  speed: 0.143,
-  intensity: 0.3,
-  grain: 0.38,
-  distort: 0.68,
+  speed: 0.07,
+  intensity: 1.35,
+  grain: 0.05,
+  distort: 0.48,
   gradientSize: 0.48,
-  primaryWeight: 0.75,
-  neutralWeight: 0.22,
+  primaryWeight: 0.85,
+  neutralWeight: 1.15,
   alpha: 1,
 });
 
@@ -328,6 +317,9 @@ export function createVwlHomeAtmosphere(canvas, options = {}) {
   });
   if (!gl) return null;
 
+  const colorCanvas = document.createElement('canvas');
+  colorCanvas.width = colorCanvas.height = 1;
+  const colorContext = colorCanvas.getContext('2d', { willReadFrequently: true });
   const reducedMotion = Boolean(options.reducedMotion);
   const touch = new TouchTexture();
   let program;
@@ -414,19 +406,15 @@ export function createVwlHomeAtmosphere(canvas, options = {}) {
     knobs.alpha = readCssNumber(styles, '--vd-liquid-alpha', DEFAULT_KNOBS.alpha);
   }
 
-  function syncThemeColors(root = document.documentElement) {
+  function syncThemeColors(root) {
     const themeEl = document.documentElement;
-    const styles = getComputedStyle(themeEl);
-    const primary =
-      parseRgbTriplet(styles.getPropertyValue('--vd-color-primary-rgb')) ||
-      parseCssColor(styles.getPropertyValue('--vd-color-primary')) ||
-      colors.primary;
+    const primary = readThemeColor(themeEl, '--vd-color-primary', colorContext) || colors.primary;
     const base =
-      parseCssColor(styles.getPropertyValue('--vd-bg-primary')) ||
-      parseCssColor(styles.getPropertyValue('--bg-primary')) ||
+      readThemeColor(themeEl, '--vd-bg-primary', colorContext) ||
+      readThemeColor(themeEl, '--bg-primary', colorContext) ||
       colors.base;
-    const n8 = parseCssColor(styles.getPropertyValue('--vd-neutral-8')) || [0.15, 0.15, 0.15];
-    const n6 = parseCssColor(styles.getPropertyValue('--vd-neutral-6')) || [0.32, 0.32, 0.32];
+    const n8 = readThemeColor(themeEl, '--vd-neutral-8', colorContext) || [0.15, 0.15, 0.15];
+    const n6 = readThemeColor(themeEl, '--vd-neutral-6', colorContext) || [0.32, 0.32, 0.32];
     const isDark = (themeEl.getAttribute('data-theme') || 'dark') === 'dark';
 
     // Two poles: primary accent vs tinted neutrals (keeps depth without grey washes).
@@ -449,6 +437,7 @@ export function createVwlHomeAtmosphere(canvas, options = {}) {
     if (isDark) {
       knobs.neutralWeight *= 0.45;
     }
+    if (running && reducedMotion) draw(0);
   }
 
   function resize() {
@@ -463,6 +452,7 @@ export function createVwlHomeAtmosphere(canvas, options = {}) {
     canvas.style.width = '100%';
     canvas.style.height = '100%';
     gl.viewport(0, 0, w, h);
+    if (running && reducedMotion) draw(0);
   }
 
   function draw(delta) {

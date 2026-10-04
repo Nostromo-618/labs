@@ -1,5 +1,11 @@
 <script setup>
 import VwlModelDetails from './VwlModelDetails.vue';
+import VwlChatSpeech from './VwlChatSpeech.vue';
+import { useChatWorkspace } from '../lib/chat-workspace.js';
+import { useId } from 'vue';
+import { clearSpeechCaches } from '../lib/speech/assets.js';
+import { SpeechSession } from '../lib/speech/session.js';
+import { ConversationSession } from '../lib/speech/conversation.js';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { VdButton, VdCard, VdIcon, VdModal, VdProgress, VdSpinner } from '@vanduo-oss/vd3';
 import {
@@ -15,18 +21,14 @@ import {
   shouldFocusChatComposer,
 } from '@vanduo-oss/vwl-ai-chat';
 import { chatRuntimeOptions, clearChatCaches } from '../lib/chat-runtime.js';
-import {
-  createDocsSearch,
-  retrieveDocs,
-  citedSources,
-  INSUFFICIENT_EVIDENCE,
-} from '../lib/docs-search.js';
 import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
 
 const MODEL_CACHE_FLAG_PREFIX = 'vwl-ai-chat-model-cached:';
 
 const props = defineProps({
   chat: { type: Object, default: null },
+  speechOptions: { type: Object, default: null },
+  conversationOptions: { type: Object, default: null },
 });
 
 /**
@@ -50,8 +52,87 @@ const cacheHint = ref('');
 const inputText = ref('');
 const messages = ref([]);
 const streaming = ref(false);
+const speechControls = ref(null);
+const speechStatus = ref('idle');
+const readingMessage = ref(null);
+const speechBusy = computed(() => speechStatus.value !== 'idle');
+const inputOverLimit = computed(() => inputText.value.length > 2000);
+const speechState = ref({ status: 'idle', whisperReady: false, kokoroReady: false });
+const conversationState = ref({
+  status: 'stopped',
+  error: '',
+  progress: '',
+  reviewText: '',
+  reviewReason: '',
+  turns: 0,
+});
+const conversationOwned = computed(() => conversationState.value.status !== 'stopped');
+const conversationRunning = computed(
+  () => conversationOwned.value && conversationState.value.status !== 'paused',
+);
+const voiceReview = ref('');
+let conversation = null,
+  restoringConversation = false,
+  conversationInstructionsActive = false;
+const speech = new SpeechSession({
+  ...(props.speechOptions || {}),
+  onChange: (value) => {
+    speechState.value = value;
+    speechStatus.value = value.status;
+  },
+  onTranscript: appendTranscript,
+});
+function appendTranscript(text) {
+  inputText.value += (inputText.value && !/\s$/.test(inputText.value) ? ' ' : '') + text;
+  void focusComposer({ force: true });
+}
+async function readMessage(msg, idx) {
+  if (conversationOwned.value || streaming.value || speechBusy.value || !msg.speechReady) return;
+  readingMessage.value = idx;
+  try {
+    await speechControls.value?.speak(msg.content);
+  } finally {
+    if (readingMessage.value === idx) readingMessage.value = null;
+  }
+}
 const tokenCount = ref(null);
 const clearModalOpen = ref(false);
+const {
+  root: workspaceRoot,
+  panel: settingsPanel,
+  settingsButton,
+  wide: workspaceWide,
+  open: settingsOpen,
+  modal: settingsModal,
+  height: workspaceHeight,
+} = useChatWorkspace(clearModalOpen);
+const settingsId = `vwl-chat-settings-${useId()}`;
+const voiceSettingsTarget = ref(null);
+const conversationLabel = computed(
+  () =>
+    ({
+      loading: 'Loading Conversation Mode…',
+      listening: 'Listening… Pause for about 1.2 seconds to send.',
+      transcribing: 'Microphone off · transcribing…',
+      thinking: 'Microphone off · thinking…',
+      'preparing-audio': 'Microphone off · preparing neural audio…',
+      speaking: 'Microphone off · speaking…',
+      paused: 'Conversation paused. Resume starts a new listening turn.',
+    })[conversationState.value.status] || '',
+);
+const manualSpeechLabel = computed(
+  () =>
+    ({
+      recording: `Microphone recording · ${speechState.value.recordingSeconds || 0} / 60 s`,
+      transcribing: 'Transcribing on this device…',
+      preparing: 'Waiting for microphone…',
+      loading: 'Loading speech model…',
+      speaking:
+        speechState.value.playbackPhase === 'preparing'
+          ? 'Preparing neural audio on this device…'
+          : 'Reading aloud…',
+    })[speechState.value.status] || '',
+);
 const storageUsage = ref('—');
 const storageQuota = ref('—');
 const storagePct = ref(0);
@@ -62,19 +143,11 @@ const stickToBottom = ref(true);
 const capacityNote = ref('');
 const freezeHint = ref('');
 const advanced = ref(false);
-const mode = ref('general');
 const contextNotice = ref('');
-const docsSemanticLoading = ref(false);
-const docsStatus = ref(
-  'Docs mode uses the local vd3 index. Optional semantic search downloads about 23 MB.',
-);
-const sessions = { general: { messages: [], history: [] }, docs: { messages: [], history: [] } };
-let docsSearch = null;
+let savedHistory = [];
 let alive = true;
 let uiOperation = 0;
 let generationAbort = null;
-let modeChanging = ref(false);
-let docsSearchPending = null;
 const curatedIds = new Set(['gemma-4-E2B-it-web', 'gemma-4-E4B-it-web', 'Qwen3-0.6B-q4f16_1-MLC']);
 
 let unsubProgress = null;
@@ -363,19 +436,21 @@ function formatBytes(n) {
   return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-async function loadModel() {
+async function loadModel({ signal, strict = false } = {}) {
   if (!chat || loading.value) return;
   const catalogId = selectedModelId.value;
   const resolved = resolveModelForSystem(catalogId);
   if (resolved.unavailable || resolved.loadBlocked) {
     errorBanner.value = resolved.reason;
     progressText.value = '';
+    if (strict) throw new Error(resolved.reason);
     return;
   }
 
   errorBanner.value = '';
   applySelection(catalogId);
   await chat.setModelId(resolved.modelId, { resetMessages: true });
+  if (signal?.aborted) throw new DOMException('Model loading stopped.', 'AbortError');
   // Keep the catalog option selected (fallback IDs are not in the <select>).
   selectedModelId.value = catalogId;
   loading.value = true;
@@ -387,9 +462,12 @@ async function loadModel() {
       : 'Initializing WebGPU engine…';
   statusTone.value = 'warn';
   statusText.value = 'Loading…';
+  const stopLoad = () => chat?.cancel?.();
+  signal?.addEventListener('abort', stopLoad, { once: true });
   try {
     await chat.load();
-    await chat.setHistory(sessions[mode.value].history);
+    if (signal?.aborted) throw new DOMException('Model loading stopped.', 'AbortError');
+    await chat.setHistory(savedHistory);
     if (!alive) return;
     markModelCached(catalogId);
     markModelCached(resolved.modelId);
@@ -407,14 +485,79 @@ async function loadModel() {
     progressText.value = '';
     errorBanner.value = err?.message || 'Failed to load model.';
     freezeHint.value = '';
+    if (strict) throw err;
   } finally {
+    signal?.removeEventListener('abort', stopLoad);
     loading.value = false;
   }
-  if (loaded.value) await focusComposer();
+  if (loaded.value && !conversationOwned.value) await focusComposer();
+}
+
+async function ensureConversationChat({ signal, onProgress }) {
+  onProgress('Loading Gemma E2B…');
+  const history = chat.getHistory?.() || savedHistory;
+  savedHistory = history;
+  if (!conversationInstructionsActive) {
+    chat.setSystemPromptOptions?.({
+      extraRules:
+        'For this spoken conversation, answer in 1–3 short conversational sentences. Use natural spoken English, avoid unnecessary lists and markdown, and keep the reply concise.',
+    });
+    conversationInstructionsActive = true;
+  }
+  if (!loaded.value || chat.modelId !== 'gemma-4-E2B-it-web') {
+    selectedModelId.value = 'gemma-4-E2B-it-web';
+    loaded.value = false;
+    await loadModel({ signal, strict: true });
+  }
+  if (signal.aborted) throw new DOMException('Conversation stopped.', 'AbortError');
+}
+function startConversation(reviewedText = null) {
+  if (!chat || restoringConversation) return;
+  conversation ||= new ConversationSession({
+    speech,
+    preflight: () => {
+      const resolved = resolveModelForSystem('gemma-4-E2B-it-web');
+      if (resolved.unavailable || resolved.loadBlocked || resolved.changed)
+        throw new Error(resolved.reason || 'Gemma E2B is unavailable on this device.');
+    },
+    ensureChat: ensureConversationChat,
+    submitTurn: (text, options) => submitTurn(text, { ...options, voice: true }),
+    cancelChat: () => {
+      generationAbort?.abort();
+      chat?.cancel?.();
+    },
+    restoreInstructions: () => {
+      chat?.setSystemPromptOptions?.({});
+      conversationInstructionsActive = false;
+    },
+    ...(props.conversationOptions || {}),
+    onChange: (state) => {
+      conversationState.value = state;
+      voiceReview.value = state.reviewText;
+    },
+  });
+  void conversation.start({ reviewedText });
+}
+async function endConversation() {
+  if (!conversation) return;
+  restoringConversation = true;
+  try {
+    await conversation.end();
+  } finally {
+    restoringConversation = false;
+  }
+}
+function foregroundChanged() {
+  if (document.hidden && conversationOwned.value) conversation?.pause();
+}
+function pauseForPage() {
+  if (conversationOwned.value) conversation?.pause();
 }
 
 async function switchModel() {
   if (!chat || loading.value || streaming.value) return;
+  await endConversation();
+  speech.dispose();
   const resolved = resolveModelForSystem(selectedModelId.value);
   if (resolved.unavailable || resolved.loadBlocked) {
     errorBanner.value = resolved.reason;
@@ -423,8 +566,7 @@ async function switchModel() {
   }
   if (resolved.modelId === chat.modelId && loaded.value) return;
   loaded.value = false;
-  sessions.general = { messages: [], history: [] };
-  sessions.docs = { messages: [], history: [] };
+  savedHistory = [];
   messages.value = [];
   tokenCount.value = null;
   stickToBottom.value = true;
@@ -432,88 +574,69 @@ async function switchModel() {
   await loadModel();
 }
 
-async function getDocsEngine() {
-  if (!docsSearch && !docsSearchPending)
-    docsSearchPending = createDocsSearch()
-      .then(async (engine) => {
-        if (!alive) {
-          await engine.dispose();
-          throw new DOMException('Closed', 'AbortError');
-        }
-        docsSearch = engine;
-        return engine;
-      })
-      .finally(() => {
-        docsSearchPending = null;
-      });
-  if (docsSearchPending) await docsSearchPending;
-  return docsSearch;
-}
-async function enableDocsSemantic() {
-  docsSemanticLoading.value = true;
-  try {
-    await (await getDocsEngine()).initSemantic();
-    docsStatus.value = 'Semantic docs search ready.';
-  } catch (error) {
-    docsStatus.value = `Fuzzy docs search remains available. ${error.message}`;
-  } finally {
-    docsSemanticLoading.value = false;
-  }
-}
 function stopGeneration() {
+  if (conversationOwned.value) conversation?.pause();
   generationAbort?.abort();
   chat?.cancel?.();
 }
 async function resetConversation() {
+  await endConversation();
+  speech.dispose();
   generationAbort?.abort();
   const operation = ++uiOperation;
   chat?.reset();
   messages.value = [];
-  sessions[mode.value] = { messages: [], history: [] };
+  savedHistory = [];
   contextNotice.value = '';
   errorBanner.value = '';
   await chat?.setHistory?.([]);
   if (alive && operation === uiOperation) streaming.value = false;
 }
-watch(mode, async (next, previous) => {
-  modeChanging.value = true;
-  uiOperation += 1;
-  sessions[previous] = { messages: messages.value, history: chat?.getHistory?.() || [] };
-  messages.value = sessions[next].messages;
-  await chat?.setHistory?.(sessions[next].history);
-  contextNotice.value = '';
-  errorBanner.value = '';
-  modeChanging.value = false;
-});
 async function sendMessage() {
-  if (!chat || !loaded.value || streaming.value || modeChanging.value) return;
+  if (
+    !chat ||
+    conversationOwned.value ||
+    !loaded.value ||
+    streaming.value ||
+    inputOverLimit.value ||
+    (speechBusy.value && speechStatus.value !== 'speaking')
+  )
+    return;
+  speech.cancel();
   const text = inputText.value.trim();
   if (!text) return;
+  inputText.value = '';
+  await submitTurn(text);
+}
+async function submitTurn(
+  text,
+  { signal: outerSignal, maxOutputTokens = 768, voice = false } = {},
+) {
+  if (!chat || !loaded.value || streaming.value)
+    throw new Error('Chat is not ready for another turn.');
   const operation = ++uiOperation;
   const current = () => alive && operation === uiOperation;
   const controller = new AbortController();
+  const stop = () => controller.abort();
+  outerSignal?.addEventListener('abort', stop, { once: true });
+  if (outerSignal?.aborted) {
+    stop();
+    outerSignal.removeEventListener('abort', stop);
+    throw new DOMException('Stopped', 'AbortError');
+  }
   generationAbort = controller;
   errorBanner.value = '';
-  inputText.value = '';
   messages.value.push({ role: 'user', content: text });
   messages.value.push({ role: 'assistant', content: '' });
   const assistantIdx = messages.value.length - 1;
   streaming.value = true;
   stickToBottom.value = true;
   await scrollToLatest(true);
-  await focusComposer({ force: true });
+  if (!voice) await focusComposer({ force: true });
   try {
-    const sources = mode.value === 'docs' ? await retrieveDocs(await getDocsEngine(), text) : [];
-    if (!current()) return;
-    if (controller.signal.aborted) throw new DOMException('Stopped', 'AbortError');
-    if (mode.value === 'docs' && !sources.length) {
-      messages.value[assistantIdx] = { role: 'assistant', content: INSUFFICIENT_EVIDENCE };
-      return;
-    }
     const reply = await chat.generate(text, {
       signal: controller.signal,
-      sources,
-      maxOutputTokens: 768,
+      maxOutputTokens,
       onContext: ({ omittedTurns }) => {
         if (current())
           contextNotice.value = omittedTurns
@@ -521,7 +644,7 @@ async function sendMessage() {
             : '';
       },
       onUpdate: (partial) => {
-        if (!current() || mode.value === 'docs') return;
+        if (!current()) return;
         messages.value[assistantIdx] = { role: 'assistant', content: partial };
         void scrollToLatest();
       },
@@ -529,34 +652,27 @@ async function sendMessage() {
         if (current()) tokenCount.value = usage?.total_tokens ?? null;
       },
     });
-    if (!current()) return;
-    const citations = citedSources(reply, sources);
-    const answer =
-      mode.value === 'docs' && !citations.length
-        ? INSUFFICIENT_EVIDENCE
-        : reply.replace(/\[source:([^[\]]+)\]/g, (_match, id) =>
-            citations.some((c) => c.id === id)
-              ? `[${citations.findIndex((c) => c.id === id) + 1}]`
-              : '',
-          );
-    messages.value[assistantIdx] = { role: 'assistant', content: answer, citations };
-    if (mode.value === 'docs') {
-      const history = chat.getHistory();
-      if (history.length) history[history.length - 1].content = answer;
-      await chat.setHistory(history);
-    }
+    if (!current() || controller.signal.aborted) throw new DOMException('Stopped', 'AbortError');
+    const answer = reply;
+    messages.value[assistantIdx] = { role: 'assistant', content: answer, speechReady: true };
+    return answer;
   } catch (err) {
-    if (!current()) return;
+    if (!current()) {
+      if (voice) throw err;
+      return;
+    }
     const stopped = err?.name === 'AbortError';
     const msg = stopped ? 'Generation stopped.' : err?.message || 'Generation failed.';
     if (!stopped) errorBanner.value = msg;
     messages.value[assistantIdx] = { role: 'assistant', content: msg };
+    if (voice) throw err;
   } finally {
+    outerSignal?.removeEventListener('abort', stop);
     if (current()) {
       generationAbort = null;
       streaming.value = false;
       await scrollToLatest(true);
-      await focusComposer();
+      if (!voice) await focusComposer();
     }
   }
 }
@@ -573,6 +689,7 @@ async function clearModelStorage() {
   try {
     await chat?.dispose?.();
     await clearChatCaches();
+    await clearSpeechCaches();
     try {
       const keys = Object.keys(localStorage).filter((key) =>
         key.startsWith(MODEL_CACHE_FLAG_PREFIX),
@@ -634,6 +751,8 @@ onMounted(async () => {
       return;
     }
     progressPct.value = described.progressPct;
+    if (loading.value && conversationState.value.status === 'loading')
+      conversation?.update({ progress: `Gemma E2B: ${described.progressText}` });
     progressText.value = described.progressText;
     freezeHint.value = described.freezeHint;
     statusText.value = described.statusText;
@@ -642,20 +761,27 @@ onMounted(async () => {
   await refreshStoragePanel();
   refreshCapacityNote(selectedModelId.value);
   document.addEventListener('visibilitychange', refreshStoragePanel);
+  document.addEventListener('visibilitychange', foregroundChanged);
+  document.addEventListener('freeze', pauseForPage);
+  window.addEventListener('pagehide', pauseForPage);
 });
 
 onBeforeUnmount(() => {
+  conversation?.pause();
+  speech.dispose();
   generationAbort?.abort();
   alive = false;
   uiOperation += 1;
   chat?.cancel?.();
   if (!props.chat) void chat?.dispose?.();
-  void docsSearch?.dispose?.();
   if (unsubProgress) {
     unsubProgress();
     unsubProgress = null;
   }
   document.removeEventListener('visibilitychange', refreshStoragePanel);
+  document.removeEventListener('visibilitychange', foregroundChanged);
+  document.removeEventListener('freeze', pauseForPage);
+  window.removeEventListener('pagehide', pauseForPage);
 });
 
 watch(
@@ -676,280 +802,482 @@ watch(loaded, async (isLoaded, wasLoaded) => {
     await focusComposer();
   }
 });
+watch(selectedModelId, () => {
+  if (!conversationOwned.value) speech.dispose();
+});
 async function suspend() {
+  if (!workspaceWide.value) settingsOpen.value = false;
+  await endConversation();
+  speech.dispose();
   uiOperation++;
   generationAbort?.abort();
   chat?.cancel();
   if (chat) {
-    sessions[mode.value] = { messages: [...messages.value], history: chat.getHistory() };
+    savedHistory = chat.getHistory();
     await chat.dispose();
   }
   loaded.value = false;
   loading.value = false;
   streaming.value = false;
   statusText.value = 'Not loaded';
-  await docsSearch?.dispose();
-  docsSearch = null;
 }
 defineExpose({ suspend, getModelId: () => selectedModelId.value });
 </script>
 
 <template>
-  <VdCard class="vwl-ai-chat-wrap vwl-card-glow vd-glass" :aria-busy="loading ? 'true' : 'false'">
-    <div v-if="loading" class="vwl-ai-load-overlay" role="status" aria-live="polite">
-      <div class="vwl-ai-load-overlay-card">
-        <VdSpinner size="sm" />
-        <div class="vwl-ai-load-overlay-title">Loading model…</div>
-        <div class="vd-text-sm vd-text-muted">
-          {{
-            freezeHint ||
-            progressText ||
-            'Please wait — interaction is paused while WebGPU initializes.'
-          }}
-        </div>
-      </div>
-    </div>
-
-    <div class="vwl-ai-header">
-      <div class="vwl-ai-header-left">
-        <VdIcon name="robot" />
-        <h3 class="vwl-ai-title">{{ displayTitle }}</h3>
-      </div>
-      <div class="vwl-ai-header-status">
-        <span class="vwl-ai-status-dot" :data-tone="statusTone"></span>
-        <span>{{ statusText }}</span>
-      </div>
-    </div>
-
-    <div v-if="!loaded" class="vwl-ai-setup">
-      <VdIcon name="download-simple" class="vwl-ai-setup-icon" />
-      <div class="vwl-ai-setup-grid">
-        <div class="vwl-ai-setup-col">
-          <label class="vwl-form-label" for="vwl-ai-model-select"
-            >Model · download size shown before loading</label
-          >
-          <label class="vwl-ai-note"
-            ><input v-model="advanced" type="checkbox" /> More models</label
-          >
-          <select
-            id="vwl-ai-model-select"
-            class="vd-select vwl-ai-model-select"
-            :value="selectedModelId"
-            :disabled="loading"
-            @change="applySelection($event.target.value)"
-          >
-            <optgroup v-for="group in groupedModels" :key="group.id" :label="group.label">
-              <option
-                v-for="model in group.models"
-                :key="model.id"
-                :value="model.id"
-                :disabled="model.resolved.unavailable"
-              >
-                {{ model.label }}
-              </option>
-            </optgroup>
-          </select>
-          <p v-if="fallbackNote && !selectedResolved.loadBlocked" class="vwl-ai-note">
-            {{ fallbackNote }}
-          </p>
-          <VwlModelDetails :model-id="selectedModelId" />
-          <p v-if="cacheHint" class="vwl-ai-note">{{ cacheHint }}</p>
-          <p v-if="capacityNote" class="vwl-ai-capacity-note" role="status">{{ capacityNote }}</p>
-        </div>
-      </div>
-      <details class="vwl-ai-diagnostics">
-        <summary>Device and storage details</summary>
-        <aside class="vwl-ai-storage-panel" aria-label="Local storage for this site">
-          <div class="vwl-ai-storage-title">Storage &amp; memory</div>
-          <div class="vd-text-sm vd-text-muted">
-            This origin: <strong>{{ storageUsage }}</strong>
+  <div ref="workspaceRoot" class="vwl-ai-workspace-host">
+    <VdCard
+      class="vwl-ai-chat-wrap vwl-card-glow vd-glass"
+      :style="{ '--vwl-chat-height': workspaceHeight }"
+      :aria-busy="loading ? 'true' : 'false'"
+    >
+      <div class="vwl-ai-chat-primary" :inert="settingsModal ? true : undefined">
+        <div class="vwl-ai-header">
+          <div class="vwl-ai-header-left">
+            <VdIcon name="robot" />
+            <h3 class="vwl-ai-title">{{ displayTitle }}</h3>
           </div>
-          <div class="vd-text-sm vd-text-muted">Quota: {{ storageQuota }}</div>
-          <div class="vwl-ai-storage-meter" aria-hidden="true">
-            <div class="vwl-ai-storage-meter-fill" :style="{ width: storagePct + '%' }"></div>
+          <div class="vwl-ai-header-status">
+            <span class="vwl-ai-status-dot" :data-tone="statusTone"></span>
+            <span>{{ statusText }}</span>
           </div>
-          <p class="vwl-ai-fineprint">
-            Includes Cache Storage / IndexedDB for this page. GPU memory is not available to the
-            page.
-          </p>
-        </aside>
-
-        <div class="vwl-ai-system-info">
-          <div class="vwl-ai-storage-title">System Info</div>
-          <div class="vd-text-sm vd-text-muted">
-            WebGPU:
-            {{
-              systemInfo
-                ? systemInfo.webgpuSupported
-                  ? 'Supported'
-                  : 'Not supported'
-                : 'Checking…'
-            }}
-          </div>
-          <div class="vd-text-sm vd-text-muted">
-            GPU: {{ systemInfo?.adapterName || systemInfo?.error || 'Detecting…' }}
-          </div>
-          <div class="vd-text-sm vd-text-muted">
-            shader-f16:
-            {{ systemInfo ? (systemInfo.shaderF16 ? 'Supported' : 'Unavailable') : 'Checking…' }}
-          </div>
-          <div
-            class="vd-text-sm vd-text-muted"
-            :title="'deviceMemory is browser-capped/approximate; GPU VRAM is not exposed to web pages.'"
-          >
-            Device: {{ deviceSummary }}
-          </div>
-        </div>
-      </details>
-
-      <p class="vd-text-muted vd-text-sm">
-        Gemma 4 is the primary family. Optional small/fast models are available when you need a
-        lighter download. Inference stays in your browser.
-      </p>
-
-      <div v-if="(loading || progressText) && !errorBanner" class="vwl-ai-progress">
-        <VdProgress :value="progressPct" />
-        <div class="vd-text-sm vd-text-muted">{{ progressText }}</div>
-        <p v-if="freezeHint" class="vwl-ai-freeze-hint">{{ freezeHint }}</p>
-      </div>
-
-      <p v-if="fallbackNote && selectedResolved.loadBlocked" class="vwl-ai-error" role="status">
-        {{ fallbackNote }}
-      </p>
-      <p v-else-if="errorBanner" class="vwl-ai-error" role="alert">{{ errorBanner }}</p>
-
-      <div class="vwl-ai-setup-actions">
-        <VdButton variant="primary" :loading="loading" :disabled="loadDisabled" @click="loadModel">
-          <VdIcon name="download-simple" />
-          {{ selectedResolved.loadBlocked ? 'Runtime unsupported' : 'Load AI Model' }}
-        </VdButton>
-        <VdButton variant="secondary" :disabled="loading" @click="clearModalOpen = true">
-          <VdIcon name="trash" />
-          Clear storage
-        </VdButton>
-      </div>
-    </div>
-
-    <div v-else class="vwl-ai-chat-interface">
-      <div class="vwl-ai-toolbar">
-        <label
-          >Conversation
-          <select v-model="mode" class="vd-select" :disabled="streaming || modeChanging">
-            <option value="general">General chat</option>
-            <option value="docs">Docs · cited vd3 answers</option>
-          </select></label
-        >
-        <VdButton variant="ghost" :disabled="loading" @click="resetConversation"
-          >New conversation</VdButton
-        >
-      </div>
-      <div v-if="mode === 'docs'" class="vwl-ai-docs-note">
-        <p role="status">{{ docsStatus }}</p>
-        <VdButton
-          size="sm"
-          variant="secondary"
-          :disabled="docsSemanticLoading || streaming"
-          @click="enableDocsSemantic"
-          >Enable semantic docs search · ~23 MB</VdButton
-        >
-      </div>
-      <p v-if="contextNotice" class="vwl-ai-docs-note" role="status">{{ contextNotice }}</p>
-      <div class="vwl-ai-toolbar">
-        <select
-          class="vd-select vwl-ai-model-select"
-          aria-label="Model"
-          :value="selectedModelId"
-          :disabled="loading || streaming"
-          @change="applySelection($event.target.value)"
-        >
-          <optgroup v-for="group in groupedModels" :key="'live-' + group.id" :label="group.label">
-            <option
-              v-for="model in group.models"
-              :key="'live-' + model.id"
-              :value="model.id"
-              :disabled="model.resolved.unavailable"
+          <div class="vwl-ai-header-actions">
+            <VdButton
+              v-if="loaded"
+              size="sm"
+              variant="ghost"
+              :disabled="loading"
+              @click="resetConversation"
+              >New conversation</VdButton
             >
-              {{ model.label }}
-            </option>
-          </optgroup>
-        </select>
-        <VdButton
-          size="sm"
-          variant="secondary"
-          :disabled="loading || streaming"
-          @click="switchModel"
-        >
-          Switch model
-        </VdButton>
-        <VdButton
-          size="sm"
-          variant="ghost"
-          :disabled="loading || streaming"
-          @click="clearModalOpen = true"
-        >
-          Clear storage
-        </VdButton>
-      </div>
+            <VdButton
+              v-if="!conversationOwned"
+              variant="primary"
+              :disabled="!systemInfo || loading || streaming || speechBusy"
+              @click="startConversation()"
+              >Conversation Mode</VdButton
+            >
+            <template v-else>
+              <VdButton
+                v-if="conversationRunning"
+                variant="secondary"
+                @click="conversation?.pause()"
+                >Pause conversation</VdButton
+              >
+              <VdButton
+                v-else
+                variant="primary"
+                :disabled="conversationState.ending"
+                @click="startConversation()"
+                >Resume conversation</VdButton
+              >
+              <VdButton
+                variant="ghost"
+                :disabled="conversationState.ending"
+                @click="endConversation"
+                >End conversation</VdButton
+              >
+            </template>
+            <VdButton
+              ref="settingsButton"
+              size="sm"
+              variant="ghost"
+              :aria-expanded="settingsOpen"
+              :aria-controls="settingsId"
+              @click="settingsOpen = !settingsOpen"
+              ><VdIcon name="sliders-horizontal" aria-hidden="true" />Settings</VdButton
+            >
+          </div>
+        </div>
 
+        <div class="vwl-ai-chat-interface">
+          <div
+            v-if="conversationOwned || manualSpeechLabel || loading || streaming"
+            class="vwl-ai-live-status"
+            role="status"
+            aria-live="polite"
+          >
+            <VdSpinner
+              v-if="
+                conversationRunning ||
+                loading ||
+                streaming ||
+                (manualSpeechLabel && speechStatus !== 'recording')
+              "
+              size="sm"
+              aria-hidden="true"
+            />
+            <span>{{
+              conversationOwned
+                ? conversationLabel
+                : manualSpeechLabel || (loading ? 'Loading model…' : 'Thinking…')
+            }}</span>
+          </div>
+          <p v-if="contextNotice" class="vwl-ai-context-note" role="status">{{ contextNotice }}</p>
+          <div
+            ref="messagesEl"
+            class="vwl-ai-messages"
+            aria-live="polite"
+            @scroll.passive="onMessagesScroll"
+          >
+            <div
+              v-for="(msg, idx) in messages"
+              :key="idx"
+              class="vwl-ai-message"
+              :data-role="msg.role"
+            >
+              <div class="vwl-ai-message-role">{{ msg.role === 'user' ? 'You' : 'Assistant' }}</div>
+              <div class="vwl-ai-message-body" v-html="renderMarkdown(msg.content)"></div>
+              <p
+                v-if="
+                  msg.role === 'assistant' &&
+                  ((idx === messages.length - 1 &&
+                    ['preparing-audio', 'speaking'].includes(conversationState.status)) ||
+                    (readingMessage === idx && speechStatus === 'speaking'))
+                "
+                class="vwl-ai-voice-progress"
+                role="status"
+                aria-live="polite"
+              >
+                <VdSpinner size="sm" aria-hidden="true" />
+                {{
+                  speechState.playbackPhase === 'preparing' ||
+                  conversationState.status === 'preparing-audio'
+                    ? 'Preparing voice… Kokoro is generating audio on this device.'
+                    : 'Playing voice…'
+                }}
+              </p>
+              <template v-if="msg.role === 'assistant' && msg.speechReady">
+                <VdButton
+                  v-if="readingMessage === idx && speechStatus === 'speaking'"
+                  size="sm"
+                  variant="ghost"
+                  @click="speechControls?.cancel()"
+                  >Stop reading</VdButton
+                >
+                <VdButton
+                  v-else
+                  size="sm"
+                  variant="ghost"
+                  :disabled="streaming || speechBusy || conversationOwned"
+                  @click="readMessage(msg, idx)"
+                  >Read aloud</VdButton
+                >
+              </template>
+            </div>
+            <div v-if="!messages.length" class="vwl-ai-empty">
+              <VdIcon name="chat-circle-dots" aria-hidden="true" />
+              <h4>
+                {{
+                  loaded
+                    ? 'What would you like to talk about?'
+                    : 'Your private conversation starts here'
+                }}
+              </h4>
+              <p>
+                {{
+                  loaded
+                    ? 'Ask anything. Answers stay on this device.'
+                    : settingsOpen
+                      ? 'Load a model in the Settings panel, or choose Conversation Mode above.'
+                      : 'Open Settings to load a model, or choose Conversation Mode above.'
+                }}
+              </p>
+              <VdButton
+                v-if="!loaded && !settingsOpen"
+                size="sm"
+                variant="secondary"
+                @click="settingsOpen = true"
+                >Open Settings</VdButton
+              >
+            </div>
+          </div>
+
+          <div v-if="conversationState.reviewReason" class="vwl-conversation-review">
+            <p role="alert">{{ conversationState.reviewReason }}</p>
+            <label
+              >Review voice message<textarea
+                v-model="voiceReview"
+                class="vwl-ai-input"
+                rows="3"
+                :readonly="conversationRunning"
+              ></textarea>
+            </label>
+            <p>{{ voiceReview.length }} / 2000 · Your typed draft is separate.</p>
+            <VdButton
+              :disabled="
+                conversationRunning ||
+                conversationState.ending ||
+                !voiceReview.trim() ||
+                voiceReview.length > 2000
+              "
+              @click="startConversation(voiceReview)"
+              >Send reviewed voice message</VdButton
+            >
+          </div>
+          <form class="vwl-ai-form" @submit.prevent="sendMessage">
+            <textarea
+              ref="composerInput"
+              v-model="inputText"
+              class="vwl-ai-input"
+              aria-label="Message"
+              rows="2"
+              placeholder="Message the local model… (Enter to send, Shift+Enter for newline)"
+              :readonly="streaming || conversationOwned"
+              :disabled="!loaded"
+              @keydown="onComposerKeydown"
+            ></textarea>
+            <div class="vwl-ai-form-meta">
+              <VwlChatSpeech
+                ref="speechControls"
+                :session="speech"
+                :session-state="speechState"
+                :conversation-owned="conversationOwned"
+                :options="speechOptions"
+                :disabled="!loaded || streaming || loading || conversationOwned"
+                :settings-target="voiceSettingsTarget"
+                compact
+                @transcript="appendTranscript"
+                @state="speechStatus = $event.status"
+              />
+
+              <span class="vd-text-sm vd-text-muted">{{ inputText.length }} / 2000</span>
+              <span v-if="tokenCount != null" class="vd-text-sm vd-text-muted"
+                >Tokens: {{ tokenCount }}</span
+              >
+              <VdButton v-if="streaming" variant="secondary" @click="stopGeneration">Stop</VdButton>
+              <VdButton
+                v-else
+                type="submit"
+                variant="primary"
+                :loading="streaming"
+                :disabled="
+                  !loaded ||
+                  streaming ||
+                  conversationOwned ||
+                  !inputText.trim() ||
+                  inputOverLimit ||
+                  (speechBusy && speechStatus !== 'speaking')
+                "
+              >
+                <VdIcon v-if="!streaming" name="paper-plane-tilt" />
+                <VdSpinner v-else size="sm" />
+                Send
+              </VdButton>
+            </div>
+          </form>
+          <p v-if="inputOverLimit" class="vwl-ai-error" role="alert">
+            Your draft is preserved. Edit it to 2000 characters or fewer before sending.
+          </p>
+          <p v-if="errorBanner" class="vwl-ai-error" role="alert">{{ errorBanner }}</p>
+
+          <p v-if="conversationState.error" class="vwl-ai-error" role="alert">
+            {{ conversationState.error }}
+          </p>
+          <p v-if="speechState.error" class="vwl-ai-error" role="alert">{{ speechState.error }}</p>
+          <p
+            v-if="
+              !loaded &&
+              (selectedResolved.unavailable || selectedResolved.loadBlocked) &&
+              selectedResolved.reason
+            "
+            class="vwl-ai-error"
+            role="alert"
+          >
+            {{ selectedResolved.reason }}
+          </p>
+          <p
+            v-if="
+              conversationState.cacheAvailable === false || speechState.cacheAvailable === false
+            "
+            class="vwl-ai-note"
+            role="status"
+          >
+            Browser storage is unavailable. Future model loads may need a connection.
+          </p>
+        </div>
+      </div>
       <div
-        ref="messagesEl"
-        class="vwl-ai-messages"
-        aria-live="polite"
-        @scroll.passive="onMessagesScroll"
+        v-if="settingsModal"
+        class="vwl-ai-settings-backdrop"
+        data-testid="chat-settings-backdrop"
+        aria-hidden="true"
+        @click="settingsOpen = false"
+      ></div>
+      <aside
+        v-show="settingsOpen"
+        ref="settingsPanel"
+        :id="settingsId"
+        class="vwl-ai-settings-panel"
+        :class="{ 'vwl-ai-settings-drawer': !workspaceWide }"
+        :role="settingsModal ? 'dialog' : 'complementary'"
+        :aria-modal="settingsModal ? 'true' : undefined"
+        aria-label="Chat settings"
+        tabindex="-1"
+        :inert="!settingsOpen ? true : undefined"
       >
-        <div v-for="(msg, idx) in messages" :key="idx" class="vwl-ai-message" :data-role="msg.role">
-          <div class="vwl-ai-message-role">{{ msg.role === 'user' ? 'You' : 'Assistant' }}</div>
-          <div class="vwl-ai-message-body" v-html="renderMarkdown(msg.content)"></div>
-          <ol
-            v-if="msg.citations?.length"
-            class="vwl-ai-citations"
-            aria-label="Documentation sources"
-          >
-            <li v-for="source in msg.citations" :key="source.id">
-              <a :href="source.url" target="_blank" rel="noopener noreferrer">{{ source.title }}</a>
-            </li>
-          </ol>
-        </div>
-        <div v-if="!messages.length" class="vwl-ai-empty">
-          Ask anything. Answers stay on this device.
-        </div>
-      </div>
-
-      <form class="vwl-ai-form" @submit.prevent="sendMessage">
-        <textarea
-          ref="composerInput"
-          v-model="inputText"
-          class="vwl-ai-input"
-          aria-label="Message"
-          rows="3"
-          maxlength="2000"
-          placeholder="Message the local model… (Enter to send, Shift+Enter for newline)"
-          :readonly="streaming"
-          @keydown="onComposerKeydown"
-        ></textarea>
-        <div class="vwl-ai-form-meta">
-          <span class="vd-text-sm vd-text-muted">{{ inputText.length }} / 2000</span>
-          <span v-if="tokenCount != null" class="vd-text-sm vd-text-muted"
-            >Tokens: {{ tokenCount }}</span
-          >
-          <VdButton v-if="streaming" variant="secondary" @click="stopGeneration">Stop</VdButton>
+        <header class="vwl-ai-settings-header">
+          <h3>Settings</h3>
           <VdButton
-            v-else
-            type="submit"
-            variant="primary"
-            :loading="streaming"
-            :disabled="streaming || !inputText.trim()"
-          >
-            <VdIcon v-if="!streaming" name="paper-plane-tilt" />
-            <VdSpinner v-else size="sm" />
-            Send
-          </VdButton>
-        </div>
-      </form>
-      <p v-if="errorBanner" class="vwl-ai-error" role="alert">{{ errorBanner }}</p>
-    </div>
-  </VdCard>
+            size="sm"
+            variant="ghost"
+            aria-label="Close settings"
+            @click="settingsOpen = false"
+            ><VdIcon name="x" aria-hidden="true"
+          /></VdButton>
+        </header>
+        <div class="vwl-ai-settings-content">
+          <section aria-label="Model settings">
+            <h4>Model</h4>
+            <div class="vwl-ai-setup-grid">
+              <div class="vwl-ai-setup-col">
+                <label class="vwl-form-label" for="vwl-ai-model-select"
+                  >Model · download size shown before loading</label
+                >
+                <label class="vwl-ai-note"
+                  ><input v-model="advanced" type="checkbox" /> More models</label
+                >
+                <select
+                  id="vwl-ai-model-select"
+                  class="vd-select vwl-ai-model-select"
+                  :value="selectedModelId"
+                  :disabled="loading || streaming || conversationOwned"
+                  @change="applySelection($event.target.value)"
+                >
+                  <optgroup v-for="group in groupedModels" :key="group.id" :label="group.label">
+                    <option
+                      v-for="model in group.models"
+                      :key="model.id"
+                      :value="model.id"
+                      :disabled="model.resolved.unavailable"
+                    >
+                      {{ model.label }}
+                    </option>
+                  </optgroup>
+                </select>
+                <p v-if="fallbackNote && !selectedResolved.loadBlocked" class="vwl-ai-note">
+                  {{ fallbackNote }}
+                </p>
+                <details class="vwl-ai-diagnostics">
+                  <summary>Model details</summary>
+                  <VwlModelDetails :model-id="selectedModelId" />
+                </details>
+                <p v-if="cacheHint" class="vwl-ai-note">{{ cacheHint }}</p>
+                <p v-if="capacityNote" class="vwl-ai-capacity-note" role="status">
+                  {{ capacityNote }}
+                </p>
+              </div>
+            </div>
 
+            <p class="vd-text-muted vd-text-sm">
+              Gemma 4 is the primary family. Optional small/fast models are available when you need
+              a lighter download. Inference stays in your browser.
+            </p>
+
+            <div v-if="(loading || progressText) && !errorBanner" class="vwl-ai-progress">
+              <VdProgress :value="progressPct" />
+              <div class="vd-text-sm vd-text-muted">{{ progressText }}</div>
+              <p v-if="freezeHint" class="vwl-ai-freeze-hint">{{ freezeHint }}</p>
+            </div>
+
+            <p
+              v-if="fallbackNote && selectedResolved.loadBlocked"
+              class="vwl-ai-error"
+              role="status"
+            >
+              {{ fallbackNote }}
+            </p>
+
+            <div class="vwl-ai-setup-actions">
+              <VdButton
+                variant="primary"
+                :loading="loading"
+                :disabled="loadDisabled || streaming || conversationOwned"
+                @click="loaded ? switchModel() : loadModel()"
+              >
+                <VdIcon name="download-simple" />
+                {{
+                  selectedResolved.loadBlocked
+                    ? 'Runtime unsupported'
+                    : loaded
+                      ? 'Switch model'
+                      : 'Load AI Model'
+                }}
+              </VdButton>
+            </div>
+          </section>
+          <section aria-label="Voice settings">
+            <h4>Voice</h4>
+            <p class="vwl-ai-note">
+              Conversation Mode uses Gemma E2B + Whisper + Kokoro Heart + voice detection · about
+              2.15 GB of model downloads, plus runtime files. Loaded models are reused. English ·
+              take turns.
+            </p>
+            <p v-if="conversationOwned && conversationState.progress" class="vwl-ai-note">
+              {{ conversationState.progress }}
+            </p>
+            <div ref="voiceSettingsTarget"></div>
+          </section>
+          <section aria-label="Storage settings">
+            <h4>Storage</h4>
+            <details class="vwl-ai-diagnostics">
+              <summary>Device and storage details</summary>
+              <aside class="vwl-ai-storage-panel" aria-label="Local storage for this site">
+                <div class="vwl-ai-storage-title">Storage &amp; memory</div>
+                <div class="vd-text-sm vd-text-muted">
+                  This origin: <strong>{{ storageUsage }}</strong>
+                </div>
+                <div class="vd-text-sm vd-text-muted">Quota: {{ storageQuota }}</div>
+                <div class="vwl-ai-storage-meter" aria-hidden="true">
+                  <div class="vwl-ai-storage-meter-fill" :style="{ width: storagePct + '%' }"></div>
+                </div>
+                <p class="vwl-ai-fineprint">
+                  Includes Cache Storage / IndexedDB for this page. GPU memory is not available to
+                  the page.
+                </p>
+              </aside>
+
+              <div class="vwl-ai-system-info">
+                <div class="vwl-ai-storage-title">System Info</div>
+                <div class="vd-text-sm vd-text-muted">
+                  WebGPU:
+                  {{
+                    systemInfo
+                      ? systemInfo.webgpuSupported
+                        ? 'Supported'
+                        : 'Not supported'
+                      : 'Checking…'
+                  }}
+                </div>
+                <div class="vd-text-sm vd-text-muted">
+                  GPU: {{ systemInfo?.adapterName || systemInfo?.error || 'Detecting…' }}
+                </div>
+                <div class="vd-text-sm vd-text-muted">
+                  shader-f16:
+                  {{
+                    systemInfo ? (systemInfo.shaderF16 ? 'Supported' : 'Unavailable') : 'Checking…'
+                  }}
+                </div>
+                <div
+                  class="vd-text-sm vd-text-muted"
+                  :title="'deviceMemory is browser-capped/approximate; GPU VRAM is not exposed to web pages.'"
+                >
+                  Device: {{ deviceSummary }}
+                </div>
+              </div>
+            </details>
+            <VdButton
+              size="sm"
+              variant="ghost"
+              :disabled="loading || streaming || conversationOwned"
+              @click="clearModalOpen = true"
+              ><VdIcon name="trash" />Clear storage</VdButton
+            >
+          </section>
+        </div>
+      </aside>
+    </VdCard>
+  </div>
   <VdModal v-model:open="clearModalOpen" title="Clear model storage?" size="md">
     <p>
       This removes Cache Storage / IndexedDB / local markers this chat stored for
@@ -958,6 +1286,7 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
     <ul>
       <li>Chat model files from the curated and advanced catalog</li>
       <li>The chat-owned LiteRT cache</li>
+      <li>Dictation, neural voice, voice detector models and preset voice data</li>
       <li>Local “model cached” markers</li>
     </ul>
     <template #footer>
@@ -968,6 +1297,21 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
 </template>
 
 <style scoped>
+.vwl-conversation-panel {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.vwl-ai-voice-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+.vwl-conversation-review {
+  display: grid;
+  gap: 0.5rem;
+}
 .vwl-ai-diagnostics summary {
   cursor: pointer;
   color: var(--text-secondary);
@@ -976,12 +1320,9 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
   display: grid;
   gap: 0.75rem;
 }
-.vwl-ai-docs-note {
+.vwl-ai-context-note {
   padding: 0 1.25rem;
   font-size: 0.85rem;
-}
-.vwl-ai-citations {
-  overflow-wrap: anywhere;
 }
 .vwl-ai-chat-wrap {
   width: 100%;
@@ -1040,7 +1381,8 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
-  padding: 1rem 1.25rem;
+  padding: 0.65rem 0.85rem;
+  flex-wrap: wrap;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -1053,7 +1395,7 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
 
 .vwl-ai-title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: var(--text-primary);
 }
 
@@ -1229,8 +1571,9 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
 .vwl-ai-chat-interface {
   display: flex;
   flex-direction: column;
-  min-height: min(62vh, 44rem);
-  max-height: 70vh;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .vwl-ai-toolbar {
@@ -1246,7 +1589,8 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
 }
 
 .vwl-ai-messages {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-height: 0;
   overflow: auto;
   padding: 1rem;
   display: flex;
@@ -1262,7 +1606,7 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
 }
 
 .vwl-ai-message[data-role='user'] {
-  background: rgba(var(--vd-color-primary-rgb), 0.08);
+  background: color-mix(in srgb, var(--vd-color-primary) 8%, var(--bg-secondary));
 }
 
 .vwl-ai-message-role {
@@ -1296,7 +1640,8 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
-  min-height: 4.5rem;
+  min-height: 3rem;
+  max-height: min(10rem, 20dvh);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: var(--bg-primary);
@@ -1311,5 +1656,225 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
   align-items: center;
   gap: 0.65rem;
   justify-content: flex-end;
+}
+
+.vwl-ai-workspace-host {
+  width: 100%;
+  min-width: 0;
+}
+.vwl-ai-chat-wrap {
+  height: var(--vwl-chat-height, calc(100dvh - 12rem));
+  min-height: 320px;
+  display: flex;
+  padding: 0;
+  overflow: hidden;
+}
+.vwl-ai-chat-primary {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.vwl-ai-chat-wrap :deep(> .vd-card-body) {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+}
+.vwl-ai-header-left {
+  flex: 1 1 12rem;
+}
+.vwl-ai-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.4rem;
+}
+.vwl-ai-header-actions {
+  grid-column: 1 / -1;
+}
+.vwl-ai-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vwl-ai-header-left {
+  min-width: 0;
+}
+.vwl-ai-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+.vwl-ai-header-actions :deep(.vd-btn) {
+  font-size: 0.8rem;
+  padding: 0.45rem 0.65rem;
+  min-height: 2.25rem;
+}
+.vwl-ai-live-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+.vwl-ai-settings-panel {
+  width: 320px;
+  flex: 0 0 320px;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-color);
+}
+.vwl-ai-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.vwl-ai-settings-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.vwl-ai-settings-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 1rem;
+}
+.vwl-ai-settings-content section + section {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+.vwl-ai-settings-content h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+.vwl-ai-settings-content select {
+  width: 100%;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+.vwl-ai-settings-content :deep(p),
+.vwl-ai-settings-content :deep(label) {
+  overflow-wrap: anywhere;
+}
+.vwl-ai-settings-content .vwl-ai-setup-grid {
+  display: block;
+}
+.vwl-ai-settings-content .vwl-ai-setup-col {
+  min-width: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+.vwl-ai-settings-content .vwl-ai-setup-actions {
+  padding: 0.65rem 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+.vwl-ai-settings-content .vwl-ai-diagnostics {
+  margin: 0.4rem 0;
+}
+.vwl-ai-settings-content .vwl-ai-storage-panel {
+  margin-bottom: 0.75rem;
+}
+.vwl-ai-settings-drawer {
+  position: fixed;
+  z-index: 1040;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, calc(100vw - 2rem));
+  max-height: 100dvh;
+  box-shadow: var(--vd-shadow-lg);
+}
+.vwl-ai-settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1030;
+  background: rgb(0 0 0 / 45%);
+}
+.vwl-ai-form {
+  flex: 0 0 auto;
+  padding: 0.65rem 0.85rem;
+}
+.vwl-ai-form-meta :deep(.vwl-chat-speech) {
+  margin-right: auto;
+}
+.vwl-ai-conversation-review {
+  flex-shrink: 0;
+}
+.vwl-conversation-review {
+  padding: 0.75rem 0.85rem;
+  max-height: 35%;
+  overflow: auto;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-color);
+}
+.vwl-ai-chat-interface > .vwl-ai-error,
+.vwl-ai-chat-interface > .vwl-ai-note {
+  padding: 0.3rem 0.85rem;
+  max-height: 5rem;
+  overflow: auto;
+  flex-shrink: 0;
+}
+.vwl-ai-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  max-width: 28rem;
+  padding: 1rem;
+}
+.vwl-ai-empty h4,
+.vwl-ai-empty p {
+  margin: 0;
+}
+.vwl-ai-message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.vwl-ai-message-body :deep(pre) {
+  max-width: 100%;
+  overflow: auto;
+}
+@media (max-width: 600px) {
+  .vwl-ai-header {
+    gap: 0.45rem;
+  }
+  .vwl-ai-header-status {
+    font-size: 0.72rem;
+  }
+  .vwl-ai-header-actions {
+    width: 100%;
+  }
+  .vwl-ai-header-actions :deep(.vd-btn) {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.45rem;
+  }
+  .vwl-ai-title {
+    font-size: 0.82rem;
+  }
+  .vwl-ai-input {
+    font-size: 1rem;
+  }
+  .vwl-ai-messages {
+    padding: 0.65rem;
+  }
+  .vwl-ai-form-meta {
+    gap: 0.3rem;
+  }
+  .vwl-ai-form-meta :deep(.vd-btn) {
+    font-size: 0.75rem;
+  }
 }
 </style>

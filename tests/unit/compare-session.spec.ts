@@ -60,7 +60,7 @@ test.describe('paired local chat session', () => {
             metrics.maximum = Math.max(metrics.maximum, metrics.active);
             try {
               await new Promise((resolve) => setTimeout(resolve, 8));
-              const answer = `pane-${this.index}-turn-${this.calls}${options.sources?.length ? ` [source:${options.sources[0].id}]` : ''}`;
+              const answer = `pane-${this.index}-turn-${this.calls}`;
               options.onUpdate(answer);
               this.history.push(
                 { role: 'user', content: prompt },
@@ -84,7 +84,15 @@ test.describe('paired local chat session', () => {
         await session.send('follow-up');
         const independent =
           session.chats[0].history.at(-1).content !== session.chats[1].history.at(-1).content;
+        const exported = session.export();
+        await session.suspend();
+        await session.loadPair();
+        const preserved = session.chats.every((chat) => chat.getHistory().length === 4);
         observations.push({
+          preserved,
+          schemaVersion: exported.schemaVersion,
+          exportHasModes: 'modes' in exported || 'mode' in exported,
+          exportedTurns: exported.turns.map((turns) => turns.length),
           models,
           metrics: { maximum: metrics.maximum, loads: metrics.loads },
           independent,
@@ -101,7 +109,20 @@ test.describe('paired local chat session', () => {
       expect(run.independent).toBe(true);
       expect(run.instances).toBe(2);
       expect(run.bothLoaded).toBe(true);
-      expect(run.metrics.loads).toEqual(['start-0', 'end-0', 'start-1', 'end-1']);
+      expect(run.preserved).toBe(true);
+      expect(run.schemaVersion).toBe(2);
+      expect(run.exportHasModes).toBe(false);
+      expect(run.exportedTurns).toEqual([2, 2]);
+      expect(run.metrics.loads).toEqual([
+        'start-0',
+        'end-0',
+        'start-1',
+        'end-1',
+        'start-2',
+        'end-2',
+        'start-3',
+        'end-3',
+      ]);
       expect(run.metrics.maximum).toBe(
         run.models.every(
           (id) =>
@@ -111,124 +132,6 @@ test.describe('paired local chat session', () => {
           : 2,
       );
     }
-  });
-
-  test('shares one Docs retrieval, validates each citation, and preserves separate mode histories', async ({
-    page,
-  }) => {
-    const result = await page.evaluate(async () => {
-      const { CompareSession } = await import('/src/lib/compare-session.js');
-      const { citedSources, INSUFFICIENT_EVIDENCE } = await import('/src/lib/docs-search.js');
-      const retrieved = [];
-      class FakeChat {
-        constructor(id, index) {
-          this.id = id;
-          this.index = index;
-          this.history = [];
-          this.loaded = false;
-        }
-        isLoaded() {
-          return this.loaded;
-        }
-        onProgress() {
-          return () => {};
-        }
-        async load() {
-          this.loaded = true;
-        }
-        async dispose() {
-          this.loaded = false;
-        }
-        async setHistory(value) {
-          this.history = structuredClone(value);
-        }
-        getHistory() {
-          return structuredClone(this.history);
-        }
-        reset() {
-          this.history = [];
-        }
-        cancel() {}
-        async generate(prompt, options) {
-          const answer = `answer-${this.index}${options.sources?.length ? ` [source:${options.sources[0].id}]` : ''}`;
-          this.history.push(
-            { role: 'user', content: prompt },
-            { role: 'assistant', content: answer },
-          );
-          options.onUpdate(answer);
-          return answer;
-        }
-      }
-      const createChat = (id, index) => new FakeChat(id, index);
-      const session = new CompareSession({
-        modelA: 'Qwen3.5-0.8B-q4f16_1-MLC',
-        createChat,
-        retrieve: async (query) => {
-          retrieved.push(query);
-          return [
-            {
-              id: 'docs:VdDock',
-              title: 'VdDock',
-              text: 'VdDock supports bottom placement.',
-              url: 'https://vd3.vanduo.dev/components/dock',
-            },
-          ];
-        },
-      });
-      session.system = { webgpuSupported: true, shaderF16: true };
-      session.state.models[1] = 'LFM2.5-230M-q4-ONNX';
-      await session.loadPair();
-      await session.setMode('docs');
-      await session.send('Where can VdDock be placed?');
-      const turns = session.state.panes.map((pane) => pane.turns[0]);
-      const citationCounts = turns.map((turn) => citedSources(turn.response, turn.sources).length);
-      const sharedSourceIds =
-        turns[0].sources.map((source) => source.id).join(',') ===
-        turns[1].sources.map((source) => source.id).join(',');
-      await session.setMode('general');
-      await session.send('A general question');
-      const generalHistory = session.histories.general.map((history) => history.length);
-      const docsHistory = session.histories.docs.map((history) => history.length);
-      await session.dispose();
-
-      const empty = new CompareSession({
-        modelA: 'Qwen3.5-0.8B-q4f16_1-MLC',
-        createChat,
-        retrieve: async () => [],
-      });
-      empty.system = { webgpuSupported: true, shaderF16: true };
-      empty.state.models[1] = 'LFM2.5-230M-q4-ONNX';
-      await empty.loadPair();
-      await empty.setMode('docs');
-      await empty.send('Unanswerable docs question');
-      const unsupported = empty.state.panes.map((pane) => ({
-        answer: pane.turns[0].response,
-        history: empty.histories.docs[empty.state.panes.indexOf(pane)],
-      }));
-      await empty.dispose();
-      return {
-        retrieved,
-        citationCounts,
-        sharedSourceIds,
-        generalHistory,
-        docsHistory,
-        unsupported,
-        insufficient: INSUFFICIENT_EVIDENCE,
-      };
-    });
-
-    expect(result.retrieved).toEqual(['Where can VdDock be placed?']);
-    expect(result.sharedSourceIds).toBe(true);
-    expect(result.citationCounts).toEqual([1, 1]);
-    expect(result.generalHistory).toEqual([2, 2]);
-    expect(result.docsHistory).toEqual([2, 2]);
-    expect(
-      result.unsupported.every(
-        (item) =>
-          item.answer === result.insufficient &&
-          item.history.at(-1).content === result.insufficient,
-      ),
-    ).toBe(true);
   });
 
   test('allows one-sided stop and retry without rerunning the successful answer', async ({

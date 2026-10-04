@@ -38,19 +38,16 @@ test.describe('vwl-model-eval scorers', () => {
       const html = mod.renderReportHtml(report);
       const pairHtml = mod.renderReportHtml({
         kind: 'paired-chat',
-        mode: 'docs',
         execution: 'together',
         timingNote: 'shared GPU timings',
         models: [
           { id: 'model-a', label: 'A & B' },
           { id: 'model-b', label: 'Model B' },
         ],
-        modes: {
-          docs: [
-            [{ prompt: '<script>question</script>', response: 'Answer A', status: 'complete' }],
-            [{ prompt: 'question', response: 'Answer B', status: 'complete' }],
-          ],
-        },
+        turns: [
+          [{ prompt: '<script>question</script>', response: 'Answer A', status: 'complete' }],
+          [{ prompt: 'question', response: 'Answer B', status: 'complete' }],
+        ],
         checks: [{ id: 'pair-recovery', pass: true }],
       });
       return {

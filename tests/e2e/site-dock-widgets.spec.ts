@@ -129,3 +129,44 @@ test.describe('Labs widget hash routes', () => {
     ).toBeVisible();
   });
 });
+
+for (const theme of ['light', 'dark'])
+  test(`code editor drag selection remains visible in ${theme} theme`, async ({ page }) => {
+    await acceptDisclaimer(page);
+    await page.goto('/#widgets/code-editor');
+    const editor = page.getByTestId('labs-widget-code-editor').locator('textarea');
+    await expect(editor).toBeVisible();
+    await page.evaluate(
+      (theme) => document.documentElement.setAttribute('data-theme', theme),
+      theme,
+    );
+    await editor.scrollIntoViewIfNeeded();
+    const box = await editor.boundingBox();
+    const metrics = await editor.evaluate((el) => ({
+      left: parseFloat(getComputedStyle(el).paddingLeft),
+      top: parseFloat(getComputedStyle(el).paddingTop),
+      line: parseFloat(getComputedStyle(el).lineHeight),
+    }));
+    await page.mouse.move(box.x + metrics.left + 1, box.y + metrics.top + metrics.line / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + metrics.left + 220, box.y + metrics.top + metrics.line * 3.5, {
+      steps: 12,
+    });
+    await page.mouse.up();
+    const selection = await editor.evaluate((el) => ({
+      text: el.value.slice(el.selectionStart, el.selectionEnd),
+      background: getComputedStyle(el, '::selection').backgroundColor,
+      value: el.value,
+    }));
+    expect(selection.text).toContain('function fib');
+    expect(selection.background).not.toBe('rgba(0, 0, 0, 0)');
+    expect(selection.value).toContain('// Fibonacci with memoization');
+    if (theme === 'light' && test.info().project.name === 'Chromium Desktop') {
+      await page.screenshot({ path: 'qa/local-refresh/screenshots/editor-selection-fixed.png' });
+    }
+    await page.getByLabel('read-only', { exact: true }).check();
+    await editor.press('ControlOrMeta+A');
+    expect(await editor.evaluate((el) => el.selectionEnd - el.selectionStart)).toBe(
+      selection.value.length,
+    );
+  });

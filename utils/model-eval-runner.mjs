@@ -28,17 +28,14 @@ const models =
 
 const base = (process.env.MODEL_EVAL_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const timeoutMs = Number(process.env.MODEL_EVAL_TIMEOUT_MS || 45 * 60 * 1000);
-const scope = process.env.MODEL_EVAL_SCOPE || 'all';
 const warmRepetitions = Number(process.env.MODEL_EVAL_WARM_REPETITIONS ?? 3);
-if (!['all', 'general', 'docs'].includes(scope))
-  throw new Error('MODEL_EVAL_SCOPE must be all, general, or docs.');
 if (!Number.isInteger(warmRepetitions) || warmRepetitions < 0 || warmRepetitions > 20)
   throw new Error('MODEL_EVAL_WARM_REPETITIONS must be an integer from 0 to 20.');
 const isPair = args.includes('--pair');
 const reportName = process.env.MODEL_EVAL_REPORT_NAME || (isPair ? 'pair-report' : 'report');
 if (!/^[a-z0-9][a-z0-9._-]{0,63}$/i.test(reportName))
   throw new Error('Invalid MODEL_EVAL_REPORT_NAME.');
-const url = `${base}/demo/model-eval-harness.html?autorun=1&models=${encodeURIComponent(models)}&scope=${scope}&warm=${warmRepetitions}${args.includes('--cold') ? '&cold=1' : ''}${isPair ? '&pair=1' : ''}`;
+const url = `${base}/demo/model-eval-harness.html?autorun=1&models=${encodeURIComponent(models)}&warm=${warmRepetitions}${args.includes('--cold') ? '&cold=1' : ''}${isPair ? '&pair=1' : ''}`;
 const reportPath = path.join(OUT_DIR, `${reportName}.json`);
 const htmlPath = path.join(OUT_DIR, reportName === 'report' ? 'index.html' : `${reportName}.html`);
 

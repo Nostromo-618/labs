@@ -66,7 +66,14 @@ function observeTheme() {
   });
   themeObserver.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-theme', 'style', 'class'],
+    attributeFilter: [
+      'data-theme',
+      'data-primary',
+      'data-palette',
+      'data-neutral',
+      'style',
+      'class',
+    ],
   });
 }
 

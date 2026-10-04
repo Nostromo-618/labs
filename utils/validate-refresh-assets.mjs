@@ -14,23 +14,27 @@ const read = (p) => fs.readFile(p);
 const json = async (p) => JSON.parse(await read(p));
 const manifest = await json('data/search-manifest.json');
 const index = await json(`data/${manifest.index}`);
-const fresh = await buildCanonicalCorpus({
-  sourceRoot,
-  input: path.join(sourceRoot, 'dist/search/search-index.json'),
-  htmlDir: path.join(sourceRoot, 'dist'),
-});
-assert.deepEqual(index, fresh, 'The corpus must exactly match the current local docs build.');
+const compareCurrentDocs = !process.argv.includes('--shipped-only');
+let verifiedAnchors = 0;
+if (compareCurrentDocs) {
+  const fresh = await buildCanonicalCorpus({
+    sourceRoot,
+    input: path.join(sourceRoot, 'dist/search/search-index.json'),
+    htmlDir: path.join(sourceRoot, 'dist'),
+  });
+  assert.deepEqual(index, fresh, 'The corpus must exactly match the current local docs build.');
+}
 assert.equal(hash(await read(`data/${manifest.index}`)), manifest.indexHash);
 assert.equal(index.corpusHash, hash(JSON.stringify(index.documents)));
-let verifiedAnchors = 0;
-for (const doc of index.documents) {
-  const file = doc.route === '/' ? 'index.html' : `${doc.route.slice(1)}.html`;
-  const html = await fs.readFile(path.join(sourceRoot, 'dist', file), 'utf8');
-  for (const anchor of doc.anchors) {
-    assert(html.includes(`id="${anchor}"`) || html.includes(`id='${anchor}'`));
-    verifiedAnchors++;
+if (compareCurrentDocs)
+  for (const doc of index.documents) {
+    const file = doc.route === '/' ? 'index.html' : `${doc.route.slice(1)}.html`;
+    const html = await fs.readFile(path.join(sourceRoot, 'dist', file), 'utf8');
+    for (const anchor of doc.anchors) {
+      assert(html.includes(`id="${anchor}"`) || html.includes(`id='${anchor}'`));
+      verifiedAnchors++;
+    }
   }
-}
 for (const preset of Object.values(manifest.presets)) {
   const bytes = await read(`data/${preset.path}`);
   assert.equal(hash(bytes), preset.hash);
@@ -63,6 +67,25 @@ for (const file of runtimeFiles)
     await read(`dist/litert-wasm/${file}`),
     await read(path.join(litertRoot, 'wasm', file)),
   );
+// Direct VAD runtime, Transformers runtime and shipped WASM must be one exact version.
+const transformersPackage = require.resolve('@huggingface/transformers');
+const transformersRoot = path.resolve(path.dirname(transformersPackage), '..');
+const transformersRequire = createRequire(path.join(transformersRoot, 'package.json'));
+const ortRoot = path.resolve(path.dirname(transformersRequire.resolve('onnxruntime-web')), '..');
+const ortVersion = (await json(path.join(ortRoot, 'package.json'))).version;
+assert.equal((await json('node_modules/onnxruntime-web/package.json')).version, ortVersion);
+assert.equal(
+  (await json(path.join(transformersRoot, 'package.json'))).dependencies['onnxruntime-web'],
+  ortVersion,
+);
+for (const name of (await fs.readdir(path.join(ortRoot, 'dist'))).filter((name) =>
+  name.startsWith('ort-wasm'),
+)) {
+  assert.deepEqual(
+    await read(`dist/transformers-wasm/${name}`),
+    await read(path.join(ortRoot, 'dist', name)),
+  );
+}
 const wasmManifest = await json('public/webllm-wasm/manifest.json');
 assert.equal(wasmManifest.webllm, '0.2.85');
 assert.equal((await json('node_modules/@mlc-ai/web-llm/package.json')).version, '0.2.85');
@@ -93,6 +116,7 @@ for (const page of ['index.html', 'demo/ai-chat-demo.html', 'demo/hybrid-search-
   assert(!scripts?.includes("'unsafe-inline'"));
 }
 const report = {
+  corpusScope: compareCurrentDocs ? 'current-local-docs' : 'shipped-pinned-corpus',
   routes: index.documents.length,
   verifiedAnchors,
   generation: manifest.generation,

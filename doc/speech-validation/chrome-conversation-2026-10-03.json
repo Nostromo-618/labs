@@ -1,0 +1,609 @@
+{
+  "loadMs": 4964,
+  "loadFailures": [],
+  "reports": [
+    {
+      "state": {
+        "status": "listening",
+        "error": "",
+        "progress": "",
+        "reviewText": "",
+        "reviewReason": "",
+        "turns": 1,
+        "cacheAvailable": true,
+        "measurements": [
+          {
+            "silenceToSubmitMs": 2307.599999997765,
+            "silenceToFirstAudioMs": 7359.099999997765
+          }
+        ]
+      },
+      "phases": [
+        {
+          "status": "loading",
+          "at": 228.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 5159.199999999255,
+          "liveTracks": 1
+        },
+        {
+          "status": "transcribing",
+          "at": 12447,
+          "liveTracks": 0
+        },
+        {
+          "status": "thinking",
+          "at": 13538.599999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 14272.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 18590.099999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 21487,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 23241.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 26750.599999997765,
+          "liveTracks": 1
+        }
+      ],
+      "turns": [
+        {
+          "text": "Remember, my favorite color is blue.",
+          "answer": "I've noted that your favorite color is blue. Is there anything else I can help you with today?",
+          "heap": 723493991
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.5426157116889954,
+          "samples": 69600,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.630754292011261,
+          "samples": 74400,
+          "microphoneOff": true
+        }
+      ],
+      "captures": 2,
+      "liveTracks": 1,
+      "heap": 723349924,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+    },
+    {
+      "state": {
+        "status": "listening",
+        "error": "",
+        "progress": "",
+        "reviewText": "",
+        "reviewReason": "",
+        "turns": 2,
+        "cacheAvailable": true,
+        "measurements": [
+          {
+            "silenceToSubmitMs": 2307.599999997765,
+            "silenceToFirstAudioMs": 7359.099999997765
+          },
+          {
+            "silenceToSubmitMs": 2235.7999999970198,
+            "silenceToFirstAudioMs": 7743
+          }
+        ]
+      },
+      "phases": [
+        {
+          "status": "loading",
+          "at": 228.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 5159.199999999255,
+          "liveTracks": 1
+        },
+        {
+          "status": "transcribing",
+          "at": 12447,
+          "liveTracks": 0
+        },
+        {
+          "status": "thinking",
+          "at": 13538.599999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 14272.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 18590.099999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 21487,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 23241.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 26750.599999997765,
+          "liveTracks": 1
+        },
+        {
+          "status": "transcribing",
+          "at": 33086.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "thinking",
+          "at": 34106.099999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 34365.29999999702,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 39613.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 43717.599999997765,
+          "liveTracks": 1
+        }
+      ],
+      "turns": [
+        {
+          "text": "Remember, my favorite color is blue.",
+          "answer": "I've noted that your favorite color is blue. Is there anything else I can help you with today?",
+          "heap": 723493991
+        },
+        {
+          "text": "What is my favorite color?",
+          "answer": "Your favorite color is blue, as you mentioned earlier.",
+          "heap": 27433425
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.5426157116889954,
+          "samples": 69600,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.630754292011261,
+          "samples": 74400,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.8486960530281067,
+          "samples": 88800,
+          "microphoneOff": true
+        }
+      ],
+      "captures": 3,
+      "liveTracks": 1,
+      "heap": 27960837,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+    },
+    {
+      "state": {
+        "status": "listening",
+        "error": "",
+        "progress": "",
+        "reviewText": "",
+        "reviewReason": "",
+        "turns": 3,
+        "cacheAvailable": true,
+        "measurements": [
+          {
+            "silenceToSubmitMs": 2307.599999997765,
+            "silenceToFirstAudioMs": 7359.099999997765
+          },
+          {
+            "silenceToSubmitMs": 2235.7999999970198,
+            "silenceToFirstAudioMs": 7743
+          },
+          {
+            "silenceToSubmitMs": 2236.39999999851,
+            "silenceToFirstAudioMs": 4486.89999999851
+          }
+        ]
+      },
+      "phases": [
+        {
+          "status": "loading",
+          "at": 228.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 5159.199999999255,
+          "liveTracks": 1
+        },
+        {
+          "status": "transcribing",
+          "at": 12447,
+          "liveTracks": 0
+        },
+        {
+          "status": "thinking",
+          "at": 13538.599999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 14272.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 18590.099999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 21487,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 23241.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 26750.599999997765,
+          "liveTracks": 1
+        },
+        {
+          "status": "transcribing",
+          "at": 33086.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "thinking",
+          "at": 34106.099999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 34365.29999999702,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 39613.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 43717.599999997765,
+          "liveTracks": 1
+        },
+        {
+          "status": "transcribing",
+          "at": 51337.599999997765,
+          "liveTracks": 0
+        },
+        {
+          "status": "thinking",
+          "at": 52357.89999999851,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 52546.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 54608.39999999851,
+          "liveTracks": 0
+        },
+        {
+          "status": "preparing-audio",
+          "at": 56084.5,
+          "liveTracks": 0
+        },
+        {
+          "status": "speaking",
+          "at": 56969.199999999255,
+          "liveTracks": 0
+        },
+        {
+          "status": "listening",
+          "at": 59048.099999997765,
+          "liveTracks": 1
+        }
+      ],
+      "turns": [
+        {
+          "text": "Remember, my favorite color is blue.",
+          "answer": "I've noted that your favorite color is blue. Is there anything else I can help you with today?",
+          "heap": 723493991
+        },
+        {
+          "text": "What is my favorite color?",
+          "answer": "Your favorite color is blue, as you mentioned earlier.",
+          "heap": 27433425
+        },
+        {
+          "text": "Say goodbye in one short sentence.",
+          "answer": "Goodbye! Have a great day.",
+          "heap": 28728023
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.5426157116889954,
+          "samples": 69600,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.630754292011261,
+          "samples": 74400,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.8486960530281067,
+          "samples": 88800,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.49689939618110657,
+          "samples": 35400,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.5697869062423706,
+          "samples": 40200,
+          "microphoneOff": true
+        }
+      ],
+      "captures": 4,
+      "liveTracks": 1,
+      "heap": 29267375,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+    }
+  ],
+  "ended": {
+    "state": {
+      "status": "stopped",
+      "error": "",
+      "progress": "",
+      "reviewText": "",
+      "reviewReason": "",
+      "turns": 3,
+      "cacheAvailable": true,
+      "measurements": [
+        {
+          "silenceToSubmitMs": 2307.599999997765,
+          "silenceToFirstAudioMs": 7359.099999997765
+        },
+        {
+          "silenceToSubmitMs": 2235.7999999970198,
+          "silenceToFirstAudioMs": 7743
+        },
+        {
+          "silenceToSubmitMs": 2236.39999999851,
+          "silenceToFirstAudioMs": 4486.89999999851
+        }
+      ],
+      "ending": false
+    },
+    "phases": [
+      {
+        "status": "loading",
+        "at": 228.5,
+        "liveTracks": 0
+      },
+      {
+        "status": "listening",
+        "at": 5159.199999999255,
+        "liveTracks": 1
+      },
+      {
+        "status": "transcribing",
+        "at": 12447,
+        "liveTracks": 0
+      },
+      {
+        "status": "thinking",
+        "at": 13538.599999997765,
+        "liveTracks": 0
+      },
+      {
+        "status": "preparing-audio",
+        "at": 14272.199999999255,
+        "liveTracks": 0
+      },
+      {
+        "status": "speaking",
+        "at": 18590.099999997765,
+        "liveTracks": 0
+      },
+      {
+        "status": "preparing-audio",
+        "at": 21487,
+        "liveTracks": 0
+      },
+      {
+        "status": "speaking",
+        "at": 23241.199999999255,
+        "liveTracks": 0
+      },
+      {
+        "status": "listening",
+        "at": 26750.599999997765,
+        "liveTracks": 1
+      },
+      {
+        "status": "transcribing",
+        "at": 33086.5,
+        "liveTracks": 0
+      },
+      {
+        "status": "thinking",
+        "at": 34106.099999997765,
+        "liveTracks": 0
+      },
+      {
+        "status": "preparing-audio",
+        "at": 34365.29999999702,
+        "liveTracks": 0
+      },
+      {
+        "status": "speaking",
+        "at": 39613.5,
+        "liveTracks": 0
+      },
+      {
+        "status": "listening",
+        "at": 43717.599999997765,
+        "liveTracks": 1
+      },
+      {
+        "status": "transcribing",
+        "at": 51337.599999997765,
+        "liveTracks": 0
+      },
+      {
+        "status": "thinking",
+        "at": 52357.89999999851,
+        "liveTracks": 0
+      },
+      {
+        "status": "preparing-audio",
+        "at": 52546.199999999255,
+        "liveTracks": 0
+      },
+      {
+        "status": "speaking",
+        "at": 54608.39999999851,
+        "liveTracks": 0
+      },
+      {
+        "status": "preparing-audio",
+        "at": 56084.5,
+        "liveTracks": 0
+      },
+      {
+        "status": "speaking",
+        "at": 56969.199999999255,
+        "liveTracks": 0
+      },
+      {
+        "status": "listening",
+        "at": 59048.099999997765,
+        "liveTracks": 1
+      },
+      {
+        "status": "paused",
+        "at": 59413.79999999702,
+        "liveTracks": 0
+      },
+      {
+        "status": "loading",
+        "at": 59444.79999999702,
+        "liveTracks": 0
+      },
+      {
+        "status": "listening",
+        "at": 59464.699999999255,
+        "liveTracks": 1
+      },
+      {
+        "status": "paused",
+        "at": 59561.79999999702,
+        "liveTracks": 0
+      },
+      {
+        "status": "stopped",
+        "at": 59561.89999999851,
+        "liveTracks": 0
+      }
+    ],
+    "turns": [
+      {
+        "text": "Remember, my favorite color is blue.",
+        "answer": "I've noted that your favorite color is blue. Is there anything else I can help you with today?",
+        "heap": 723493991
+      },
+      {
+        "text": "What is my favorite color?",
+        "answer": "Your favorite color is blue, as you mentioned earlier.",
+        "heap": 27433425
+      },
+      {
+        "text": "Say goodbye in one short sentence.",
+        "answer": "Goodbye! Have a great day.",
+        "heap": 28728023
+      }
+    ],
+    "peaks": [
+      {
+        "peak": 0.5426157116889954,
+        "samples": 69600,
+        "microphoneOff": true
+      },
+      {
+        "peak": 0.630754292011261,
+        "samples": 74400,
+        "microphoneOff": true
+      },
+      {
+        "peak": 0.8486960530281067,
+        "samples": 88800,
+        "microphoneOff": true
+      },
+      {
+        "peak": 0.49689939618110657,
+        "samples": 35400,
+        "microphoneOff": true
+      },
+      {
+        "peak": 0.5697869062423706,
+        "samples": 40200,
+        "microphoneOff": true
+      }
+    ],
+    "captures": 5,
+    "liveTracks": 0,
+    "heap": 29708345,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+  },
+  "outputPeak": 0.8455386757850647,
+  "violations": [],
+  "uploadRequests": 0,
+  "memoryScope": "Main-thread heap only, excludes WASM workers and GPU allocations; measurements are observations, not full memory certification."
+}

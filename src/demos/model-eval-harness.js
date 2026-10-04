@@ -9,7 +9,6 @@ window.__VWL_MODEL_EVAL_RUN__ = async () => {
   ).split(',');
   const options = {
     modelIds,
-    scope: params.get('scope') || 'all',
     repetitions: Number(params.get('warm') ?? 3),
     cold: params.get('cold') === '1',
     signal: controller.signal,

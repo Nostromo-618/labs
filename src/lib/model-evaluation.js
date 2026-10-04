@@ -5,7 +5,12 @@ import {
   buildReportDocument,
   renderReportHtml,
 } from '../../model-eval.js';
-import { chatRuntimeOptions, clearChatCaches, getChatDeviceCapabilities } from './chat-runtime.js';
+import {
+  chatRuntimeOptions,
+  clearChatCaches,
+  getChatDeviceCapabilities,
+  getChatRuntimeVersion,
+} from './chat-runtime.js';
 import { evaluateLifecycle } from '../demos/chat-lifecycle-eval.js';
 import { CompareSession } from './compare-session.js';
 import suite from '../../utils/model-eval-suite.json';
@@ -15,7 +20,6 @@ const aborted = (signal) => {
 };
 export async function runEvaluation({
   modelIds,
-  scope = 'all',
   repetitions = 3,
   cold = false,
   signal,
@@ -41,11 +45,6 @@ export async function runEvaluation({
   };
   report.execution = 'isolated-serial';
   report.coldCacheRequested = cold;
-  try {
-    report.corpus = await (await fetch('/data/search-manifest.json')).json();
-  } catch {
-    report.corpus = null;
-  }
   const publish = (message) => onProgress({ message, report: structuredClone(report) });
   try {
     if (cold) await clearChatCaches(modelIds);
@@ -58,7 +57,7 @@ export async function runEvaluation({
         label: option.label,
         family: option.family,
         backend: option.backend,
-        runtimeVersion: option.runtimeVersion,
+        runtimeVersion: getChatRuntimeVersion(option),
         revision: option.revision,
         precision: option.precision,
         license: option.license,
@@ -132,47 +131,45 @@ export async function runEvaluation({
           });
           modelResult.loadSource ??= source;
           if (round === 0) {
-            if (scope !== 'docs')
-              for (const test of suite.cases) {
-                aborted(signal);
-                await chat.reset();
-                const start = performance.now();
-                let firstAnswerMs = null,
-                  reply = '',
-                  usage,
-                  error;
-                try {
-                  reply = await chat.generate(test.prompt, {
-                    signal,
-                    maxOutputTokens: option.reasoning === 'required' ? 2048 : 512,
-                    onUpdate: () => {
-                      firstAnswerMs ??= performance.now() - start;
-                    },
-                    onFinish: (value) => {
-                      usage = value;
-                    },
-                  });
-                } catch (e) {
-                  if (signal?.aborted) throw e;
-                  error = e.message;
-                }
-                const scored = error ? { pass: false, reasons: [error] } : scoreCase(test, reply);
-                modelResult.cases.push({
-                  id: test.id,
-                  round,
-                  category: test.category,
-                  ...scored,
-                  status: scored.pass ? 'passed' : 'failed',
-                  firstAnswerMs,
-                  latencyMs: performance.now() - start,
-                  usage,
-                  excerpt: reply || error,
+            for (const test of suite.cases) {
+              aborted(signal);
+              await chat.reset();
+              const start = performance.now();
+              let firstAnswerMs = null,
+                reply = '',
+                usage,
+                error;
+              try {
+                reply = await chat.generate(test.prompt, {
+                  signal,
+                  maxOutputTokens: option.reasoning === 'required' ? 2048 : 512,
+                  onUpdate: () => {
+                    firstAnswerMs ??= performance.now() - start;
+                  },
+                  onFinish: (value) => {
+                    usage = value;
+                  },
                 });
-                publish(`${option.label}: ${test.id} ${scored.pass ? 'PASS' : 'FAIL'}`);
+              } catch (e) {
+                if (signal?.aborted) throw e;
+                error = e.message;
               }
+              const scored = error ? { pass: false, reasons: [error] } : scoreCase(test, reply);
+              modelResult.cases.push({
+                id: test.id,
+                round,
+                category: test.category,
+                ...scored,
+                status: scored.pass ? 'passed' : 'failed',
+                firstAnswerMs,
+                latencyMs: performance.now() - start,
+                usage,
+                excerpt: reply || error,
+              });
+              publish(`${option.label}: ${test.id} ${scored.pass ? 'PASS' : 'FAIL'}`);
+            }
             const lifecycle = await evaluateLifecycle(chat, publish, {
               signal,
-              scope,
               includeWarmReload: false,
             });
             modelResult.cases.push(...lifecycle.map((c) => ({ ...c, round })));
@@ -181,9 +178,7 @@ export async function runEvaluation({
                 id: 'native-tool-response',
                 round,
                 status: 'skipped',
-                reasons: [
-                  'This integration supports General and Docs chat; tools are not enabled.',
-                ],
+                reasons: ['This integration supports General chat; tools are not enabled.'],
               });
           } else {
             const start = performance.now();
@@ -282,7 +277,7 @@ export async function runPairEvaluation({
         modelId,
         revision: option?.revision || null,
         precision: option?.precision || null,
-        runtimeVersion: option?.runtimeVersion || null,
+        runtimeVersion: getChatRuntimeVersion(option),
         downloadBytes: option?.approxBytes || null,
         estimatedWorkingBytes: option?.estimatedWorkingBytes ?? null,
         contextWindowTokens: option?.maxNumTokens ?? null,

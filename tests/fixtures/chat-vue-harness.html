@@ -24,6 +24,10 @@
       const chat = {
         modelId: 'gemma-4-E2B-it-web',
         setModelId: async () => {},
+        load: async () => {},
+        setSystemPromptOptions: (options) => {
+          window.chatQA.instructions = options;
+        },
         isLoaded: () => true,
         onProgress: () => () => {},
         getHistory: () => history.map((m) => ({ ...m })),
@@ -39,7 +43,10 @@
           pending?.(true);
         },
         async generate(text, options) {
-          window.chatQA.calls.push({ text, sources: options.sources || [] });
+          window.chatQA.calls.push({
+            text,
+            maxOutputTokens: options.maxOutputTokens,
+          });
           if (text === 'hold')
             return new Promise((resolve, reject) => {
               pending = (stop) => {
@@ -48,17 +55,112 @@
                 else resolve('Late response');
               };
             });
-          const answer = options.sources?.length
-            ? `VdDock supports bottom, top, left and right. [source:${options.sources[0].id}]`
-            : text === 'html'
-              ? '<img src=x onerror="window.injected=1">'
-              : 'Answer: ' + text;
+          const answer =
+            text === 'html' ? '<img src=x onerror="window.injected=1">' : 'Answer: ' + text;
           options.onUpdate?.(answer);
           history.push({ role: 'user', content: text }, { role: 'assistant', content: answer });
           return answer;
         },
       };
-      const app = createApp({ render: () => h(Chat, { chat }) });
+      const ready = new Set();
+      window.speechQA = {
+        transcript: 'dictated text',
+        denied: false,
+        hold: false,
+        cancels: 0,
+        loads: [],
+        spoken: [],
+        finish: null,
+      };
+      const speechOptions = {
+        runtime: {
+          isLoaded: (kind) => ready.has(kind),
+          async load(kind) {
+            window.speechQA.loads.push(kind);
+            if (window.speechQA.holdLoad)
+              await new Promise((resolve) => {
+                window.speechQA.finish = resolve;
+              });
+            ready.add(kind);
+          },
+          async resetVad() {},
+          async transcribe() {
+            if (window.speechQA.hold)
+              return new Promise((resolve) => {
+                window.speechQA.finish = () => resolve(window.speechQA.transcript);
+              });
+            return window.speechQA.transcript;
+          },
+          async synthesize(text) {
+            window.speechQA.spoken.push(text);
+            if (window.speechQA.holdNeural)
+              return new Promise((resolve) => {
+                window.speechQA.finish = () =>
+                  resolve({ chunks: [new Float32Array([0.1])], sampleRate: 24000 });
+              });
+            return { chunks: [new Float32Array([0.1])], sampleRate: 24000 };
+          },
+          cancel() {
+            window.speechQA.cancels++;
+          },
+          dispose() {
+            ready.clear();
+          },
+        },
+        async recorderFactory() {
+          if (window.speechQA.denied)
+            throw new DOMException('Microphone permission denied', 'NotAllowedError');
+          return {
+            stop: async () => new Float32Array(1600),
+            cancel: () => window.speechQA.cancels++,
+          };
+        },
+        playerFactory: () => ({
+          play: async (_pcm, _rate, options) => options?.onStart?.(),
+          cancel() {},
+        }),
+        async systemSpeaker(text, _voice, signal) {
+          window.speechQA.spoken.push(text);
+          return new Promise((resolve, reject) => {
+            signal.addEventListener(
+              'abort',
+              () => reject(new DOMException('Stopped', 'AbortError')),
+              { once: true },
+            );
+            window.speechQA.finish = resolve;
+          });
+        },
+      };
+      window.conversationQA = { captures: 0, stops: 0, utterance: null };
+      const conversationOptions = {
+        preflight() {},
+        async requestMicrophone() {
+          if (window.speechQA.denied) throw new Error('Microphone permission denied');
+          return {
+            getTracks: () => [
+              {
+                stop() {
+                  window.conversationQA.stops++;
+                },
+              },
+            ],
+          };
+        },
+        async captureFactory({ onUtterance }) {
+          window.conversationQA.captures++;
+          window.conversationQA.utterance = (limit = false) =>
+            onUtterance({ audio: new Float32Array(16000), limit });
+          return {
+            cancel() {
+              window.conversationQA.stops++;
+            },
+          };
+        },
+        delay: async () => {},
+      };
+      const app = createApp({
+        render: () => h(Chat, { chat, speechOptions, conversationOptions }),
+      });
       app.use(VanduoVue, { storagePrefix: 'vwl-' });
       app.mount('#app');
     </script>

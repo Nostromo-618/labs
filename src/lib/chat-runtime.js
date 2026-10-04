@@ -1,5 +1,15 @@
+import { dependencies } from '../../package.json';
 import { collectDeviceSignals, MODEL_OPTIONS } from '@vanduo-oss/vwl-ai-chat';
 import { loadTransformers } from './transformers-chat.js';
+/** Labs owns injected runtimes; report installed versions rather than catalog defaults. */
+export function getChatRuntimeVersion(model) {
+  const name = {
+    transformers: '@huggingface/transformers',
+    litert: '@litert-lm/core',
+    webllm: '@mlc-ai/web-llm',
+  }[model?.backend];
+  return dependencies[name] || model?.runtimeVersion || null;
+}
 /** Bundled runtime adapters. Model weights download only after a user's Load action. */
 const ownedConfigs = new Map();
 function localConfig(base) {

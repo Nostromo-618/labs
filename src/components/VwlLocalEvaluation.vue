@@ -3,8 +3,7 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import { MODEL_OPTIONS, BASELINE_MODEL_IDS, NEW_MODEL_IDS } from '@vanduo-oss/vwl-ai-chat';
 import { runEvaluation, runPairEvaluation, renderReportHtml } from '../lib/model-evaluation.js';
 const selected = ref([...BASELINE_MODEL_IDS, ...NEW_MODEL_IDS]);
-const scope = ref('all'),
-  cold = ref(true),
+const cold = ref(true),
   pair = ref(false),
   busy = ref(false),
   message = ref(''),
@@ -22,7 +21,6 @@ async function run() {
   error.value = '';
   const options = {
     modelIds: [...selected.value],
-    scope: scope.value,
     cold: cold.value,
     repetitions: 3,
     signal: controller.signal,
@@ -61,22 +59,13 @@ const escapeHtml = (value) =>
     return entities[character];
   });
 function renderPairReportHtml(value) {
-  const panes = value.modes?.[value.mode] || [[], []];
+  const panes = value.turns || [[], []];
   const models = value.models || [];
   const renderPane = (index) => {
     const title = models[index]?.label || models[index]?.id || `Pane ${index ? 'B' : 'A'}`;
     const turns = (panes[index] || [])
       .map((turn) => {
-        const citations = (turn.citations || [])
-          .map((source) => {
-            const url = String(source.url || '');
-            const safeUrl = /^https:\/\/vd3\.vanduo\.dev\//.test(url)
-              ? `<a rel="noreferrer" href="${escapeHtml(url)}">${escapeHtml(source.title || url)}</a>`
-              : escapeHtml(source.title || source.id || 'Source');
-            return `<li>${safeUrl}</li>`;
-          })
-          .join('');
-        return `<article><h3>${escapeHtml(turn.prompt)}</h3><p>Status: ${escapeHtml(turn.status)}</p><p>${escapeHtml(turn.response)}</p>${citations ? `<ul>${citations}</ul>` : ''}</article>`;
+        return `<article><h3>${escapeHtml(turn.prompt)}</h3><p>Status: ${escapeHtml(turn.status)}</p><p>${escapeHtml(turn.response)}</p></article>`;
       })
       .join('');
     return `<section><h2>Pane ${index ? 'B' : 'A'} · ${escapeHtml(title)}</h2>${turns || '<p>No turns.</p>'}</section>`;
@@ -84,7 +73,7 @@ function renderPairReportHtml(value) {
   const checks = (value.checks || [])
     .map((check) => `<li>${escapeHtml(check.id)}: ${check.pass ? 'passed' : 'failed'}</li>`)
     .join('');
-  return `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Vanduo paired model evaluation</title><style>body{font:16px/1.55 system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}section,article{border:1px solid #8885;border-radius:12px;padding:1rem}article{margin:.75rem 0}p{overflow-wrap:anywhere}</style><h1>Paired model evaluation</h1><p>${escapeHtml(value.timingNote)}</p><p>Mode: ${escapeHtml(value.mode)} · execution: ${escapeHtml(value.execution)}${value.stopped ? ' · stopped with partial results' : ''}</p><main>${renderPane(0)}${renderPane(1)}</main><h2>Checks</h2><ul>${checks}</ul></html>`;
+  return `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Vanduo paired model evaluation</title><style>body{font:16px/1.55 system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}section,article{border:1px solid #8885;border-radius:12px;padding:1rem}article{margin:.75rem 0}p{overflow-wrap:anywhere}</style><h1>Paired model evaluation</h1><p>${escapeHtml(value.timingNote)}</p><p>Execution: ${escapeHtml(value.execution)}${value.stopped ? ' · stopped with partial results' : ''}</p><main>${renderPane(0)}${renderPane(1)}</main><h2>Checks</h2><ul>${checks}</ul></html>`;
 }
 async function suspend() {
   controller?.abort();
@@ -115,13 +104,6 @@ onBeforeUnmount(() => {
     <p>{{ (bytes / 1e9).toFixed(2) }} GB total model files before cache reuse.</p>
     <div class="vwl-eval-actions">
       <label
-        >Checks
-        <select v-model="scope" :disabled="busy || pair">
-          <option value="all">All checks</option>
-          <option value="general">General</option>
-          <option value="docs">Docs</option>
-        </select></label
-      ><label
         ><input type="checkbox" v-model="cold" :disabled="busy || pair" /> Clear selected chat
         caches before running</label
       ><label
@@ -152,18 +134,13 @@ onBeforeUnmount(() => {
         <article v-for="(model, paneIndex) in report.models" :key="paneIndex">
           <h4>Pane {{ paneIndex ? 'B' : 'A' }} · {{ model.label }}</h4>
           <article
-            v-for="(turn, turnIndex) in report.modes?.[report.mode]?.[paneIndex] || []"
+            v-for="(turn, turnIndex) in report.turns?.[paneIndex] || []"
             :key="turnIndex"
             class="vwl-eval-pair-turn"
           >
             <h5>{{ turn.prompt }}</h5>
             <p>Status: {{ turn.status }}</p>
             <p>{{ turn.response }}</p>
-            <ul v-if="turn.citations?.length">
-              <li v-for="source in turn.citations" :key="source.id">
-                <a :href="source.url" target="_blank" rel="noreferrer">{{ source.title }}</a>
-              </li>
-            </ul>
           </article>
         </article>
         <h4>Pair checks</h4>

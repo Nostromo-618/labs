@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
+import { staticAssetsPlugin } from './utils/static-assets.mjs';
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -26,11 +26,11 @@ const vdlCbunRoot = path.resolve(root, '../vwl-cbun');
 const vdlCbunDist = path.join(vdlCbunRoot, 'dist');
 const useLocalVdlCbun = fs.existsSync(path.join(vdlCbunDist, 'index.js'));
 
-/** Dev-only: serve `.models/<id>/…` at `/models/<id>/…` (never copied into `dist/`).
+/** Dev/QA preview only: serve `.models/<id>/…` at `/models/<id>/…` (never copied into `dist/`).
  *  Also accepts HuggingFace-style `/resolve/main/…` suffixes that WebLLM appends.
  */
-function localModelsPlugin() {
-  return {
+function localModelsPlugin(preview = false) {
+  const plugin = {
     name: 'labs-local-models',
     configureServer(server) {
       server.middlewares.use('/models', (req, res, next) => {
@@ -73,6 +73,8 @@ function localModelsPlugin() {
       });
     },
   };
+  if (preview) plugin.configurePreviewServer = plugin.configureServer;
+  return plugin;
 }
 
 /** Dev-only: write verbose telemetry/trace logs from browser harness to project root `logs/` (gitignored). */
@@ -164,22 +166,9 @@ export default defineConfig(({ mode }) => ({
       },
     },
     vue(),
-    localModelsPlugin(),
+    localModelsPlugin(mode === 'qa'),
     devLogsPlugin(),
-    viteStaticCopy({
-      targets: [
-        { src: path.join(litertRoot, 'wasm/*'), dest: 'litert-wasm', rename: { stripBase: true } },
-        {
-          src: path.join(ortRoot, 'dist/ort-wasm*'),
-          dest: 'transformers-wasm',
-          rename: { stripBase: true },
-        },
-        { src: 'data/search-manifest.json', dest: '.' },
-        { src: 'data/search', dest: '.' },
-        { src: 'doc', dest: '.' },
-        { src: 'favicon.svg', dest: '.' },
-      ],
-    }),
+    staticAssetsPlugin({ root, litertRoot, ortRoot }),
   ],
   worker: { format: 'es' },
   resolve: {
@@ -197,7 +186,14 @@ export default defineConfig(({ mode }) => ({
         'ai-chat-demo': path.resolve(root, 'demo/ai-chat-demo.html'),
         'hybrid-search-demo': path.resolve(root, 'demo/hybrid-search-demo.html'),
         ...(mode === 'qa'
-          ? { 'model-eval-harness': path.resolve(root, 'demo/model-eval-harness.html') }
+          ? {
+              'model-eval-harness': path.resolve(root, 'demo/model-eval-harness.html'),
+              'speech-eval-harness': path.resolve(root, 'demo/speech-eval-harness.html'),
+              'conversation-eval-harness': path.resolve(
+                root,
+                'demo/conversation-eval-harness.html',
+              ),
+            }
           : {}),
       },
     },
