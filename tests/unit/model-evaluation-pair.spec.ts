@@ -5,7 +5,7 @@ test('a stopped pair evaluation keeps completed turns and its partial report', a
   const report = await page.evaluate(async () => {
     const { runPairEvaluation } = await import('/src/lib/model-evaluation.js');
     const controller = new AbortController();
-    const modelIds = ['Qwen3.5-0.8B-q4f16_1-MLC', 'LFM2.5-230M-q4-ONNX'];
+    const modelIds = ['Qwen3-0.6B-q4f16_1-MLC', 'LFM2.5-230M-q4-ONNX'];
     const state = {
       models: [...modelIds],
       panes: [
@@ -64,7 +64,7 @@ test('pair recovery retries only the stopped pane', async ({ page }) => {
   await page.goto('/');
   const result = await page.evaluate(async () => {
     const { runPairEvaluation } = await import('/src/lib/model-evaluation.js');
-    const modelIds = ['Qwen3.5-0.8B-q4f16_1-MLC', 'LFM2.5-230M-q4-ONNX'];
+    const modelIds = ['Qwen3-0.6B-q4f16_1-MLC', 'LFM2.5-230M-q4-ONNX'];
     const state = {
       models: [...modelIds],
       busy: false,
@@ -94,6 +94,7 @@ test('pair recovery retries only the stopped pane', async ({ page }) => {
         if (prompt.startsWith('Write')) {
           state.busy = true;
           onChange(state);
+          await new Promise((resolve) => setTimeout(resolve, 80));
           turns[0].response = 'An unfinished island story.';
           turns[1].status = 'complete';
           state.busy = false;

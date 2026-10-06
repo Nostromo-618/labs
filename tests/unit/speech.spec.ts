@@ -62,6 +62,8 @@ test('missing local English voices explains optional neural download without loa
     }),
   );
   await page.reload();
+  const settings = page.getByRole('button', { name: 'Settings', exact: true });
+  if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
   await page.getByText('Voice settings', { exact: true }).click();
   await expect(page.getByText(/No local English voice is installed/)).toBeVisible();
   const error = await page.evaluate(async () => {
@@ -77,6 +79,8 @@ test('missing local English voices explains optional neural download without loa
 });
 
 test('neural voice test distinguishes audio preparation from playback', async ({ page }) => {
+  const settings = page.getByRole('button', { name: 'Settings', exact: true });
+  if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
   await page.getByText('Voice settings', { exact: true }).click();
   await page.getByLabel('Read-aloud voice').selectOption('neural');
   await expect(page.getByRole('button', { name: 'Test Neural voice', exact: true })).toHaveCount(0);
@@ -549,11 +553,15 @@ test('completed replies support manual playback, stop, sending interruption and 
   await input.press('Enter');
   await expect(page.locator('[data-role="assistant"]').last()).toContainText('Answer: next');
   await expect(page.getByRole('button', { name: 'Stop reading', exact: true })).toHaveCount(0);
+  const settings = page.getByRole('button', { name: 'Settings', exact: true });
+  if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
   await page.getByText('Voice settings', { exact: true }).click();
   await page.getByLabel('Read-aloud voice').selectOption('neural');
   expect(await page.evaluate(() => window.speechQA.loads)).toEqual([]);
   await page.getByRole('button', { name: 'Load Neural voice', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Neural voice ready' })).toBeDisabled();
+  if ((await page.locator('.vwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
+    await page.getByRole('button', { name: 'Close settings', exact: true }).click();
   await page.getByRole('button', { name: 'Read aloud', exact: true }).last().click();
   await expect
     .poll(() => page.evaluate(() => window.speechQA.spoken))

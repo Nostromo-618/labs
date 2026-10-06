@@ -199,6 +199,7 @@ test('conversation status and paused review remain in chat when Settings is clos
 });
 
 test('both real demo hosts keep a lazy workspace with documentation below', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   for (const url of ['/#demos/aichat', '/demo/ai-chat-demo.html']) {
     await page.goto(url);
     if (await page.getByTestId('disclaimer-gate').isVisible())

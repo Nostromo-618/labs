@@ -1,3 +1,5 @@
+import { validateLlmInput } from '@vanduo-oss/vwl-ai-chat/guardrails/llm';
+import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat';
 import { AiChat, getModelOption } from '@vanduo-oss/vwl-ai-chat';
 import {
   chatRuntimeOptions,
@@ -33,12 +35,14 @@ export class CompareSession {
     this.closed = false;
     this.pending = Promise.resolve();
     this.state = {
-      models: [modelA, ''],
+      models: [getModelOption(modelA) ? modelA : 'gemma-4-E2B-it-web', ''],
       execution: 'together',
       busy: false,
       loading: false,
       panes: [emptyPane(), emptyPane()],
-      error: '',
+      error: getModelOption(modelA)
+        ? ''
+        : 'This model is no longer supported. Choose a retained model and load it.',
       outputTokens: 1024,
       contextTokens: 4096,
       activePane: 0,
@@ -148,7 +152,7 @@ export class CompareSession {
     turn.response = '';
     turn.error = '';
     pane.error = '';
-    pane.status = 'Generating';
+    pane.status = 'Generating and checking reply';
     this.emit();
     const start = performance.now();
     try {
@@ -193,6 +197,8 @@ export class CompareSession {
   }
   async send(prompt) {
     if (!prompt.trim() || this.state.busy || this.state.loading) return;
+    const guard = validateLlmInput(prompt);
+    if (!guard.allowed) throw toGuardrailError(guard);
     if (!this.state.models.every(Boolean)) throw new Error('Choose and load a pair first.');
     if (this.state.execution === 'together' && this.chats.some((c) => !c?.isLoaded()))
       throw new Error('Load both models before sending.');
@@ -270,6 +276,8 @@ export class CompareSession {
     this.emit();
   }
   async select(i, id) {
+    if (!getModelOption(id))
+      throw new Error('This model is no longer supported. Choose a retained model and load it.');
     if (id === this.state.models[i]) return;
     await this.newComparison();
     await this.release(0);
@@ -295,7 +303,8 @@ export class CompareSession {
       execution: this.state.execution,
       turns: clone(this.state.panes.map((p) => p.turns)),
       exportedAt: new Date().toISOString(),
-      timingNote: 'Together timings share GPU resources and are not isolated speed rankings.',
+      timingNote:
+        'firstAnswerMs measures the complete checked reply. Together timings share GPU resources and are not isolated speed rankings.',
     };
   }
   async suspend() {

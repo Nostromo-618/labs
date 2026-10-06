@@ -12,6 +12,9 @@ import {
   AiChat,
   MODEL_GROUPS,
   MODEL_OPTIONS,
+  PRIMARY_MODEL_OPTIONS,
+  getModelVariants,
+  getModelChoiceLabel,
   assessLoadCapacity,
   collectDeviceSignals,
   describeLoadProgress,
@@ -20,6 +23,8 @@ import {
   getModelOption,
   shouldFocusChatComposer,
 } from '@vanduo-oss/vwl-ai-chat';
+import { validateLlmInput } from '@vanduo-oss/vwl-ai-chat/guardrails/llm';
+import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat';
 import { chatRuntimeOptions, clearChatCaches } from '../lib/chat-runtime.js';
 import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
 
@@ -142,13 +147,15 @@ const composerInput = ref(null);
 const stickToBottom = ref(true);
 const capacityNote = ref('');
 const freezeHint = ref('');
-const advanced = ref(false);
 const contextNotice = ref('');
 let savedHistory = [];
 let alive = true;
 let uiOperation = 0;
 let generationAbort = null;
-const curatedIds = new Set(['gemma-4-E2B-it-web', 'gemma-4-E4B-it-web', 'Qwen3-0.6B-q4f16_1-MLC']);
+const selectedPrimaryId = computed(
+  () => getModelOption(selectedModelId.value)?.variantOf || selectedModelId.value,
+);
+const selectedVariants = computed(() => getModelVariants(selectedModelId.value));
 
 let unsubProgress = null;
 
@@ -170,9 +177,7 @@ const deviceSummary = computed(() => {
 const groupedModels = computed(() =>
   MODEL_GROUPS.map((group) => ({
     ...group,
-    models: MODEL_OPTIONS.filter(
-      (m) => (advanced.value || curatedIds.has(m.id)) && (m.group || 'optional') === group.id,
-    ).map((model) => {
+    models: PRIMARY_MODEL_OPTIONS.filter((m) => m.group === group.id).map((model) => {
       const resolved = resolveModelForSystem(model.id);
       return {
         ...model,
@@ -262,12 +267,10 @@ function buildOptionLabel(model, resolved) {
   const flags = [];
   if (model.litertKind === 'web-official') flags.push('LiteRT official web');
   else if (model.litertKind === 'portable') flags.push('LiteRT portable');
-  else if (model.litertKind === 'spike') flags.push('LiteRT spike');
-  if (model.experimental) flags.push('Experimental');
   if (resolved.loadBlocked) flags.push('Runtime unsupported');
   if (isModelLikelyCached(model.id)) flags.push('Cached');
   if (resolved.unavailable) flags.push('Unavailable');
-  return `${model.label}${flags.length ? ` — ${flags.join(' — ')}` : ''}`;
+  return `${getModelChoiceLabel(model)}${flags.length ? ` — ${flags.join(' — ')}` : ''}`;
 }
 
 const selectedResolved = computed(() => resolveModelForSystem(selectedModelId.value));
@@ -322,6 +325,11 @@ function refreshCapacityNote(modelId = selectedModelId.value) {
 }
 
 function applySelection(modelId) {
+  if (!getModelOption(modelId)) {
+    errorBanner.value = 'This model is no longer supported. Choose a retained model and load it.';
+    modelId = MODEL_OPTIONS[0].id;
+    loaded.value = false;
+  }
   selectedModelId.value = modelId;
   const resolved = resolveModelForSystem(modelId);
   fallbackNote.value =
@@ -614,6 +622,12 @@ async function submitTurn(
 ) {
   if (!chat || !loaded.value || streaming.value)
     throw new Error('Chat is not ready for another turn.');
+  const guard = validateLlmInput(text);
+  if (!guard.allowed) {
+    errorBanner.value = guard.message;
+    if (voice) throw toGuardrailError(guard);
+    return;
+  }
   const operation = ++uiOperation;
   const current = () => alive && operation === uiOperation;
   const controller = new AbortController();
@@ -637,11 +651,23 @@ async function submitTurn(
     const reply = await chat.generate(text, {
       signal: controller.signal,
       maxOutputTokens,
-      onContext: ({ omittedTurns }) => {
+      onContext: ({
+        omittedTurns,
+        omittedSources = 0,
+        rejectedSources = 0,
+        rejectedHistoryTurns = 0,
+      }) => {
         if (current())
-          contextNotice.value = omittedTurns
-            ? `${omittedTurns} older turn(s) omitted from model context. Your transcript is still visible.`
-            : '';
+          contextNotice.value = [
+            omittedSources ? `${omittedSources} reference(s) omitted by the source limit.` : '',
+            omittedTurns ? `${omittedTurns} older turn(s) omitted from model context.` : '',
+            rejectedSources ? `${rejectedSources} reference(s) rejected by guardrails.` : '',
+            rejectedHistoryTurns
+              ? `${rejectedHistoryTurns} history turn(s) rejected by guardrails.`
+              : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
       },
       onUpdate: (partial) => {
         if (!current()) return;
@@ -910,7 +936,8 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
             <span>{{
               conversationOwned
                 ? conversationLabel
-                : manualSpeechLabel || (loading ? 'Loading model…' : 'Thinking…')
+                : manualSpeechLabel ||
+                  (loading ? 'Loading model…' : 'Generating and checking reply…')
             }}</span>
           </div>
           <p v-if="contextNotice" class="vwl-ai-context-note" role="status">{{ contextNotice }}</p>
@@ -1134,13 +1161,10 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
                 <label class="vwl-form-label" for="vwl-ai-model-select"
                   >Model · download size shown before loading</label
                 >
-                <label class="vwl-ai-note"
-                  ><input v-model="advanced" type="checkbox" /> More models</label
-                >
                 <select
                   id="vwl-ai-model-select"
                   class="vd-select vwl-ai-model-select"
-                  :value="selectedModelId"
+                  :value="selectedPrimaryId"
                   :disabled="loading || streaming || conversationOwned"
                   @change="applySelection($event.target.value)"
                 >
@@ -1149,11 +1173,31 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
                       v-for="model in group.models"
                       :key="model.id"
                       :value="model.id"
-                      :disabled="model.resolved.unavailable"
+                      :disabled="systemInfo?.webgpuSupported === false"
                     >
                       {{ model.label }}
                     </option>
                   </optgroup>
+                </select>
+                <label
+                  v-if="selectedVariants.length > 1"
+                  class="vwl-ai-note"
+                  for="vwl-ai-precision-select"
+                  >Precision</label
+                >
+                <select
+                  v-if="selectedVariants.length > 1"
+                  id="vwl-ai-precision-select"
+                  class="vd-select"
+                  :value="selectedModelId"
+                  :disabled="loading || streaming || conversationOwned"
+                  @change="applySelection($event.target.value)"
+                >
+                  <option v-for="variant in selectedVariants" :key="variant.id" :value="variant.id">
+                    {{ variant.precision.toUpperCase()
+                    }}{{ variant.variantOf ? ' · Compatibility' : '' }} ·
+                    {{ Math.round(variant.approxBytes / 1e6) }} MB
+                  </option>
                 </select>
                 <p v-if="fallbackNote && !selectedResolved.loadBlocked" class="vwl-ai-note">
                   {{ fallbackNote }}
@@ -1284,7 +1328,7 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
       <strong>this site only</strong>. The next load may download again.
     </p>
     <ul>
-      <li>Chat model files from the curated and advanced catalog</li>
+      <li>Chat model files from the retained catalog</li>
       <li>The chat-owned LiteRT cache</li>
       <li>Dictation, neural voice, voice detector models and preset voice data</li>
       <li>Local “model cached” markers</li>

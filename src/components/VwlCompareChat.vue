@@ -1,6 +1,12 @@
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue';
-import { MODEL_OPTIONS, MODEL_GROUPS } from '@vanduo-oss/vwl-ai-chat';
+import {
+  MODEL_OPTIONS,
+  MODEL_GROUPS,
+  PRIMARY_MODEL_OPTIONS,
+  getModelVariants,
+  getModelChoiceLabel,
+} from '@vanduo-oss/vwl-ai-chat';
 import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
 import { CompareSession } from '../lib/compare-session.js';
 import VwlModelDetails from './VwlModelDetails.vue';
@@ -18,7 +24,7 @@ const session = new CompareSession({
 session.emit();
 const groups = MODEL_GROUPS.map((g) => ({
   ...g,
-  models: MODEL_OPTIONS.filter((m) => m.group === g.id && !m.litertRuntime),
+  models: PRIMARY_MODEL_OPTIONS.filter((m) => m.group === g.id),
 })).filter((g) => g.models.length);
 const selected = computed(() =>
   state.value.models.map((id) => MODEL_OPTIONS.find((m) => m.id === id)),
@@ -79,16 +85,38 @@ onBeforeUnmount(() => {
         <select
           :id="`vwl-compare-model-${i}`"
           class="vd-select"
-          :value="state.models[i]"
+          :value="selected[i]?.variantOf || state.models[i]"
           :disabled="locked"
           @change="act(() => session.select(i, $event.target.value))"
         >
           <option value="" disabled>Choose a model</option>
           <optgroup v-for="group in groups" :key="group.id" :label="group.label">
             <option v-for="model in group.models" :key="model.id" :value="model.id">
-              {{ model.label }}
+              {{ getModelChoiceLabel(model) }}
             </option>
           </optgroup>
+        </select>
+        <label
+          v-if="getModelVariants(state.models[i]).length > 1"
+          :for="`vwl-compare-precision-${i}`"
+          >Precision</label
+        >
+        <select
+          v-if="getModelVariants(state.models[i]).length > 1"
+          :id="`vwl-compare-precision-${i}`"
+          class="vd-select"
+          :value="state.models[i]"
+          :disabled="locked"
+          @change="act(() => session.select(i, $event.target.value))"
+        >
+          <option
+            v-for="variant in getModelVariants(state.models[i])"
+            :key="variant.id"
+            :value="variant.id"
+          >
+            {{ variant.precision.toUpperCase() }}{{ variant.variantOf ? ' · Compatibility' : '' }} ·
+            {{ Math.round(variant.approxBytes / 1e6) }} MB
+          </option>
         </select>
         <VwlModelDetails :model-id="state.models[i]" />
       </div>
@@ -196,11 +224,15 @@ onBeforeUnmount(() => {
             <p v-if="turn.context?.omittedTurns">
               {{ turn.context.omittedTurns }} older turns omitted from context.
             </p>
+            <p v-if="turn.context?.rejectedSources || turn.context?.rejectedHistoryTurns">
+              Guardrails omitted {{ turn.context.rejectedSources || 0 }} reference(s) and
+              {{ turn.context.rejectedHistoryTurns || 0 }} history turn(s).
+            </p>
             <p v-if="turn.error">{{ turn.error }}</p>
             <small
               >{{ turn.status
               }}<template v-if="turn.firstAnswerMs != null">
-                · First answer {{ (turn.firstAnswerMs / 1000).toFixed(2) }}s</template
+                · Checked reply {{ (turn.firstAnswerMs / 1000).toFixed(2) }}s</template
               ><template v-if="turn.generationMs != null">
                 · Completed {{ (turn.generationMs / 1000).toFixed(2) }}s</template
               ></small

@@ -1,6 +1,6 @@
 # vwl-guardrails
 
-Canonical documentation for FOSS guardrails consumed from published VWL packages (not a labs-owned source tree).
+Canonical documentation for FOSS guardrails consumed from linked VWL sibling packages (not a labs-owned source tree).
 
 This module family centralizes deterministic validation and safety composition used across:
 
@@ -119,7 +119,7 @@ Default deterministic block patterns for common prompt-injection/jailbreak class
 
 #### `normalizeJailbreakScanText(text): string`
 
-Folds common typos (e.g. `gonre` → `ignore`, `previousi` → `previous`) so override regexes still match.
+Produces a bounded scan form with Unicode compatibility/confusable folds, invisible-character removal, common obfuscation and typo normalization (e.g. `gonre` → `ignore`). Original submitted content is preserved.
 
 #### `validateLlmInput(input): GuardrailResult`
 
@@ -127,11 +127,12 @@ Validates prompt text (`string` or options object) and returns allow/block resul
 
 - Blocks empty input (`llm.input.empty`)
 - Blocks over-length input (`llm.input.too_long`)
-- Blocks matched guard patterns on raw and typo-normalized text (`llm.input.blocked`)
+- Blocks matched guard patterns on bounded raw, normalized and decoded variants (`llm.input.blocked`)
+- Supports `profile` and locally quoted educational discussion; reference/tool boundaries disable the quote exception
 
 #### `validateLlmOutput(input): GuardrailResult`
 
-Lightweight assistant-output check for jailbreak-compliance phrasing (e.g. “I will disregard previous instructions”). Used by `AiChat` after generation (`llm.output.blocked`).
+Checks complete visible assistant output for jailbreak-compliance phrasing, narrow harmful-content patterns and the profile's reviewed profanity rules. `AiChat` uses it before callbacks, transcript persistence or speech (`llm.output.blocked`). This is limited local moderation, not a semantic classifier.
 
 #### `buildChatSystemPrompt(options?): string`
 
@@ -217,7 +218,7 @@ type GuardrailError = Error & {
 
 ```javascript
 import { validateLlmInput } from '@vanduo-oss/vwl-ai-chat/guardrails/llm';
-import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat' /* or package core re-exports */;
+import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat'; /* or package core re-exports */
 
 const check = validateLlmInput({
   text: userPrompt,
@@ -242,8 +243,11 @@ const chatPrompt = buildChatSystemPrompt({
 ### Search index/vector validation at load time
 
 ```javascript
-import { validateSearchIndexPayload, validateVectorPayload } from '@vanduo-oss/vwl-hybrid-search/guardrails/search';
-import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat' /* or package core re-exports */;
+import {
+  validateSearchIndexPayload,
+  validateVectorPayload,
+} from '@vanduo-oss/vwl-hybrid-search/guardrails/search';
+import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat'; /* or package core re-exports */
 
 const indexCheck = validateSearchIndexPayload(indexPayload);
 if (!indexCheck.allowed) throw toGuardrailError(indexCheck);
@@ -267,3 +271,13 @@ Prefer the published package guardrail APIs:
 
 - `validateLlmInput()`
 - `buildChatSystemPrompt()`
+
+## October 2026 chat boundaries
+
+AiChat defaults to `guardrailProfile: 'family-friendly'`; `'general'` relaxes the family language rule while retaining harmful-assistance and injection rules. Profanity in user input alone is allowed. Health, identity, abuse reporting and help-seeking remain supported.
+
+`onGuardrail` optionally receives stage, code, rule IDs and structured source/history/tool identifiers, never raw rejected text. References and imported complete history turns are checked before admission; `onContext` reports rejection counts. If every supplied reference is rejected, generation stops. Tool arguments are checked before execution; rejected results are replaced before callbacks or ingestion.
+
+`onUpdate` keeps its signature and now delivers the complete checked answer once. Output is buffered before display/history/speech, canceled output is discarded, and blocked output becomes a fixed safe answer while backend context is rebuilt.
+
+Pinned `obscenity@0.4.6`, adapted Microsoft PyRIT rules and Unicode data are documented in the sibling notices/provenance manifest. This local policy supplies limited semantic moderation, without a classifier or remote service. See [chat validation](./vwl-model-guardrails-validation.md).

@@ -75,7 +75,7 @@ const DemoApp = {
                       'WebLLM (@mlc-ai/web-llm)',
                     ),
                   ]),
-                  ': Optional smaller instruct models (and experimental Gemma MLC packages).',
+                  ': Tiny Qwen and LFM specialists; engine and tool support are shown before loading.',
                 ]),
                 h('li', [
                   h('strong', [

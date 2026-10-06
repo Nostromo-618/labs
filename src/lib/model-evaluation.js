@@ -22,6 +22,7 @@ export async function runEvaluation({
   modelIds,
   repetitions = 3,
   cold = false,
+  releaseCachesAfterModel = false,
   signal,
   onProgress = () => {},
 }) {
@@ -212,7 +213,7 @@ export async function runEvaluation({
                 ? [error]
                 : pass
                   ? ['Real model completed after warm reload.']
-                  : ['Warm response missing.'],
+                  : ['Warm reload completed, but the exact-word response check failed.'],
               firstAnswerMs,
               latencyMs: performance.now() - start,
               usage,
@@ -243,6 +244,7 @@ export async function runEvaluation({
           await chat.dispose();
         }
       }
+      if (releaseCachesAfterModel) await clearChatCaches([modelId]);
       const scoredCases = modelResult.cases.filter((c) => c.status !== 'skipped');
       Object.assign(modelResult, summarizeModelResults({ ...modelResult }, scoredCases), {
         cases: modelResult.cases,
@@ -294,7 +296,8 @@ export async function runPairEvaluation({
       measuredGpuMemory: null,
     },
   };
-  let stopOnNextAOutput = false;
+  let stopOnNextARun = false;
+  let stopTimer;
   let compare;
   let lastPaneStatus = '';
   compare = createCompare({
@@ -306,14 +309,9 @@ export async function runPairEvaluation({
         onProgress({ message: status });
       }
       const firstPaneTurn = state.panes[0].turns.at(-1);
-      if (
-        stopOnNextAOutput &&
-        state.busy &&
-        firstPaneTurn?.status === 'running' &&
-        firstPaneTurn.response
-      ) {
-        stopOnNextAOutput = false;
-        compare.stop(0);
+      if (stopOnNextARun && state.busy && firstPaneTurn?.status === 'running') {
+        stopOnNextARun = false;
+        stopTimer = setTimeout(() => compare.stop(0), 50);
       }
     },
   });
@@ -341,8 +339,9 @@ export async function runPairEvaluation({
       pass: compare.state.panes.every((p) => /amber finch/i.test(p.turns.at(-1)?.response || '')),
     });
     checkpoint('Paired recall completed.');
-    stopOnNextAOutput = true;
+    stopOnNextARun = true;
     await compare.send('Write a detailed story about twenty islands.');
+    clearTimeout(stopTimer);
     checks.push({
       id: 'independent-stop',
       pass:
@@ -378,6 +377,7 @@ export async function runPairEvaluation({
     onProgress({ message: 'Pair stress test stopped; partial results retained.', report: partial });
     return partial;
   } finally {
+    clearTimeout(stopTimer);
     signal?.removeEventListener('abort', stop);
     await compare.dispose();
   }
