@@ -8,8 +8,9 @@ import {
 import { SPEECH_MODELS, assetURL, openSpeechCache } from '../lib/speech/assets.js';
 import { getKokoroVoice, verifyVoiceBytes } from '../lib/speech/voices.js';
 import { splitSpeechTokens } from '../lib/speech/text.js';
+import { publicUrl } from '../lib/public-url.js';
 
-env.backends.onnx.wasm.wasmPaths = '/transformers-wasm/';
+env.backends.onnx.wasm.wasmPaths = publicUrl('transformers-wasm/');
 env.backends.onnx.wasm.numThreads = 1;
 env.useBrowserCache = false;
 env.allowLocalModels = false;

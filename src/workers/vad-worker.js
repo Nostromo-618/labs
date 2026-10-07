@@ -2,8 +2,9 @@
 // 84768cefdf5a3852400e9d8237f7315d14b64a08 (MIT). See speech/PROVENANCE.md.
 import * as ort from 'onnxruntime-web/wasm';
 import { SPEECH_MODELS, assetURL, openSpeechCache } from '../lib/speech/assets.js';
+import { publicUrl } from '../lib/public-url.js';
 
-ort.env.wasm.wasmPaths = '/transformers-wasm/';
+ort.env.wasm.wasmPaths = publicUrl('transformers-wasm/');
 ort.env.wasm.numThreads = 1;
 let session, state, context;
 function reset() {

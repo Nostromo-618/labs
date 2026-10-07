@@ -5,8 +5,9 @@ import {
   InterruptableStoppingCriteria,
   env,
 } from '@huggingface/transformers';
+import { publicUrl } from '../lib/public-url.js';
 
-env.backends.onnx.wasm.wasmPaths = '/transformers-wasm/';
+env.backends.onnx.wasm.wasmPaths = publicUrl('transformers-wasm/');
 env.backends.onnx.wasm.numThreads = 1;
 env.useBrowserCache = false;
 env.allowLocalModels = true;

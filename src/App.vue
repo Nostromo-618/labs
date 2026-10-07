@@ -12,6 +12,7 @@ import { VdCard, VdIcon } from '@vanduo-oss/vd3';
 import { DEFAULT_DOCS_BASE_URL, VWL_HYBRID_SEARCH_VERSION } from '@vanduo-oss/vwl-hybrid-search';
 import { VWL_AI_CHAT_VERSION } from '@vanduo-oss/vwl-ai-chat';
 import { renderDocumentation } from '../utils/documentation.mjs';
+import { publicUrl } from './lib/public-url.js';
 import { TOC_VERSION } from './content/disclaimer.js';
 import {
   acceptDisclaimer as persistAccept,
@@ -200,10 +201,10 @@ function parseLabsHash() {
 async function fetchDocumentationHtml(slug) {
   if (docHtmlCache[slug]) return docHtmlCache[slug];
   const path = slug === 'neptune' ? '/doc/vwl-hybrid-search.md' : '/doc/vwl-ai-chat.md';
-  const res = await fetch(path, { credentials: 'same-origin' });
+  const res = await fetch(publicUrl(path), { credentials: 'same-origin' });
   if (!res.ok) throw new Error(`Could not load documentation (${res.status})`);
   const md = hydrateComponentVersionTokens(await res.text(), slug);
-  docHtmlCache[slug] = renderDocumentation(md, path);
+  docHtmlCache[slug] = renderDocumentation(md, path, import.meta.env.BASE_URL);
   return docHtmlCache[slug];
 }
 
@@ -515,7 +516,7 @@ watch(demoSlug, (slug) => {
                 <span class="labs-demo-card-desc" id="labs-card-neptune-desc"
                   >In-browser hybrid fuzzy + semantic search over vd3 docs—no server required</span
                 >
-                <span class="labs-demo-card-source">Source: vanduo-oss/labs</span>
+                <span class="labs-demo-card-source">Source: nostromo-618/labs</span>
                 <span class="labs-demo-card-badge-row">
                   <span class="labs-demo-card-badge">Experimental</span>
                   <span class="labs-demo-card-badge labs-demo-card-badge-version">{{
@@ -542,7 +543,7 @@ watch(demoSlug, (slug) => {
                 <span class="labs-demo-card-desc" id="labs-card-aichat-desc"
                   >In-browser AI chat with Gemma 4 and FOSS guardrails—no server required</span
                 >
-                <span class="labs-demo-card-source">Source: vanduo-oss/labs</span>
+                <span class="labs-demo-card-source">Source: nostromo-618/labs</span>
                 <span class="labs-demo-card-badge-row">
                   <span class="labs-demo-card-badge">Experimental</span>
                   <span class="labs-demo-card-badge labs-demo-card-badge-version">{{

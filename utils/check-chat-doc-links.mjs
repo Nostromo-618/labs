@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+const pagesBase = '/labs';
 const pending = ['/doc/vwl-ai-chat.html'];
 const visited = new Set();
 const external = new Set();
@@ -25,23 +26,30 @@ while (pending.length) {
       external.add(target.href);
       continue;
     }
+    // Built pages prefix links with `/labs`. Files in dist/ stay unprefixed.
+    const logical =
+      target.pathname === pagesBase || target.pathname === `${pagesBase}/`
+        ? '/'
+        : target.pathname.startsWith(`${pagesBase}/`)
+          ? target.pathname.slice(pagesBase.length)
+          : target.pathname;
     const file = path.join(
       // Root app routes are checked as index.html below.
       root,
-      decodeURIComponent(target.pathname).replace(/^\//, '') || 'index.html',
+      decodeURIComponent(logical).replace(/^\//, '') || 'index.html',
     );
-    local.add(target.pathname);
+    local.add(logical);
     if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
       errors.push(`${page}: missing ${href}`);
       continue;
     }
-    if (!target.pathname.startsWith('/doc/')) continue; // App routes use hashes, not DOM heading IDs.
-    if (target.pathname.endsWith('.html')) {
+    if (!logical.startsWith('/doc/')) continue; // App routes use hashes, not DOM heading IDs.
+    if (logical.endsWith('.html')) {
       const content = fs.readFileSync(file, 'utf8');
       if (!content.includes('<main>')) errors.push(`${page}: SPA fallback ${href}`);
       if (target.hash && !content.includes(`id="${decodeURIComponent(target.hash.slice(1))}"`))
         errors.push(`${page}: missing fragment ${href}`);
-      pending.push(target.pathname);
+      pending.push(logical);
     }
   }
 }

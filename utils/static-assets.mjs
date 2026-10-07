@@ -39,9 +39,11 @@ export function staticAssetsPlugin({ root, litertRoot, ortRoot }) {
     }
   }
   let output;
+  let siteBase = '/';
   return {
     name: 'labs-static-assets',
     configResolved(config) {
+      siteBase = config.base || '/';
       if (config.command === 'build') output = path.resolve(config.root, config.build.outDir);
     },
     configureServer(server) {
@@ -60,6 +62,7 @@ export function staticAssetsPlugin({ root, litertRoot, ortRoot }) {
           const html = documentationPage(
             fs.readFileSync(document, 'utf8'),
             url.slice(0, -5) + '.md',
+            siteBase,
           );
           response.setHeader('Content-Type', 'text/html; charset=utf-8');
           response.end(request.method === 'HEAD' ? undefined : html);
@@ -113,7 +116,11 @@ export function staticAssetsPlugin({ root, litertRoot, ortRoot }) {
       for (const [url, source] of documents) {
         await fs.promises.writeFile(
           path.join(output, url.slice(1)),
-          documentationPage(await fs.promises.readFile(source, 'utf8'), url.slice(0, -5) + '.md'),
+          documentationPage(
+            await fs.promises.readFile(source, 'utf8'),
+            url.slice(0, -5) + '.md',
+            siteBase,
+          ),
         );
       }
     },

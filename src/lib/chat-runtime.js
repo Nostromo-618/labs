@@ -1,6 +1,7 @@
 import { dependencies } from '../../package.json';
 import { collectDeviceSignals, MODEL_OPTIONS } from '@vanduo-oss/vwl-ai-chat';
 import { loadTransformers } from './transformers-chat.js';
+import { publicUrl } from './public-url.js';
 /** Labs owns injected runtimes; report installed versions rather than catalog defaults. */
 export function getChatRuntimeVersion(model) {
   const name = {
@@ -20,7 +21,7 @@ function localConfig(base) {
       model_lib:
         MODEL_OPTIONS.some((m) => m.id === record.model_id && m.backend === 'webllm') ||
         /^Qwen3-0\.6B-q4f(?:16|32)_1-MLC$/.test(record.model_id)
-          ? new URL(`/webllm-wasm/${record.model_id}.wasm`, location.href).href
+          ? new URL(publicUrl(`webllm-wasm/${record.model_id}.wasm`), location.href).href
           : record.model_lib,
     })),
   };
@@ -120,7 +121,7 @@ export const chatRuntimeOptions = {
       createEngine: async (...args) => trackEngine(await runtime.createEngine(...args), 'dispose'),
     };
   },
-  liteRtWasmPath: '/litert-wasm/',
+  liteRtWasmPath: publicUrl('litert-wasm/'),
 };
 
 /** Exact chat-owned cache names and model identities; never scan unrelated databases. */

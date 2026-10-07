@@ -298,7 +298,7 @@ onUnmounted(() => {
     <template #actions>
       <a
         class="labs-dock-github"
-        href="https://github.com/vanduo-oss/labs"
+        href="https://github.com/nostromo-618/labs"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Open Vanduo Web Labs GitHub repository"

@@ -38,28 +38,28 @@ jobs:
       - name: Checkout vwl-cbun
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vwl-cbun
+          repository: nostromo-618/vwl-cbun
           ref: 9db112b0bbc2c0ddc9d72818c422c311d35f2623
           path: vwl-cbun
 
       - name: Checkout vwl-hybrid-search
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vwl-hybrid-search
+          repository: nostromo-618/vwl-hybrid-search
           ref: 01ff2c2eba19cab43bb2a77c6771b781c4ee4bd7
           path: vwl-hybrid-search
 
       - name: Checkout vwl-ai-chat
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vwl-ai-chat
+          repository: nostromo-618/vwl-ai-chat
           ref: 73de3fbf15dc9fc5527d6894958b06f7f420254d
           path: vwl-ai-chat
 
       - name: Checkout vwl-hex-earth
         uses: actions/checkout@v7
         with:
-          repository: vanduo-oss/vwl-hex-earth
+          repository: nostromo-618/vwl-hex-earth
           ref: fe97ecdedf413700663a234186963f25d793e70c
           path: vwl-hex-earth
 
