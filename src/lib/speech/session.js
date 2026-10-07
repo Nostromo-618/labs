@@ -55,10 +55,11 @@ export class SpeechSession {
       error: error?.name === 'AbortError' ? '' : error.message || 'Speech failed.',
     });
   }
-  async load(kind) {
+  async load(kind, options = {}) {
     const { epoch, signal } = this.begin('loading');
     try {
       const result = await this.runtime.load(kind, {
+        ...options,
         signal,
         onProgress: (p) => {
           if (epoch === this.epoch)
@@ -138,6 +139,7 @@ export class SpeechSession {
     {
       provider = 'system',
       voiceURI = '',
+      voiceId = 'af_heart',
       player = null,
       signal: outerSignal,
       onPhase = () => {},
@@ -154,7 +156,11 @@ export class SpeechSession {
     outerSignal?.addEventListener('abort', cancel, { once: true });
     try {
       if (outerSignal?.aborted) throw new DOMException('Speech stopped.', 'AbortError');
-      if (provider === 'neural' && !this.runtime.isLoaded('kokoro'))
+      if (
+        provider === 'neural' &&
+        (!this.runtime.isLoaded('kokoro') ||
+          (this.runtime.isVoiceLoaded && !this.runtime.isVoiceLoaded(voiceId)))
+      )
         throw new Error('Load Neural voice before reading aloud.');
       // Unlock Web Audio from the click, before model inference awaits.
       if (provider === 'neural' && !player) this.player = this.playerFactory(signal);
@@ -164,7 +170,7 @@ export class SpeechSession {
       // during playback, keeping both latency and buffered audio bounded.
       const sentences = splitSpeechText(text, 300, { oneSentence: provider === 'neural' });
       const prepare = (sentence) =>
-        this.runtime.synthesize(sentence, { signal }).then(
+        this.runtime.synthesize(sentence, { signal, voiceId }).then(
           (value) => ({ value }),
           (error) => ({ error }),
         );

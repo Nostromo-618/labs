@@ -2,10 +2,20 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { KOKORO_VOICES, getKokoroVoice } from '../src/lib/speech/voices.js';
 import { SPEECH_MODELS, assetURL } from '../src/lib/speech/assets.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const requested = process.argv.slice(2);
+const args = process.argv.slice(2);
+const voiceArg = args.indexOf('--voices');
+const selectedVoices = args.includes('--all-voices')
+  ? KOKORO_VOICES
+  : voiceArg >= 0
+    ? (args[voiceArg + 1] || '').split(',').map(getKokoroVoice)
+    : [getKokoroVoice()];
+const requested = args.filter(
+  (arg, i) => !arg.startsWith('--') && (voiceArg < 0 || i !== voiceArg + 1),
+);
 const kinds = requested.length ? requested : Object.keys(SPEECH_MODELS);
 for (const kind of kinds) {
   const spec = SPEECH_MODELS[kind];
@@ -24,7 +34,14 @@ for (const kind of kinds) {
       size: record.bytes,
       lfs: { sha256: record.sha256 },
     })) || (await metadata.json()).siblings;
-  for (const file of spec.files) {
+  const paths =
+    kind === 'kokoro'
+      ? [
+          ...spec.files.filter((file) => !file.startsWith('voices/')),
+          ...selectedVoices.map((v) => v.path),
+        ]
+      : spec.files;
+  for (const file of paths) {
     const artifact = files.find((record) => record.rfilename === file);
     if (!artifact) throw new Error(`Pinned model lacks ${file}`);
     const target = path.join(directory, file);

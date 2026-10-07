@@ -53,7 +53,7 @@ export async function requestConversationMicrophone({ signal }) {
     !navigator.mediaDevices?.getUserMedia ||
     !globalThis.AudioWorkletNode
   )
-    throw new Error('Conversation Mode needs HTTPS and local microphone support.');
+    throw new Error('Voice Conversation Mode needs HTTPS and local microphone support.');
   const stream = await awaitConversationMicrophone(requestMicrophoneAudio(), signal);
   if (signal.aborted) {
     stream.getTracks().forEach((track) => track.stop());
@@ -138,7 +138,7 @@ export async function createConversationCapture({
     await audioReady(context.audioWorklet.addModule(captureURL), signal);
     if (closed || signal.aborted) throw aborted();
     if (context.state !== 'running')
-      throw new Error('Microphone audio is suspended. Resume Conversation Mode.');
+      throw new Error('Microphone audio is suspended. Resume Voice Conversation Mode.');
     source = context.createMediaStreamSource(stream);
     node = new globalThis.AudioWorkletNode(context, 'vwl-conversation-capture');
     sink = context.createGain();

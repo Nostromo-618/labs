@@ -3,10 +3,14 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { VdButton, VdIcon, VdSpinner } from '@vanduo-oss/vd3';
 import { SpeechSession } from '../lib/speech/session.js';
 import { localEnglishVoices } from '../lib/speech/text.js';
+import { KOKORO_VOICES, getKokoroVoice } from '../lib/speech/voices.js';
+import { readChatPreferences, saveChatPreferences } from '../lib/chat-preferences.js';
 import { SPEECH_MODELS } from '../lib/speech/assets.js';
 
 const props = defineProps({
   disabled: Boolean,
+  settingsDisabled: Boolean,
+  voiceSettings: { type: Object, default: null },
   compact: Boolean,
   settingsTarget: { type: Object, default: null },
   conversationOwned: Boolean,
@@ -14,10 +18,33 @@ const props = defineProps({
   sessionState: { type: Object, default: null },
   options: { type: Object, default: null },
 });
-const emit = defineEmits(['transcript', 'state']);
-const provider = ref('system'),
-  voiceURI = ref(''),
-  voices = ref([]);
+const emit = defineEmits(['transcript', 'state', 'voice-settings']);
+const localSettings = ref(readChatPreferences());
+const settings = computed(() => props.voiceSettings || localSettings.value);
+function setSetting(key, value) {
+  const next = { ...settings.value, [key]: value };
+  localSettings.value = next;
+  saveChatPreferences(next);
+  emit('voice-settings', next);
+}
+const provider = computed({
+  get: () => settings.value.provider,
+  set: (value) => setSetting('provider', value),
+});
+const voiceURI = computed({
+  get: () => settings.value.voiceURI,
+  set: (value) => setSetting('voiceURI', value),
+});
+const voiceId = computed({
+  get: () => settings.value.voiceId,
+  set: (value) => setSetting('voiceId', value),
+});
+const selectedNeuralVoice = computed(() => getKokoroVoice(voiceId.value));
+const voiceGroups = ['American English', 'British English'].map((accent) => ({
+  accent,
+  voices: KOKORO_VOICES.filter((v) => v.accent === accent),
+}));
+const voices = ref([]);
 const state = ref({
   status: 'idle',
   error: '',
@@ -45,14 +72,11 @@ watch(
 );
 function refreshVoices() {
   voices.value = localEnglishVoices();
-  if (!voices.value.some((voice) => voice.voiceURI === voiceURI.value))
-    voiceURI.value =
-      voices.value.find((voice) => voice.default)?.voiceURI || voices.value[0]?.voiceURI || '';
 }
 function dispose() {
   session.dispose();
 }
-watch(provider, () => session.cancel());
+watch([provider, voiceId, voiceURI], () => session.cancel());
 watch(
   () => props.disabled,
   (disabled) => {
@@ -74,7 +98,20 @@ onBeforeUnmount(() => {
 defineExpose({
   cancel: () => session.cancel(),
   dispose,
-  speak: (text) => session.speak(text, { provider: provider.value, voiceURI: voiceURI.value }),
+  speak: (text) => {
+    if (
+      provider.value === 'system' &&
+      !localEnglishVoices().some((v) => v.voiceURI === voiceURI.value)
+    ) {
+      session.update({ error: 'Choose an installed local English voice before reading aloud.' });
+      return Promise.resolve();
+    }
+    return session.speak(text, {
+      provider: provider.value,
+      voiceURI: voiceURI.value,
+      voiceId: voiceId.value,
+    });
+  },
 });
 </script>
 
@@ -89,7 +126,7 @@ defineExpose({
         v-if="!state.whisperReady"
         size="sm"
         variant="secondary"
-        :disabled="disabled || busy"
+        :disabled="settingsDisabled || busy"
         @click="session.load('whisper')"
       >
         <VdIcon name="microphone" aria-hidden="true" />
@@ -122,12 +159,12 @@ defineExpose({
         >Cancel speech</VdButton
       >
       <Teleport :to="settingsTarget || 'body'" :disabled="!settingsTarget">
-        <details>
+        <details open>
           <summary>Voice settings</summary>
           <div class="vwl-chat-speech-settings">
             <label
               >Read-aloud voice
-              <select v-model="provider" class="vd-select" :disabled="disabled || busy">
+              <select v-model="provider" class="vd-select" :disabled="settingsDisabled || busy">
                 <option value="system">System voice · local only</option>
                 <option value="neural">Neural voice · Kokoro</option>
               </select>
@@ -135,7 +172,8 @@ defineExpose({
             <template v-if="provider === 'system'">
               <label v-if="voices.length"
                 >Local English voice
-                <select v-model="voiceURI" class="vd-select" :disabled="disabled || busy">
+                <select v-model="voiceURI" class="vd-select" :disabled="settingsDisabled || busy">
+                  <option value="" disabled>Choose a local voice</option>
                   <option v-for="voice in voices" :key="voice.voiceURI" :value="voice.voiceURI">
                     {{ voice.name }} ({{ voice.lang }})
                   </option>
@@ -147,26 +185,60 @@ defineExpose({
               </p>
             </template>
             <template v-else>
+              <label
+                >English Kokoro voice
+                <select v-model="voiceId" class="vd-select" :disabled="settingsDisabled || busy">
+                  <optgroup v-for="group in voiceGroups" :key="group.accent" :label="group.accent">
+                    <option v-for="voice in group.voices" :key="voice.id" :value="voice.id">
+                      {{ voice.name }} · {{ voice.id }}
+                    </option>
+                  </optgroup>
+                </select>
+              </label>
               <p>
-                Heart (af_heart) · about {{ SPEECH_MODELS.kokoro.downloadMB }} MB including voice
-                data. Runs on this device. Audio can take several seconds to prepare.
+                {{ selectedNeuralVoice.name }} ({{ voiceId }}) · about
+                {{ SPEECH_MODELS.kokoro.downloadMB }} MB including voice data. Runs on this device.
+                Audio can take several seconds to prepare.
               </p>
               <VdButton
                 size="sm"
                 variant="secondary"
-                :disabled="disabled || busy || state.kokoroReady"
-                @click="session.load('kokoro')"
-                >{{ state.kokoroReady ? 'Neural voice ready' : 'Load Neural voice' }}</VdButton
+                :disabled="
+                  settingsDisabled ||
+                  busy ||
+                  (state.kokoroReady &&
+                    (!session.runtime.isVoiceLoaded || session.runtime.isVoiceLoaded(voiceId)))
+                "
+                @click="session.load('kokoro', { voiceId })"
+                >{{
+                  state.kokoroReady &&
+                  (!session.runtime.isVoiceLoaded || session.runtime.isVoiceLoaded(voiceId))
+                    ? 'Neural voice ready'
+                    : 'Load Neural voice'
+                }}</VdButton
               >
               <VdButton
-                v-if="state.kokoroReady"
+                v-if="
+                  state.kokoroReady &&
+                  (!session.runtime.isVoiceLoaded || session.runtime.isVoiceLoaded(voiceId))
+                "
                 size="sm"
                 variant="secondary"
-                :disabled="disabled || busy"
-                @click="session.speak('This is the local neural voice.', { provider: 'neural' })"
+                :disabled="settingsDisabled || busy"
+                @click="
+                  session.speak('This is the selected local neural voice.', {
+                    provider: 'neural',
+                    voiceId,
+                  })
+                "
                 >Test Neural voice</VdButton
               >
-              <p v-if="state.kokoroReady">
+              <p
+                v-if="
+                  state.kokoroReady &&
+                  (!session.runtime.isVoiceLoaded || session.runtime.isVoiceLoaded(voiceId))
+                "
+              >
                 If playback finishes silently, check that the browser tab and this site's Sound
                 setting are not muted.
               </p>

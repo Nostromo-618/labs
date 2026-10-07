@@ -62,7 +62,10 @@ test('missing local English voices explains optional neural download without loa
     }),
   );
   await page.reload();
-  await page.getByText('Voice settings', { exact: true }).click();
+  const settings = page.getByRole('button', { name: 'Settings', exact: true });
+  if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
+  await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
+  await page.getByLabel('Read-aloud voice').selectOption('system');
   await expect(page.getByText(/No local English voice is installed/)).toBeVisible();
   const error = await page.evaluate(async () => {
     const { speakSystem } = await import('/src/lib/speech/audio.js');
@@ -77,7 +80,9 @@ test('missing local English voices explains optional neural download without loa
 });
 
 test('neural voice test distinguishes audio preparation from playback', async ({ page }) => {
-  await page.getByText('Voice settings', { exact: true }).click();
+  const settings = page.getByRole('button', { name: 'Settings', exact: true });
+  if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
+  await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
   await page.getByLabel('Read-aloud voice').selectOption('neural');
   await expect(page.getByRole('button', { name: 'Test Neural voice', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Load Neural voice', exact: true }).click();
@@ -89,7 +94,7 @@ test('neural voice test distinguishes audio preparation from playback', async ({
     page.getByText('Preparing neural audio on this device…', { exact: true }),
   ).toBeVisible();
   expect(await page.evaluate(() => window.speechQA.spoken)).toEqual([
-    'This is the local neural voice.',
+    'This is the selected local neural voice.',
   ]);
   await page.evaluate(() => window.speechQA.finish());
   await expect(page.getByRole('button', { name: 'Test Neural voice', exact: true })).toBeEnabled();
@@ -345,6 +350,25 @@ test('recording interrupts playback and stale recording failure cannot release a
 test('General read-aloud uses the final answer and reset/navigation release speech', async ({
   page,
 }) => {
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'vwl-chat-settings-v1',
+      JSON.stringify({ provider: 'system', voiceURI: 'qa-local' }),
+    ),
+  );
+  await page.addInitScript(() =>
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: {
+        getVoices: () => [
+          { name: 'QA English', lang: 'en-US', localService: true, voiceURI: 'qa-local' },
+        ],
+        addEventListener() {},
+        removeEventListener() {},
+      },
+    }),
+  );
+  await page.reload();
   const input = page.getByRole('textbox', { name: 'Message' });
   await input.fill('VdDock placement');
   await input.press('Enter');
@@ -540,6 +564,25 @@ test('permission denial and silence preserve drafts; reset invalidates late tran
 test('completed replies support manual playback, stop, sending interruption and explicit neural loading', async ({
   page,
 }) => {
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'vwl-chat-settings-v1',
+      JSON.stringify({ provider: 'system', voiceURI: 'qa-local' }),
+    ),
+  );
+  await page.addInitScript(() =>
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: {
+        getVoices: () => [
+          { name: 'QA English', lang: 'en-US', localService: true, voiceURI: 'qa-local' },
+        ],
+        addEventListener() {},
+        removeEventListener() {},
+      },
+    }),
+  );
+  await page.reload();
   const input = page.getByRole('textbox', { name: 'Message' });
   await input.fill('hello');
   await input.press('Enter');
@@ -549,11 +592,15 @@ test('completed replies support manual playback, stop, sending interruption and 
   await input.press('Enter');
   await expect(page.locator('[data-role="assistant"]').last()).toContainText('Answer: next');
   await expect(page.getByRole('button', { name: 'Stop reading', exact: true })).toHaveCount(0);
-  await page.getByText('Voice settings', { exact: true }).click();
+  const settings = page.getByRole('button', { name: 'Settings', exact: true });
+  if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
+  await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
   await page.getByLabel('Read-aloud voice').selectOption('neural');
   expect(await page.evaluate(() => window.speechQA.loads)).toEqual([]);
   await page.getByRole('button', { name: 'Load Neural voice', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Neural voice ready' })).toBeDisabled();
+  if ((await page.locator('.vwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
+    await page.getByRole('button', { name: 'Close settings', exact: true }).click();
   await page.getByRole('button', { name: 'Read aloud', exact: true }).last().click();
   await expect
     .poll(() => page.evaluate(() => window.speechQA.spoken))

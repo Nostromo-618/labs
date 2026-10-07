@@ -3,15 +3,22 @@ import VwlModelDetails from './VwlModelDetails.vue';
 import VwlChatSpeech from './VwlChatSpeech.vue';
 import { useChatWorkspace } from '../lib/chat-workspace.js';
 import { useId } from 'vue';
+import { readChatPreferences, saveChatPreferences } from '../lib/chat-preferences.js';
+import { getKokoroVoice } from '../lib/speech/voices.js';
+import { localEnglishVoices } from '../lib/speech/text.js';
+import { SPEECH_MODELS } from '../lib/speech/assets.js';
 import { clearSpeechCaches } from '../lib/speech/assets.js';
 import { SpeechSession } from '../lib/speech/session.js';
 import { ConversationSession } from '../lib/speech/conversation.js';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { VdButton, VdCard, VdIcon, VdModal, VdProgress, VdSpinner } from '@vanduo-oss/vd3';
 import {
   AiChat,
   MODEL_GROUPS,
   MODEL_OPTIONS,
+  PRIMARY_MODEL_OPTIONS,
+  getModelVariants,
+  getModelChoiceLabel,
   assessLoadCapacity,
   collectDeviceSignals,
   describeLoadProgress,
@@ -20,6 +27,8 @@ import {
   getModelOption,
   shouldFocusChatComposer,
 } from '@vanduo-oss/vwl-ai-chat';
+import { validateLlmInput } from '@vanduo-oss/vwl-ai-chat/guardrails/llm';
+import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat';
 import { chatRuntimeOptions, clearChatCaches } from '../lib/chat-runtime.js';
 import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
 
@@ -39,6 +48,17 @@ const props = defineProps({
  */
 let chat = null;
 
+const preferences = ref(readChatPreferences());
+const delivery = computed({
+  get: () => preferences.value.delivery,
+  set: (value) => updatePreferences({ delivery: value }),
+});
+function updatePreferences(patch) {
+  preferences.value = { ...preferences.value, ...patch };
+  saveChatPreferences(patch);
+}
+const previewText = ref(''),
+  previewIndex = ref(-1);
 const selectedModelId = ref(MODEL_OPTIONS[0].id);
 const systemInfo = ref(null);
 const loaded = ref(false);
@@ -69,6 +89,21 @@ const conversationState = ref({
 const conversationOwned = computed(() => conversationState.value.status !== 'stopped');
 const conversationRunning = computed(
   () => conversationOwned.value && conversationState.value.status !== 'paused',
+);
+const conversationLocked = computed(
+  () =>
+    conversationOwned.value &&
+    (conversationState.value.status !== 'paused' ||
+      conversationState.value.settling ||
+      conversationState.value.ending),
+);
+const conversationDownloadMB = computed(() =>
+  Math.round(
+    (getModelOption(selectedModelId.value)?.approxBytes || 0) / 1e6 +
+      SPEECH_MODELS.whisper.downloadMB +
+      SPEECH_MODELS.vad.downloadMB +
+      (preferences.value.provider === 'neural' ? SPEECH_MODELS.kokoro.downloadMB : 0),
+  ),
 );
 const voiceReview = ref('');
 let conversation = null,
@@ -111,13 +146,13 @@ const voiceSettingsTarget = ref(null);
 const conversationLabel = computed(
   () =>
     ({
-      loading: 'Loading Conversation Mode…',
+      loading: 'Loading Voice Conversation Mode…',
       listening: 'Listening… Pause for about 1.2 seconds to send.',
       transcribing: 'Microphone off · transcribing…',
       thinking: 'Microphone off · thinking…',
       'preparing-audio': 'Microphone off · preparing neural audio…',
       speaking: 'Microphone off · speaking…',
-      paused: 'Conversation paused. Resume starts a new listening turn.',
+      paused: 'Voice conversation paused. Resume starts a new listening turn.',
     })[conversationState.value.status] || '',
 );
 const manualSpeechLabel = computed(
@@ -142,13 +177,15 @@ const composerInput = ref(null);
 const stickToBottom = ref(true);
 const capacityNote = ref('');
 const freezeHint = ref('');
-const advanced = ref(false);
 const contextNotice = ref('');
 let savedHistory = [];
 let alive = true;
 let uiOperation = 0;
 let generationAbort = null;
-const curatedIds = new Set(['gemma-4-E2B-it-web', 'gemma-4-E4B-it-web', 'Qwen3-0.6B-q4f16_1-MLC']);
+const selectedPrimaryId = computed(
+  () => getModelOption(selectedModelId.value)?.variantOf || selectedModelId.value,
+);
+const selectedVariants = computed(() => getModelVariants(selectedModelId.value));
 
 let unsubProgress = null;
 
@@ -170,9 +207,7 @@ const deviceSummary = computed(() => {
 const groupedModels = computed(() =>
   MODEL_GROUPS.map((group) => ({
     ...group,
-    models: MODEL_OPTIONS.filter(
-      (m) => (advanced.value || curatedIds.has(m.id)) && (m.group || 'optional') === group.id,
-    ).map((model) => {
+    models: PRIMARY_MODEL_OPTIONS.filter((m) => m.group === group.id).map((model) => {
       const resolved = resolveModelForSystem(model.id);
       return {
         ...model,
@@ -262,12 +297,10 @@ function buildOptionLabel(model, resolved) {
   const flags = [];
   if (model.litertKind === 'web-official') flags.push('LiteRT official web');
   else if (model.litertKind === 'portable') flags.push('LiteRT portable');
-  else if (model.litertKind === 'spike') flags.push('LiteRT spike');
-  if (model.experimental) flags.push('Experimental');
   if (resolved.loadBlocked) flags.push('Runtime unsupported');
   if (isModelLikelyCached(model.id)) flags.push('Cached');
   if (resolved.unavailable) flags.push('Unavailable');
-  return `${model.label}${flags.length ? ` — ${flags.join(' — ')}` : ''}`;
+  return `${getModelChoiceLabel(model)}${flags.length ? ` — ${flags.join(' — ')}` : ''}`;
 }
 
 const selectedResolved = computed(() => resolveModelForSystem(selectedModelId.value));
@@ -322,6 +355,11 @@ function refreshCapacityNote(modelId = selectedModelId.value) {
 }
 
 function applySelection(modelId) {
+  if (!getModelOption(modelId)) {
+    errorBanner.value = 'This model is no longer supported. Choose a retained model and load it.';
+    modelId = MODEL_OPTIONS[0].id;
+    loaded.value = false;
+  }
   selectedModelId.value = modelId;
   const resolved = resolveModelForSystem(modelId);
   fallbackNote.value =
@@ -493,8 +531,8 @@ async function loadModel({ signal, strict = false } = {}) {
   if (loaded.value && !conversationOwned.value) await focusComposer();
 }
 
-async function ensureConversationChat({ signal, onProgress }) {
-  onProgress('Loading Gemma E2B…');
+async function ensureConversationChat({ signal, onProgress, settings }) {
+  onProgress(`Loading ${getModelDisplayName(settings.modelId)}…`);
   const history = chat.getHistory?.() || savedHistory;
   savedHistory = history;
   if (!conversationInstructionsActive) {
@@ -504,21 +542,33 @@ async function ensureConversationChat({ signal, onProgress }) {
     });
     conversationInstructionsActive = true;
   }
-  if (!loaded.value || chat.modelId !== 'gemma-4-E2B-it-web') {
-    selectedModelId.value = 'gemma-4-E2B-it-web';
+  if (!loaded.value || chat.modelId !== settings.modelId) {
+    selectedModelId.value = settings.modelId;
     loaded.value = false;
     await loadModel({ signal, strict: true });
   }
   if (signal.aborted) throw new DOMException('Conversation stopped.', 'AbortError');
 }
 function startConversation(reviewedText = null) {
-  if (!chat || restoringConversation) return;
+  if (!chat || restoringConversation || conversationState.value.settling) return;
   conversation ||= new ConversationSession({
     speech,
-    preflight: () => {
-      const resolved = resolveModelForSystem('gemma-4-E2B-it-web');
-      if (resolved.unavailable || resolved.loadBlocked || resolved.changed)
-        throw new Error(resolved.reason || 'Gemma E2B is unavailable on this device.');
+    getSettings: () => ({
+      ...preferences.value,
+      modelId: selectedModelId.value,
+      maxOutputTokens: getModelOption(selectedModelId.value)?.reasoning === 'required' ? 1024 : 192,
+    }),
+    preflight: (settings) => {
+      if (settings.provider === 'neural') getKokoroVoice(settings.voiceId);
+      else if (!localEnglishVoices().some((v) => v.voiceURI === settings.voiceURI))
+        throw new Error('Choose an installed local English voice before starting.');
+      const resolved = resolveModelForSystem(settings.modelId);
+      if (resolved.changed)
+        throw new Error(
+          'Select the compatible precision in model settings before starting Voice Conversation Mode.',
+        );
+      if (resolved.unavailable || resolved.loadBlocked)
+        throw new Error(resolved.reason || 'The selected model is unavailable on this device.');
     },
     ensureChat: ensureConversationChat,
     submitTurn: (text, options) => submitTurn(text, { ...options, voice: true }),
@@ -574,7 +624,13 @@ async function switchModel() {
   await loadModel();
 }
 
+onActivated(() => {
+  if (!conversationLocked.value) preferences.value = readChatPreferences();
+});
+
 function stopGeneration() {
+  previewText.value = '';
+  previewIndex.value = -1;
   if (conversationOwned.value) conversation?.pause();
   generationAbort?.abort();
   chat?.cancel?.();
@@ -584,6 +640,8 @@ async function resetConversation() {
   speech.dispose();
   generationAbort?.abort();
   const operation = ++uiOperation;
+  previewText.value = '';
+  previewIndex.value = -1;
   chat?.reset();
   messages.value = [];
   savedHistory = [];
@@ -614,6 +672,12 @@ async function submitTurn(
 ) {
   if (!chat || !loaded.value || streaming.value)
     throw new Error('Chat is not ready for another turn.');
+  const guard = validateLlmInput(text);
+  if (!guard.allowed) {
+    errorBanner.value = guard.message;
+    if (voice) throw toGuardrailError(guard);
+    return;
+  }
   const operation = ++uiOperation;
   const current = () => alive && operation === uiOperation;
   const controller = new AbortController();
@@ -629,6 +693,8 @@ async function submitTurn(
   messages.value.push({ role: 'user', content: text });
   messages.value.push({ role: 'assistant', content: '' });
   const assistantIdx = messages.value.length - 1;
+  previewIndex.value = assistantIdx;
+  previewText.value = '';
   streaming.value = true;
   stickToBottom.value = true;
   await scrollToLatest(true);
@@ -637,14 +703,33 @@ async function submitTurn(
     const reply = await chat.generate(text, {
       signal: controller.signal,
       maxOutputTokens,
-      onContext: ({ omittedTurns }) => {
+      delivery: voice ? 'complete' : delivery.value,
+      onPreview: (text) => {
+        if (current() && !controller.signal.aborted) {
+          previewText.value = text;
+          void scrollToLatest();
+        }
+      },
+      onContext: ({
+        omittedTurns,
+        omittedSources = 0,
+        rejectedSources = 0,
+        rejectedHistoryTurns = 0,
+      }) => {
         if (current())
-          contextNotice.value = omittedTurns
-            ? `${omittedTurns} older turn(s) omitted from model context. Your transcript is still visible.`
-            : '';
+          contextNotice.value = [
+            omittedSources ? `${omittedSources} reference(s) omitted by the source limit.` : '',
+            omittedTurns ? `${omittedTurns} older turn(s) omitted from model context.` : '',
+            rejectedSources ? `${rejectedSources} reference(s) rejected by guardrails.` : '',
+            rejectedHistoryTurns
+              ? `${rejectedHistoryTurns} history turn(s) rejected by guardrails.`
+              : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
       },
       onUpdate: (partial) => {
-        if (!current()) return;
+        if (!current() || controller.signal.aborted) return;
         messages.value[assistantIdx] = { role: 'assistant', content: partial };
         void scrollToLatest();
       },
@@ -670,6 +755,8 @@ async function submitTurn(
     outerSignal?.removeEventListener('abort', stop);
     if (current()) {
       generationAbort = null;
+      previewText.value = '';
+      previewIndex.value = -1;
       streaming.value = false;
       await scrollToLatest(true);
       if (!voice) await focusComposer();
@@ -752,7 +839,9 @@ onMounted(async () => {
     }
     progressPct.value = described.progressPct;
     if (loading.value && conversationState.value.status === 'loading')
-      conversation?.update({ progress: `Gemma E2B: ${described.progressText}` });
+      conversation?.update({
+        progress: `${getModelDisplayName(selectedModelId.value)}: ${described.progressText}`,
+      });
     progressText.value = described.progressText;
     freezeHint.value = described.freezeHint;
     statusText.value = described.statusText;
@@ -810,6 +899,8 @@ async function suspend() {
   await endConversation();
   speech.dispose();
   uiOperation++;
+  previewText.value = '';
+  previewIndex.value = -1;
   generationAbort?.abort();
   chat?.cancel();
   if (chat) {
@@ -855,7 +946,7 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
               variant="primary"
               :disabled="!systemInfo || loading || streaming || speechBusy"
               @click="startConversation()"
-              >Conversation Mode</VdButton
+              >Voice Conversation Mode</VdButton
             >
             <template v-else>
               <VdButton
@@ -867,13 +958,13 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
               <VdButton
                 v-else
                 variant="primary"
-                :disabled="conversationState.ending"
+                :disabled="conversationState.ending || conversationState.settling"
                 @click="startConversation()"
                 >Resume conversation</VdButton
               >
               <VdButton
                 variant="ghost"
-                :disabled="conversationState.ending"
+                :disabled="conversationState.ending || conversationState.settling"
                 @click="endConversation"
                 >End conversation</VdButton
               >
@@ -892,29 +983,6 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
 
         <div class="vwl-ai-chat-interface">
           <div
-            v-if="conversationOwned || manualSpeechLabel || loading || streaming"
-            class="vwl-ai-live-status"
-            role="status"
-            aria-live="polite"
-          >
-            <VdSpinner
-              v-if="
-                conversationRunning ||
-                loading ||
-                streaming ||
-                (manualSpeechLabel && speechStatus !== 'recording')
-              "
-              size="sm"
-              aria-hidden="true"
-            />
-            <span>{{
-              conversationOwned
-                ? conversationLabel
-                : manualSpeechLabel || (loading ? 'Loading model…' : 'Thinking…')
-            }}</span>
-          </div>
-          <p v-if="contextNotice" class="vwl-ai-context-note" role="status">{{ contextNotice }}</p>
-          <div
             ref="messagesEl"
             class="vwl-ai-messages"
             aria-live="polite"
@@ -927,7 +995,13 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
               :data-role="msg.role"
             >
               <div class="vwl-ai-message-role">{{ msg.role === 'user' ? 'You' : 'Assistant' }}</div>
-              <div class="vwl-ai-message-body" v-html="renderMarkdown(msg.content)"></div>
+              <div
+                v-if="idx === previewIndex && previewText"
+                class="vwl-ai-message-body vwl-checked-preview"
+              >
+                {{ previewText }}
+              </div>
+              <div v-else class="vwl-ai-message-body" v-html="renderMarkdown(msg.content)"></div>
               <p
                 v-if="
                   msg.role === 'assistant' &&
@@ -979,8 +1053,8 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
                   loaded
                     ? 'Ask anything. Answers stay on this device.'
                     : settingsOpen
-                      ? 'Load a model in the Settings panel, or choose Conversation Mode above.'
-                      : 'Open Settings to load a model, or choose Conversation Mode above.'
+                      ? 'Load a model in the Settings panel, or choose Voice Conversation Mode above.'
+                      : 'Open Settings to load a model, or choose Voice Conversation Mode above.'
                 }}
               </p>
               <VdButton
@@ -1033,6 +1107,9 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
                 :session="speech"
                 :session-state="speechState"
                 :conversation-owned="conversationOwned"
+                :voice-settings="preferences"
+                :settings-disabled="loading || streaming || conversationLocked"
+                @voice-settings="updatePreferences"
                 :options="speechOptions"
                 :disabled="!loaded || streaming || loading || conversationOwned"
                 :settings-target="voiceSettingsTarget"
@@ -1066,6 +1143,29 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
               </VdButton>
             </div>
           </form>
+          <div class="vwl-ai-live-status" role="status" aria-live="polite">
+            <VdSpinner
+              v-if="
+                conversationRunning ||
+                loading ||
+                streaming ||
+                (manualSpeechLabel && speechStatus !== 'recording')
+              "
+              size="sm"
+              aria-hidden="true"
+            />
+            <span v-if="conversationOwned || manualSpeechLabel || loading || streaming">{{
+              conversationOwned
+                ? conversationLabel
+                : manualSpeechLabel ||
+                  (loading
+                    ? 'Loading model…'
+                    : delivery === 'checked-stream'
+                      ? 'Generating checked reply…'
+                      : 'Generating and checking reply…')
+            }}</span>
+          </div>
+          <p v-if="contextNotice" class="vwl-ai-context-note" role="status">{{ contextNotice }}</p>
           <p v-if="inputOverLimit" class="vwl-ai-error" role="alert">
             Your draft is preserved. Edit it to 2000 characters or fewer before sending.
           </p>
@@ -1097,185 +1197,237 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
           </p>
         </div>
       </div>
-      <div
-        v-if="settingsModal"
-        class="vwl-ai-settings-backdrop"
-        data-testid="chat-settings-backdrop"
-        aria-hidden="true"
-        @click="settingsOpen = false"
-      ></div>
-      <aside
-        v-show="settingsOpen"
-        ref="settingsPanel"
-        :id="settingsId"
-        class="vwl-ai-settings-panel"
-        :class="{ 'vwl-ai-settings-drawer': !workspaceWide }"
-        :role="settingsModal ? 'dialog' : 'complementary'"
-        :aria-modal="settingsModal ? 'true' : undefined"
-        aria-label="Chat settings"
-        tabindex="-1"
-        :inert="!settingsOpen ? true : undefined"
-      >
-        <header class="vwl-ai-settings-header">
-          <h3>Settings</h3>
-          <VdButton
-            size="sm"
-            variant="ghost"
-            aria-label="Close settings"
-            @click="settingsOpen = false"
-            ><VdIcon name="x" aria-hidden="true"
-          /></VdButton>
-        </header>
-        <div class="vwl-ai-settings-content">
-          <section aria-label="Model settings">
-            <h4>Model</h4>
-            <div class="vwl-ai-setup-grid">
-              <div class="vwl-ai-setup-col">
-                <label class="vwl-form-label" for="vwl-ai-model-select"
-                  >Model · download size shown before loading</label
-                >
-                <label class="vwl-ai-note"
-                  ><input v-model="advanced" type="checkbox" /> More models</label
-                >
-                <select
-                  id="vwl-ai-model-select"
-                  class="vd-select vwl-ai-model-select"
-                  :value="selectedModelId"
-                  :disabled="loading || streaming || conversationOwned"
-                  @change="applySelection($event.target.value)"
-                >
-                  <optgroup v-for="group in groupedModels" :key="group.id" :label="group.label">
-                    <option
-                      v-for="model in group.models"
-                      :key="model.id"
-                      :value="model.id"
-                      :disabled="model.resolved.unavailable"
-                    >
-                      {{ model.label }}
-                    </option>
-                  </optgroup>
-                </select>
-                <p v-if="fallbackNote && !selectedResolved.loadBlocked" class="vwl-ai-note">
-                  {{ fallbackNote }}
-                </p>
-                <details class="vwl-ai-diagnostics">
-                  <summary>Model details</summary>
-                  <VwlModelDetails :model-id="selectedModelId" />
-                </details>
-                <p v-if="cacheHint" class="vwl-ai-note">{{ cacheHint }}</p>
-                <p v-if="capacityNote" class="vwl-ai-capacity-note" role="status">
-                  {{ capacityNote }}
-                </p>
-              </div>
-            </div>
-
-            <p class="vd-text-muted vd-text-sm">
-              Gemma 4 is the primary family. Optional small/fast models are available when you need
-              a lighter download. Inference stays in your browser.
-            </p>
-
-            <div v-if="(loading || progressText) && !errorBanner" class="vwl-ai-progress">
-              <VdProgress :value="progressPct" />
-              <div class="vd-text-sm vd-text-muted">{{ progressText }}</div>
-              <p v-if="freezeHint" class="vwl-ai-freeze-hint">{{ freezeHint }}</p>
-            </div>
-
-            <p
-              v-if="fallbackNote && selectedResolved.loadBlocked"
-              class="vwl-ai-error"
-              role="status"
-            >
-              {{ fallbackNote }}
-            </p>
-
-            <div class="vwl-ai-setup-actions">
-              <VdButton
-                variant="primary"
-                :loading="loading"
-                :disabled="loadDisabled || streaming || conversationOwned"
-                @click="loaded ? switchModel() : loadModel()"
-              >
-                <VdIcon name="download-simple" />
-                {{
-                  selectedResolved.loadBlocked
-                    ? 'Runtime unsupported'
-                    : loaded
-                      ? 'Switch model'
-                      : 'Load AI Model'
-                }}
-              </VdButton>
-            </div>
-          </section>
-          <section aria-label="Voice settings">
-            <h4>Voice</h4>
-            <p class="vwl-ai-note">
-              Conversation Mode uses Gemma E2B + Whisper + Kokoro Heart + voice detection · about
-              2.15 GB of model downloads, plus runtime files. Loaded models are reused. English ·
-              take turns.
-            </p>
-            <p v-if="conversationOwned && conversationState.progress" class="vwl-ai-note">
-              {{ conversationState.progress }}
-            </p>
-            <div ref="voiceSettingsTarget"></div>
-          </section>
-          <section aria-label="Storage settings">
-            <h4>Storage</h4>
-            <details class="vwl-ai-diagnostics">
-              <summary>Device and storage details</summary>
-              <aside class="vwl-ai-storage-panel" aria-label="Local storage for this site">
-                <div class="vwl-ai-storage-title">Storage &amp; memory</div>
-                <div class="vd-text-sm vd-text-muted">
-                  This origin: <strong>{{ storageUsage }}</strong>
-                </div>
-                <div class="vd-text-sm vd-text-muted">Quota: {{ storageQuota }}</div>
-                <div class="vwl-ai-storage-meter" aria-hidden="true">
-                  <div class="vwl-ai-storage-meter-fill" :style="{ width: storagePct + '%' }"></div>
-                </div>
-                <p class="vwl-ai-fineprint">
-                  Includes Cache Storage / IndexedDB for this page. GPU memory is not available to
-                  the page.
-                </p>
-              </aside>
-
-              <div class="vwl-ai-system-info">
-                <div class="vwl-ai-storage-title">System Info</div>
-                <div class="vd-text-sm vd-text-muted">
-                  WebGPU:
-                  {{
-                    systemInfo
-                      ? systemInfo.webgpuSupported
-                        ? 'Supported'
-                        : 'Not supported'
-                      : 'Checking…'
-                  }}
-                </div>
-                <div class="vd-text-sm vd-text-muted">
-                  GPU: {{ systemInfo?.adapterName || systemInfo?.error || 'Detecting…' }}
-                </div>
-                <div class="vd-text-sm vd-text-muted">
-                  shader-f16:
-                  {{
-                    systemInfo ? (systemInfo.shaderF16 ? 'Supported' : 'Unavailable') : 'Checking…'
-                  }}
-                </div>
-                <div
-                  class="vd-text-sm vd-text-muted"
-                  :title="'deviceMemory is browser-capped/approximate; GPU VRAM is not exposed to web pages.'"
-                >
-                  Device: {{ deviceSummary }}
-                </div>
-              </div>
-            </details>
+      <Teleport to="body" :disabled="workspaceWide">
+        <div
+          v-if="settingsModal"
+          class="vwl-ai-settings-backdrop"
+          data-testid="chat-settings-backdrop"
+          aria-hidden="true"
+          @click="settingsOpen = false"
+        ></div>
+        <aside
+          v-show="settingsOpen"
+          ref="settingsPanel"
+          :id="settingsId"
+          class="vwl-ai-settings-panel"
+          :class="{ 'vwl-ai-settings-drawer': !workspaceWide }"
+          :role="settingsModal ? 'dialog' : 'complementary'"
+          :aria-modal="settingsModal ? 'true' : undefined"
+          aria-label="Chat settings"
+          tabindex="-1"
+          :inert="!settingsOpen ? true : undefined"
+        >
+          <header class="vwl-ai-settings-header">
+            <h3>Settings</h3>
             <VdButton
               size="sm"
               variant="ghost"
-              :disabled="loading || streaming || conversationOwned"
-              @click="clearModalOpen = true"
-              ><VdIcon name="trash" />Clear storage</VdButton
-            >
-          </section>
-        </div>
-      </aside>
+              aria-label="Close settings"
+              @click="settingsOpen = false"
+              ><VdIcon name="x" aria-hidden="true"
+            /></VdButton>
+          </header>
+          <div class="vwl-ai-settings-content">
+            <section aria-label="Model settings">
+              <h4>Model</h4>
+              <div class="vwl-ai-setup-grid">
+                <div class="vwl-ai-setup-col">
+                  <label class="vwl-form-label" for="vwl-ai-model-select"
+                    >Model · download size shown before loading</label
+                  >
+                  <select
+                    id="vwl-ai-model-select"
+                    class="vd-select vwl-ai-model-select"
+                    :value="selectedPrimaryId"
+                    :disabled="loading || streaming || conversationLocked"
+                    @change="applySelection($event.target.value)"
+                  >
+                    <optgroup v-for="group in groupedModels" :key="group.id" :label="group.label">
+                      <option
+                        v-for="model in group.models"
+                        :key="model.id"
+                        :value="model.id"
+                        :disabled="systemInfo?.webgpuSupported === false"
+                      >
+                        {{ model.label }}
+                      </option>
+                    </optgroup>
+                  </select>
+                  <label
+                    v-if="selectedVariants.length > 1"
+                    class="vwl-ai-note"
+                    for="vwl-ai-precision-select"
+                    >Precision</label
+                  >
+                  <select
+                    v-if="selectedVariants.length > 1"
+                    id="vwl-ai-precision-select"
+                    class="vd-select"
+                    :value="selectedModelId"
+                    :disabled="loading || streaming || conversationLocked"
+                    @change="applySelection($event.target.value)"
+                  >
+                    <option
+                      v-for="variant in selectedVariants"
+                      :key="variant.id"
+                      :value="variant.id"
+                    >
+                      {{ variant.precision.toUpperCase()
+                      }}{{ variant.variantOf ? ' · Compatibility' : '' }} ·
+                      {{ Math.round(variant.approxBytes / 1e6) }} MB
+                    </option>
+                  </select>
+                  <p v-if="fallbackNote && !selectedResolved.loadBlocked" class="vwl-ai-note">
+                    {{ fallbackNote }}
+                  </p>
+                  <details class="vwl-ai-diagnostics" open>
+                    <summary>Model details</summary>
+                    <VwlModelDetails :model-id="selectedModelId" />
+                  </details>
+                  <p v-if="cacheHint" class="vwl-ai-note">{{ cacheHint }}</p>
+                  <p v-if="capacityNote" class="vwl-ai-capacity-note" role="status">
+                    {{ capacityNote }}
+                  </p>
+                </div>
+              </div>
+
+              <p class="vd-text-muted vd-text-sm">
+                Gemma 4 is the primary family. Optional small/fast models are available when you
+                need a lighter download. Inference stays in your browser.
+              </p>
+
+              <div v-if="(loading || progressText) && !errorBanner" class="vwl-ai-progress">
+                <VdProgress :value="progressPct" />
+                <div class="vd-text-sm vd-text-muted">{{ progressText }}</div>
+                <p v-if="freezeHint" class="vwl-ai-freeze-hint">{{ freezeHint }}</p>
+              </div>
+
+              <p
+                v-if="fallbackNote && selectedResolved.loadBlocked"
+                class="vwl-ai-error"
+                role="status"
+              >
+                {{ fallbackNote }}
+              </p>
+
+              <div class="vwl-ai-setup-actions">
+                <VdButton
+                  variant="primary"
+                  :loading="loading"
+                  :disabled="loadDisabled || streaming || conversationLocked"
+                  @click="
+                    conversationOwned ? startConversation() : loaded ? switchModel() : loadModel()
+                  "
+                >
+                  <VdIcon name="download-simple" />
+                  {{
+                    conversationOwned
+                      ? 'Resume with selected settings'
+                      : selectedResolved.loadBlocked
+                        ? 'Runtime unsupported'
+                        : loaded
+                          ? 'Switch model'
+                          : 'Load AI Model'
+                  }}
+                </VdButton>
+              </div>
+            </section>
+            <section aria-label="Reply delivery settings">
+              <h4>Text replies</h4>
+              <label
+                >Reply delivery<select
+                  v-model="delivery"
+                  class="vd-select"
+                  :disabled="loading || streaming || conversationLocked"
+                >
+                  <option value="checked-stream">Checked live text</option>
+                  <option value="complete">Full-answer check</option>
+                </select></label
+              >
+              <p class="vwl-ai-note">
+                Live text is checked before display. Later context can still trigger a block after
+                earlier text appeared. Spoken turns always use a full-answer check.
+              </p>
+            </section>
+            <section aria-label="Voice settings">
+              <h4>Voice</h4>
+              <p class="vwl-ai-note">
+                Voice Conversation Mode uses the selected chat model and voice, Whisper and voice
+                detection · about
+                {{ conversationDownloadMB }} MB of model downloads, plus runtime files. Loaded
+                models are reused. English · take turns.
+              </p>
+              <p v-if="conversationOwned && conversationState.progress" class="vwl-ai-note">
+                {{ conversationState.progress }}
+              </p>
+              <div ref="voiceSettingsTarget"></div>
+            </section>
+            <section aria-label="Storage settings">
+              <h4>Storage</h4>
+              <details class="vwl-ai-diagnostics">
+                <summary>Device and storage details</summary>
+                <aside class="vwl-ai-storage-panel" aria-label="Local storage for this site">
+                  <div class="vwl-ai-storage-title">Storage &amp; memory</div>
+                  <div class="vd-text-sm vd-text-muted">
+                    This origin: <strong>{{ storageUsage }}</strong>
+                  </div>
+                  <div class="vd-text-sm vd-text-muted">Quota: {{ storageQuota }}</div>
+                  <div class="vwl-ai-storage-meter" aria-hidden="true">
+                    <div
+                      class="vwl-ai-storage-meter-fill"
+                      :style="{ width: storagePct + '%' }"
+                    ></div>
+                  </div>
+                  <p class="vwl-ai-fineprint">
+                    Includes Cache Storage / IndexedDB for this page. GPU memory is not available to
+                    the page.
+                  </p>
+                </aside>
+
+                <div class="vwl-ai-system-info">
+                  <div class="vwl-ai-storage-title">System Info</div>
+                  <div class="vd-text-sm vd-text-muted">
+                    WebGPU:
+                    {{
+                      systemInfo
+                        ? systemInfo.webgpuSupported
+                          ? 'Supported'
+                          : 'Not supported'
+                        : 'Checking…'
+                    }}
+                  </div>
+                  <div class="vd-text-sm vd-text-muted">
+                    GPU: {{ systemInfo?.adapterName || systemInfo?.error || 'Detecting…' }}
+                  </div>
+                  <div class="vd-text-sm vd-text-muted">
+                    shader-f16:
+                    {{
+                      systemInfo
+                        ? systemInfo.shaderF16
+                          ? 'Supported'
+                          : 'Unavailable'
+                        : 'Checking…'
+                    }}
+                  </div>
+                  <div
+                    class="vd-text-sm vd-text-muted"
+                    :title="'deviceMemory is browser-capped/approximate; GPU VRAM is not exposed to web pages.'"
+                  >
+                    Device: {{ deviceSummary }}
+                  </div>
+                </div>
+              </details>
+              <VdButton
+                size="sm"
+                variant="ghost"
+                :disabled="loading || streaming || conversationLocked"
+                @click="clearModalOpen = true"
+                ><VdIcon name="trash" />Clear storage</VdButton
+              >
+            </section>
+          </div>
+        </aside>
+      </Teleport>
     </VdCard>
   </div>
   <VdModal v-model:open="clearModalOpen" title="Clear model storage?" size="md">
@@ -1284,7 +1436,7 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
       <strong>this site only</strong>. The next load may download again.
     </p>
     <ul>
-      <li>Chat model files from the curated and advanced catalog</li>
+      <li>Chat model files from the retained catalog</li>
       <li>The chat-owned LiteRT cache</li>
       <li>Dictation, neural voice, voice detector models and preset voice data</li>
       <li>Local “model cached” markers</li>
@@ -1297,6 +1449,10 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
 </template>
 
 <style scoped>
+.vwl-checked-preview {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .vwl-conversation-panel {
   padding: 0.75rem 1.25rem;
   border-bottom: 1px solid var(--border-color);
@@ -1720,8 +1876,11 @@ defineExpose({ suspend, getModelId: () => selectedModelId.value });
   flex-shrink: 0;
   padding: 0.45rem 0.85rem;
   font-size: 0.83rem;
+  line-height: 1.5;
   color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  box-sizing: border-box;
+  min-height: calc(max(1.5em, 1.5rem) + 0.9rem + 1px);
 }
 .vwl-ai-settings-panel {
   width: 320px;

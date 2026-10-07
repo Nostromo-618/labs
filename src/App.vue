@@ -11,7 +11,7 @@ import {
 import { VdCard, VdIcon } from '@vanduo-oss/vd3';
 import { DEFAULT_DOCS_BASE_URL, VWL_HYBRID_SEARCH_VERSION } from '@vanduo-oss/vwl-hybrid-search';
 import { VWL_AI_CHAT_VERSION } from '@vanduo-oss/vwl-ai-chat';
-import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
+import { renderDocumentation } from '../utils/documentation.mjs';
 import { TOC_VERSION } from './content/disclaimer.js';
 import {
   acceptDisclaimer as persistAccept,
@@ -203,7 +203,7 @@ async function fetchDocumentationHtml(slug) {
   const res = await fetch(path, { credentials: 'same-origin' });
   if (!res.ok) throw new Error(`Could not load documentation (${res.status})`);
   const md = hydrateComponentVersionTokens(await res.text(), slug);
-  docHtmlCache[slug] = labsMarkdownToHtml(md);
+  docHtmlCache[slug] = renderDocumentation(md, path);
   return docHtmlCache[slug];
 }
 

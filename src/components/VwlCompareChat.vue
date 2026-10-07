@@ -1,7 +1,14 @@
 <script setup>
-import { computed, onBeforeUnmount, ref } from 'vue';
-import { MODEL_OPTIONS, MODEL_GROUPS } from '@vanduo-oss/vwl-ai-chat';
+import { computed, onActivated, onBeforeUnmount, ref } from 'vue';
+import {
+  MODEL_OPTIONS,
+  MODEL_GROUPS,
+  PRIMARY_MODEL_OPTIONS,
+  getModelVariants,
+  getModelChoiceLabel,
+} from '@vanduo-oss/vwl-ai-chat';
 import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
+import { readChatPreferences } from '../lib/chat-preferences.js';
 import { CompareSession } from '../lib/compare-session.js';
 import VwlModelDetails from './VwlModelDetails.vue';
 const props = defineProps({ modelA: { type: String, default: 'gemma-4-E2B-it-web' } });
@@ -16,9 +23,10 @@ const session = new CompareSession({
   },
 });
 session.emit();
+onActivated(() => session.setDelivery(readChatPreferences().delivery));
 const groups = MODEL_GROUPS.map((g) => ({
   ...g,
-  models: MODEL_OPTIONS.filter((m) => m.group === g.id && !m.litertRuntime),
+  models: PRIMARY_MODEL_OPTIONS.filter((m) => m.group === g.id),
 })).filter((g) => g.models.length);
 const selected = computed(() =>
   state.value.models.map((id) => MODEL_OPTIONS.find((m) => m.id === id)),
@@ -73,22 +81,59 @@ onBeforeUnmount(() => {
       One prompt, two ongoing chats. Each model remembers its own answers, so follow-up contexts may
       differ.
     </p>
+    <label
+      >Reply delivery<select
+        class="vd-select"
+        :value="state.delivery"
+        :disabled="locked"
+        @change="session.setDelivery($event.target.value)"
+      >
+        <option value="checked-stream">Checked live text</option>
+        <option value="complete">Full-answer check</option>
+      </select></label
+    >
+    <p>
+      Live text is checked before display. Later context can still trigger a block after earlier
+      text appeared.
+    </p>
     <div class="vwl-compare-pickers">
       <div v-for="i in [0, 1]" :key="i">
         <label :for="`vwl-compare-model-${i}`">Model {{ i === 0 ? 'A' : 'B' }}</label>
         <select
           :id="`vwl-compare-model-${i}`"
           class="vd-select"
-          :value="state.models[i]"
+          :value="selected[i]?.variantOf || state.models[i]"
           :disabled="locked"
           @change="act(() => session.select(i, $event.target.value))"
         >
           <option value="" disabled>Choose a model</option>
           <optgroup v-for="group in groups" :key="group.id" :label="group.label">
             <option v-for="model in group.models" :key="model.id" :value="model.id">
-              {{ model.label }}
+              {{ getModelChoiceLabel(model) }}
             </option>
           </optgroup>
+        </select>
+        <label
+          v-if="getModelVariants(state.models[i]).length > 1"
+          :for="`vwl-compare-precision-${i}`"
+          >Precision</label
+        >
+        <select
+          v-if="getModelVariants(state.models[i]).length > 1"
+          :id="`vwl-compare-precision-${i}`"
+          class="vd-select"
+          :value="state.models[i]"
+          :disabled="locked"
+          @change="act(() => session.select(i, $event.target.value))"
+        >
+          <option
+            v-for="variant in getModelVariants(state.models[i])"
+            :key="variant.id"
+            :value="variant.id"
+          >
+            {{ variant.precision.toUpperCase() }}{{ variant.variantOf ? ' · Compatibility' : '' }} ·
+            {{ Math.round(variant.approxBytes / 1e6) }} MB
+          </option>
         </select>
         <VwlModelDetails :model-id="state.models[i]" />
       </div>
@@ -192,15 +237,24 @@ onBeforeUnmount(() => {
           <p v-if="!pane.turns.length">Answers will appear here.</p>
           <article v-for="(turn, n) in pane.turns" :key="n">
             <p class="vwl-compare-prompt">{{ turn.prompt }}</p>
-            <div class="labs-md-prose" v-html="labsMarkdownToHtml(turn.response)"></div>
+            <div v-if="turn.status === 'running' && pane.preview" class="vwl-checked-preview">
+              {{ pane.preview }}
+            </div>
+            <div v-else class="labs-md-prose" v-html="labsMarkdownToHtml(turn.response)"></div>
             <p v-if="turn.context?.omittedTurns">
               {{ turn.context.omittedTurns }} older turns omitted from context.
+            </p>
+            <p v-if="turn.context?.rejectedSources || turn.context?.rejectedHistoryTurns">
+              Guardrails omitted {{ turn.context.rejectedSources || 0 }} reference(s) and
+              {{ turn.context.rejectedHistoryTurns || 0 }} history turn(s).
             </p>
             <p v-if="turn.error">{{ turn.error }}</p>
             <small
               >{{ turn.status
-              }}<template v-if="turn.firstAnswerMs != null">
-                · First answer {{ (turn.firstAnswerMs / 1000).toFixed(2) }}s</template
+              }}<template v-if="turn.firstPreviewMs != null">
+                · First checked text {{ (turn.firstPreviewMs / 1000).toFixed(2) }}s</template
+              ><template v-if="turn.firstAnswerMs != null">
+                · Checked reply {{ (turn.firstAnswerMs / 1000).toFixed(2) }}s</template
               ><template v-if="turn.generationMs != null">
                 · Completed {{ (turn.generationMs / 1000).toFixed(2) }}s</template
               ></small
@@ -241,6 +295,10 @@ onBeforeUnmount(() => {
   </section>
 </template>
 <style scoped>
+.vwl-checked-preview {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .vwl-compare {
   display: grid;
   gap: 1rem;

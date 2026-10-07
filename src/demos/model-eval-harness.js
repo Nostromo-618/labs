@@ -11,6 +11,7 @@ window.__VWL_MODEL_EVAL_RUN__ = async () => {
     modelIds,
     repetitions: Number(params.get('warm') ?? 3),
     cold: params.get('cold') === '1',
+    releaseCachesAfterModel: params.get('releaseCaches') === '1',
     signal: controller.signal,
     onProgress: ({ message, report }) => {
       const el = document.getElementById('log');

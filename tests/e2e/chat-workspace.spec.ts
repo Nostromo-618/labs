@@ -71,7 +71,15 @@ for (const theme of ['light', 'dark']) {
       await composer(page).fill('Keep my draft');
       const before = await page.locator('.vwl-ai-messages').boundingBox();
       await openSettings(page);
-      await page.getByText('Voice settings', { exact: true }).click();
+      await expect(page.getByText('Model details', { exact: true }).locator('..')).toHaveAttribute(
+        'open',
+        '',
+      );
+      await expect(page.getByText('Voice settings', { exact: true }).locator('..')).toHaveAttribute(
+        'open',
+        '',
+      );
+      await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
       await page.getByLabel('Read-aloud voice').selectOption('neural');
       const after = await page.locator('.vwl-ai-messages').boundingBox();
       expect(Math.abs(before.height - after.height)).toBeLessThan(2);
@@ -94,6 +102,43 @@ for (const theme of ['light', 'dark']) {
     });
   }
 }
+
+test('live playback status stays below the composer while a long transcript scrolls', async ({
+  page,
+}, info) => {
+  await page.goto('/tests/fixtures/chat-vue-harness.html');
+  await closeSettings(page);
+  const status = page.locator('.vwl-ai-live-status');
+  const idle = await status.boundingBox();
+  for (let i = 0; i < 3; i++) {
+    await composer(page).fill(`Turn ${i}: ${'Long conversation text. '.repeat(55)}`);
+    await composer(page).press('Enter');
+    await expect(page.locator('[data-role="assistant"]')).toHaveCount(i + 1);
+  }
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Load Neural voice', exact: true }).click();
+  await closeSettings(page);
+  await page.evaluate(() => {
+    window.speechQA.holdNeural = true;
+  });
+  await page.getByRole('button', { name: 'Read aloud', exact: true }).last().click();
+  await expect(status).toContainText('Preparing neural audio on this device…');
+  await composer(page).scrollIntoViewIfNeeded();
+  await expect(status).toBeInViewport();
+  const before = await status.boundingBox();
+  const form = await page.locator('.vwl-ai-form').boundingBox();
+  expect(before.y).toBeGreaterThanOrEqual(form.y + form.height - 1);
+  expect(Math.abs(before.height - idle.height)).toBeLessThan(2);
+  await page.locator('.vwl-ai-messages').evaluate((el) => {
+    el.scrollTop = 0;
+  });
+  const after = await status.boundingBox();
+  expect(Math.abs(before.y - after.y)).toBeLessThan(1);
+  await expect(status).toBeInViewport();
+  await page.screenshot({ path: `qa/chat-workspace/status-footer-${info.project.name}.png` });
+  await page.getByRole('button', { name: 'Cancel speech', exact: true }).click();
+  await expect(status).toBeEmpty();
+});
 
 test('narrow drawer traps focus, restores it, handles backdrop and nested storage modal', async ({
   page,
@@ -150,7 +195,7 @@ test('panel toggles and breakpoint changes preserve downloads, recording, playba
   await page.getByRole('button', { name: /Stop recording/ }).click();
   await expect(composer(page)).toHaveValue('saved draft dictated text');
   await openSettings(page);
-  await page.getByText('Voice settings', { exact: true }).click();
+  await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
   await page.getByLabel('Read-aloud voice').selectOption('neural');
   await page.getByRole('button', { name: 'Load Neural voice', exact: true }).click();
   await page.evaluate(() => {
@@ -175,7 +220,7 @@ test('conversation status and paused review remain in chat when Settings is clos
 }) => {
   await page.goto('/tests/fixtures/chat-vue-harness.html');
   await composer(page).fill('saved draft');
-  await page.getByRole('button', { name: 'Conversation Mode', exact: true }).click();
+  await page.getByRole('button', { name: 'Voice Conversation Mode', exact: true }).click();
   await expect(
     page.getByText('Listening… Pause for about 1.2 seconds to send.', { exact: true }),
   ).toBeVisible();
@@ -199,6 +244,7 @@ test('conversation status and paused review remain in chat when Settings is clos
 });
 
 test('both real demo hosts keep a lazy workspace with documentation below', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   for (const url of ['/#demos/aichat', '/demo/ai-chat-demo.html']) {
     await page.goto(url);
     if (await page.getByTestId('disclaimer-gate').isVisible())
@@ -207,7 +253,9 @@ test('both real demo hosts keep a lazy workspace with documentation below', asyn
     await expect(panel(page)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Open Settings', exact: true })).toHaveCount(0);
     await expect(
-      page.getByText('Load a model in the Settings panel, or choose Conversation Mode above.'),
+      page.getByText(
+        'Load a model in the Settings panel, or choose Voice Conversation Mode above.',
+      ),
     ).toBeVisible();
     await settle(page);
     const before = await page.locator('.vwl-ai-messages').boundingBox();
@@ -223,7 +271,7 @@ test('both real demo hosts keep a lazy workspace with documentation below', asyn
       await page.screenshot({ path: 'qa/theme-refresh/chat-settings-open.png' });
     await expect(composer(page)).toBeDisabled();
     await expect(
-      page.getByRole('button', { name: 'Conversation Mode', exact: true }),
+      page.getByRole('button', { name: 'Voice Conversation Mode', exact: true }),
     ).toBeVisible();
   }
 });

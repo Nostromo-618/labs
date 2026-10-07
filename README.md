@@ -8,12 +8,12 @@ Live demos: **https://labs.vanduo.dev**
 
 Clone these beside Labs (same parent directory) so `link:../vwl-*` resolves:
 
-| Repo | Role |
-|------|------|
-| [`vanduo-oss/vwl-cbun`](https://github.com/vanduo-oss/vwl-cbun) | Widgets: code-editor, draw, hex-grid, music-player (`#widgets/*`); Vite aliases into sibling `dist/` |
-| [`vanduo-oss/vwl-hybrid-search`](https://github.com/vanduo-oss/vwl-hybrid-search) | Headless `HybridSearch` + search guardrails |
-| [`vanduo-oss/vwl-ai-chat`](https://github.com/vanduo-oss/vwl-ai-chat) | Headless `AiChat` + LLM/tools guardrails + markdown |
-| Labs-local `model-eval.js` | Model evaluation harness (CLI / standalone; not listed on the live site) |
+| Repo                                                                              | Role                                                                                                 |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [`vanduo-oss/vwl-cbun`](https://github.com/vanduo-oss/vwl-cbun)                   | Widgets: code-editor, draw, hex-grid, music-player (`#widgets/*`); Vite aliases into sibling `dist/` |
+| [`vanduo-oss/vwl-hybrid-search`](https://github.com/vanduo-oss/vwl-hybrid-search) | Headless `HybridSearch` + search guardrails                                                          |
+| [`vanduo-oss/vwl-ai-chat`](https://github.com/vanduo-oss/vwl-ai-chat)             | Headless `AiChat` + LLM/tools guardrails + markdown                                                  |
+| Labs-local `model-eval.js`                                                        | Model evaluation harness (CLI / standalone; not listed on the live site)                             |
 
 The site injects bundled runtimes through `src/lib/chat-runtime.js` and the standalone search demo resolves the documentation manifest through `src/lib/docs-search.js`. Build the sibling packages before starting Labs. Hex Earth remains private and is consumed through `link:../vwl-hex-earth`.
 
@@ -41,9 +41,19 @@ pnpm index   # canonical local vd3-docs build → atomic dual-preset data/search
 
 ## vwl-ai-chat (demo)
 
-In-browser AI chat (LiteRT Gemma default, WebLLM fallbacks) with FOSS guardrails. Labs UI: `VwlAiChatUI`.
+In-browser AI chat (Gemma default on LiteRT, Tiny on WebLLM and LFM candidates on Transformers.js / ONNX WebGPU) with FOSS guardrails. Labs UI: `VwlAiChatUI`.
 
 See [doc/vwl-ai-chat.md](./doc/vwl-ai-chat.md).
+
+The demo resolves documentation links from `/doc/`. Linked Markdown reports open as
+readable, script-free HTML pages; original Markdown, JSON evidence and license texts
+remain available. Notices, guardrail provenance and the pinned voice catalog are
+copied from their authoritative workspace sources during build.
+
+After `pnpm build`, run `pnpm docs:check` to validate the chat guide's complete local
+link graph (also checked in CI). For a running production preview, use
+`pnpm docs:check http://127.0.0.1:4173` to verify served content as well. Live external
+checks are separate from CI because third-party availability can change.
 
 ```bash
 pnpm models:fetch   # optional local .models/ mirror for faster dev
@@ -55,18 +65,6 @@ pnpm model-eval     # local CLI eval harness — see doc/vwl-model-eval.md
 ## Hex Earth
 
 `#demos/hex-earth` opens the sibling demo across the available viewport with the Oola dock retained. Geography and canvas code stay in `vwl-hex-earth`; they load only when the route opens. Controls and Stats can be moved with the pointer or arrow keys on desktop. Phones use compact sheets and initially select the low tier. All tiers remain selectable; comparative benchmarks run only on request. Reset layout restores panel positions.
-
-## vwl-ai-draw (in-repo / local)
-
-Alpha — **not listed** on the live Labs site. AI-assisted SVG canvas: host-executed DrawPlans from Gemma 4 (E2B default) with a regex recipe fast-path, read-only question turns, and an optional flagged WebLLM Qwen3-0.6B fast planner. Standalone: `demo/ai-draw-demo.html`. Labs UI: `VwlAiDrawUI`.
-
-See [doc/vwl-ai-draw.md](./doc/vwl-ai-draw.md).
-
-```bash
-pnpm model-eval:draw   # darwin/arm64: plan-validity + latency baseline per model
-```
-
----
 
 ## vwl-model-eval (in-repo / local)
 
@@ -97,12 +95,11 @@ pnpm dev
 - `http://localhost:3000/` — Labs site
 - `http://localhost:3000/demo/hybrid-search-demo.html`
 - `http://localhost:3000/demo/ai-chat-demo.html`
-- `http://localhost:3000/demo/ai-draw-demo.html` — local only (not on live demos)
 - `http://localhost:3000/demo/model-eval-harness.html` — local only
 
 ```bash
 pnpm format:check && pnpm lint && pnpm test:unit && pnpm build
-pnpm test:local    # optional: Gemma drawing requests on macOS arm64 / RUN_AI_DRAW_INFERENCE=1
+pnpm test:local    # optional actual-model browser checks
 ```
 
 Theme controls use `app.use(VanduoVue, { storagePrefix: 'vwl-' })` so preferences do not collide with vd3-docs on shared Pages origins. First visit shows a mandatory terms gate (AI Act transparency + experimental demos); decline opens a farewell screen.

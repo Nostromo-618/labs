@@ -1,4 +1,4 @@
-import { AiChat } from '@vanduo-oss/vwl-ai-chat';
+import { AiChat, getModelOption } from '@vanduo-oss/vwl-ai-chat';
 import { chatRuntimeOptions, getChatDeviceCapabilities } from '../lib/chat-runtime.js';
 import { SpeechSession } from '../lib/speech/session.js';
 import { ConversationSession } from '../lib/speech/conversation.js';
@@ -12,7 +12,9 @@ const tracks = [],
   turns = [],
   peaks = [];
 const status = document.getElementById('status');
-const chat = new AiChat({ ...chatRuntimeOptions, modelId: 'gemma-4-E2B-it-web' });
+const modelId = new URLSearchParams(location.search).get('model') || 'gemma-4-E2B-it-web';
+const voiceId = new URLSearchParams(location.search).get('voice') || 'af_heart';
+const chat = new AiChat({ ...chatRuntimeOptions, modelId });
 const speech = new SpeechSession();
 const originalPlayer = speech.playerFactory;
 speech.playerFactory = (signal) => {
@@ -40,10 +42,19 @@ const report = () => ({
 });
 const loop = new ConversationSession({
   speech,
+  getSettings: () => ({
+    provider: 'neural',
+    voiceId,
+    modelId,
+    maxOutputTokens: getModelOption(modelId)?.reasoning === 'required' ? 1024 : 192,
+  }),
   ensureChat: async () => {
     const capability = await getChatDeviceCapabilities();
-    if (!capability.webgpuSupported || !capability.shaderF16)
-      throw new Error('Gemma needs WebGPU/f16');
+    if (
+      !capability.webgpuSupported ||
+      ((getModelOption(modelId)?.requires || []).includes('shader-f16') && !capability.shaderF16)
+    )
+      throw new Error('The selected model needs compatible WebGPU features');
     chat.setSystemPromptOptions({
       extraRules: 'Answer in 1–3 short conversational sentences in natural English.',
     });
@@ -52,8 +63,16 @@ const loop = new ConversationSession({
   cancelChat: () => chat.cancel(),
   restoreInstructions: () => chat.setSystemPromptOptions({}),
   submitTurn: async (text, options) => {
-    const answer = await chat.generate(text, options);
-    turns.push({ text, answer, heap: performance.memory?.usedJSHeapSize ?? null });
+    let previews = 0;
+    const answer = await chat.generate(text, { ...options, onPreview: () => previews++ });
+    turns.push({
+      text,
+      answer,
+      previews,
+      delivery: options.delivery,
+      maxOutputTokens: options.maxOutputTokens,
+      heap: performance.memory?.usedJSHeapSize ?? null,
+    });
     return answer;
   },
   requestMicrophone: async ({ signal }) => {
@@ -104,7 +123,7 @@ window.conversationEvaluation = {
   },
   async feed(text) {
     if (loop.state.status !== 'listening') throw new Error('Not listening');
-    const output = await speech.runtime.synthesize(text);
+    const output = await speech.runtime.synthesize(text, { voiceId });
     for (const pcm of output.chunks) {
       const source = inputContext.createBufferSource();
       source.buffer = inputContext.createBuffer(1, pcm.length, output.sampleRate);

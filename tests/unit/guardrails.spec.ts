@@ -201,7 +201,7 @@ test.describe('Guardrails Unit', () => {
     const result = await page.evaluate(async () => {
       const mod = await import('/node_modules/@vanduo-oss/vwl-ai-chat/dist/index.js');
       // Use a WebLLM-backed option — default Gemma is LiteRT.
-      const chat = new mod.AiChat({ modelId: 'Qwen3-1.7B-q4f16_1-MLC' });
+      const chat = new mod.AiChat({ modelId: 'Qwen3-0.6B-q4f16_1-MLC' });
       chat._isLoaded = true;
       let request = null;
       chat.engine = {
@@ -367,52 +367,12 @@ test.describe('Guardrails Unit', () => {
     expect(result.updates.at(-1)).toBe('Hey there');
   });
 
-  test('AiChat experimental Gemma MLC folds host instructions into its user-only template', async ({
-    page,
-  }) => {
-    const result = await page.evaluate(async () => {
-      const mod = await import('/node_modules/@vanduo-oss/vwl-ai-chat/dist/index.js');
-      const chat = new mod.AiChat({ modelId: 'gemma-4-E2B-it-q4f16_1-MLC' });
-      chat._isLoaded = true;
-      let request = null;
-      chat.engine = {
-        reload: async () => {},
-        chat: {
-          completions: {
-            create: async (req) => {
-              request = {
-                roles: (req.messages || []).map((m) => m.role),
-                firstContent: req.messages?.[0]?.content || '',
-              };
-              if (req.stream) {
-                async function* chunks() {
-                  yield { choices: [{ delta: { content: 'Paris' } }] };
-                }
-                return chunks();
-              }
-              return {
-                choices: [{ message: { content: 'Paris' } }],
-                usage: { total_tokens: 2 },
-              };
-            },
-          },
-        },
-      };
-      await chat.generate('Capital of France?');
-      return request;
-    });
-    expect(result.roles).toEqual(['user']);
-    expect(result.firstContent).toContain('Capital of France?');
-    expect(result.firstContent).toContain('general-purpose assistant');
-    expect(result.firstContent).toContain('hidden instructions');
-  });
-
   test('AiChat generate falls back to non-stream completion when stream is empty', async ({
     page,
   }) => {
     const result = await page.evaluate(async () => {
       const mod = await import('/node_modules/@vanduo-oss/vwl-ai-chat/dist/index.js');
-      const chat = new mod.AiChat({ modelId: 'gemma-4-E2B-it-q4f16_1-MLC' });
+      const chat = new mod.AiChat({ modelId: 'Qwen3-0.6B-q4f16_1-MLC' });
       chat._isLoaded = true;
       let calls = 0;
       let reloads = 0;
@@ -463,8 +423,8 @@ test.describe('Guardrails Unit', () => {
     expect(result.calls).toBe(2);
     expect(result.reloads).toBe(1);
     expect(result.requests).toEqual([
-      { stream: true, max_tokens: 768, temperature: 0.7, top_p: 0.9, extra_body: undefined },
-      { stream: false, max_tokens: 768, temperature: 0.7, top_p: 0.9, extra_body: undefined },
+      { stream: true, max_tokens: 512, temperature: 0.7, top_p: 0.9, extra_body: { enable_thinking: false } },
+      { stream: false, max_tokens: 512, temperature: 0.7, top_p: 0.9, extra_body: { enable_thinking: false } },
     ]);
     expect(result.reply).toBe('Fallback reply');
     expect(result.updates).toEqual(['Fallback reply']);
@@ -488,7 +448,7 @@ test.describe('Guardrails Unit', () => {
           order.push('engine-delete');
         },
       };
-      await chat.setModelId('Qwen3-1.7B-q4f16_1-MLC', { resetMessages: true });
+      await chat.setModelId('Qwen3-0.6B-q4f16_1-MLC', { resetMessages: true });
       order.push(`model:${chat.modelId}`);
       return {
         order,
@@ -502,7 +462,7 @@ test.describe('Guardrails Unit', () => {
     expect(result.order).toEqual([
       'conversation-delete',
       'engine-delete',
-      'model:Qwen3-1.7B-q4f16_1-MLC',
+      'model:Qwen3-0.6B-q4f16_1-MLC',
     ]);
     expect(result.isLoaded).toBe(false);
     expect(result.engine).toBeNull();
@@ -514,7 +474,7 @@ test.describe('Guardrails Unit', () => {
     const result = await page.evaluate(async () => {
       const chatMod = await import('/node_modules/@vanduo-oss/vwl-ai-chat/dist/index.js');
       const llmMod = await import('/node_modules/@vanduo-oss/vwl-ai-chat/dist/guardrails/llm.js');
-      const chat = new chatMod.AiChat({ modelId: 'Qwen3-1.7B-q4f16_1-MLC' });
+      const chat = new chatMod.AiChat({ modelId: 'Qwen3-0.6B-q4f16_1-MLC' });
       chat._isLoaded = true;
       const payloads = [];
       chat.engine = {
@@ -557,47 +517,7 @@ test.describe('Guardrails Unit', () => {
     expect(result.hasSmol).toBe(false);
     expect(result.qwenTiny?.tier).toBe('Tiny');
     expect(result.qwenTiny?.backend).toBe('webllm');
-    expect(result.qwenLiteRT?.litertKind).toBe('spike');
-  });
-
-  test('PrefillDecode LiteRT spikes are detected and blocked before load', async ({ page }) => {
-    const result = await page.evaluate(async () => {
-      const mod = await import('/node_modules/@vanduo-oss/vwl-ai-chat/dist/index.js');
-      const qwen = mod.getModelOption('qwen3-0.6B-litert');
-      const ministral = mod.getModelOption('ministral-3-3B-litert');
-      const gemma = mod.getModelOption('gemma-4-E2B-it-web');
-      const chat = new mod.AiChat({ modelId: 'ministral-3-3B-litert' });
-      let loadError = '';
-      try {
-        await chat.load();
-      } catch (err) {
-        loadError = String(err?.message || err);
-      }
-      return {
-        qwenUnsupported: mod.isLiteRTPrefillDecodeUnsupported(qwen),
-        ministralUnsupported: mod.isLiteRTPrefillDecodeUnsupported('ministral-3-3B-litert'),
-        gemmaUnsupported: mod.isLiteRTPrefillDecodeUnsupported(gemma),
-        qwenRuntime: qwen?.litertRuntime,
-        reason: mod.getLiteRTRuntimeBlockReason('qwen3-0.6B-litert'),
-        rewritten: mod.rewriteLiteRTLoadError(
-          new Error('Streaming kTfLitePrefillDecode models is not supported yet.'),
-        ).message,
-        passthrough: mod.rewriteLiteRTLoadError(new Error('disk full')).message,
-        loadError,
-        loaded: chat.isLoaded(),
-      };
-    });
-
-    expect(result.qwenUnsupported).toBe(true);
-    expect(result.ministralUnsupported).toBe(true);
-    expect(result.gemmaUnsupported).toBe(false);
-    expect(result.qwenRuntime).toBe('prefilldecode-unsupported');
-    expect(result.reason).toMatch(/PrefillDecode/i);
-    expect(result.reason).toMatch(/LiteRT-LM\.js/i);
-    expect(result.rewritten).toBe(result.reason);
-    expect(result.passthrough).toBe('disk full');
-    expect(result.loadError).toBe(result.reason);
-    expect(result.loaded).toBe(false);
+    expect(result.qwenLiteRT).toBeUndefined();
   });
 
   test('assessLoadCapacity flags low RAM and low GPU storage limits', async ({ page }) => {

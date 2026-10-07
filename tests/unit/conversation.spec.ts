@@ -262,7 +262,7 @@ test('one click preserves history/draft, automatically submits consecutive turns
   page,
 }) => {
   await page.getByRole('textbox', { name: 'Message', exact: true }).fill('typed draft');
-  await page.getByRole('button', { name: 'Conversation Mode', exact: true }).click();
+  await page.getByRole('button', { name: 'Voice Conversation Mode', exact: true }).click();
   await expect(
     page.getByText('Listening… Pause for about 1.2 seconds to send.', { exact: true }),
   ).toBeVisible();
@@ -299,7 +299,7 @@ for (const [name, transcript, limit] of [
     page,
   }) => {
     await page.getByRole('textbox', { name: 'Message', exact: true }).fill('saved draft');
-    await page.getByRole('button', { name: 'Conversation Mode', exact: true }).click();
+    await page.getByRole('button', { name: 'Voice Conversation Mode', exact: true }).click();
     await expect(page.getByText(/Listening… Pause/)).toBeVisible();
     await page.evaluate(
       ({ transcript, limit }) => {
@@ -330,7 +330,7 @@ test('permission denial pauses with an actionable error; pending Kokoro has an i
   await page.evaluate(() => {
     window.speechQA.denied = true;
   });
-  await page.getByRole('button', { name: 'Conversation Mode', exact: true }).click();
+  await page.getByRole('button', { name: 'Voice Conversation Mode', exact: true }).click();
   await expect(page.getByText('Microphone permission denied', { exact: true })).toBeVisible();
   await page.evaluate(() => {
     window.speechQA.denied = false;
@@ -352,14 +352,16 @@ test('permission denial pauses with an actionable error; pending Kokoro has an i
 });
 
 test('page suspension pauses automatic mode and reset ends it', async ({ page }) => {
-  await page.getByRole('button', { name: 'Conversation Mode', exact: true }).click();
+  await page.getByRole('button', { name: 'Voice Conversation Mode', exact: true }).click();
   await expect(page.getByText(/Listening… Pause/)).toBeVisible();
   await page.evaluate(() => document.dispatchEvent(new Event('freeze')));
   await expect(
     page.getByRole('button', { name: 'Resume conversation', exact: true }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'New conversation', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Conversation Mode', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Voice Conversation Mode', exact: true }),
+  ).toBeVisible();
 });
 
 for (const failure of ['microphone', 'transcription', 'generation', 'playback']) {

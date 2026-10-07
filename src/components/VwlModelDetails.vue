@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { getModelOption } from '@vanduo-oss/vwl-ai-chat';
+import { getModelOption, getModelChoiceLabel } from '@vanduo-oss/vwl-ai-chat';
 const props = defineProps({ modelId: { type: String, default: '' } });
 const model = computed(() => getModelOption(props.modelId));
 </script>
@@ -10,8 +10,18 @@ const model = computed(() => getModelOption(props.modelId));
       {{ model.purpose || model.tier }} {{ model.experimental ? 'Experimental candidate.' : '' }}
     </p>
     <p>
-      {{ (model.approxBytes / 1e6).toFixed(0) }} MB download ·
-      {{ model.precision || model.backend }} · {{ model.license || 'See model licence' }}
+      {{ getModelChoiceLabel(model) }} · {{ model.precision || 'Web build' }} ·
+      {{ model.license || 'See model licence' }}
+    </p>
+    <p v-if="model.toolCalling">
+      <a :href="model.toolCalling.source" rel="noopener noreferrer"
+        >Model documentation: tool calling</a
+      >.
+      {{
+        model.capabilities?.tools
+          ? 'Available through the Gemma integration.'
+          : 'Integration pending; this build has not been certified for tools.'
+      }}
     </p>
     <p>
       Requires a compatible WebGPU browser.

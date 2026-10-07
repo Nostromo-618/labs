@@ -1,0 +1,627 @@
+{
+  "date": "2026-10-07",
+  "browser": "154.0.8037.98",
+  "device": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "adapter": {},
+    "localVoices": []
+  },
+  "packageTests": 243,
+  "packageCoverage": {
+    "statements": 95.08,
+    "branches": 90.42,
+    "functions": 96.09,
+    "lines": 95.36
+  },
+  "labsBrowserTests": 200,
+  "models": [
+    {
+      "id": "gemma-4-E2B-it-web",
+      "loadMs": 4672.300000000279,
+      "totalMs": 14332.19999999972,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "spokenGenerationMs": 962.5,
+      "spokenPreviews": 0,
+      "spokenAudio": {
+        "seconds": 12.4,
+        "peak": 0.5036289691925049,
+        "finite": true
+      },
+      "firstPreviewMs": 1301.6999999997206,
+      "previewCount": 26
+    },
+    {
+      "id": "gemma-4-E4B-it-web",
+      "loadMs": 12807.399999999907,
+      "totalMs": 30263,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "spokenGenerationMs": 2380.5,
+      "spokenPreviews": 0,
+      "spokenAudio": {
+        "seconds": 13.425,
+        "peak": 0.5518579483032227,
+        "finite": true
+      },
+      "firstPreviewMs": 3650.100000000093,
+      "previewCount": 30
+    },
+    {
+      "id": "Qwen3-0.6B-q4f16_1-MLC",
+      "loadMs": 1125.1000000000931,
+      "totalMs": 5259.299999999814,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "spokenGenerationMs": 551.8000000002794,
+      "spokenPreviews": 0,
+      "spokenAudio": {
+        "seconds": 10.35,
+        "peak": 0.613998532295227,
+        "finite": true
+      },
+      "firstPreviewMs": 780.1999999997206,
+      "previewCount": 18
+    },
+    {
+      "id": "Qwen3-0.6B-q4f32_1-MLC",
+      "loadMs": 1247.1999999997206,
+      "totalMs": 5847,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "firstPreviewMs": 1009.5,
+      "previewCount": 18
+    },
+    {
+      "id": "LFM2.5-230M-q4-ONNX",
+      "loadMs": 882.7000000001863,
+      "totalMs": 5525.299999999814,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "spokenGenerationMs": 728.7000000001863,
+      "spokenPreviews": 0,
+      "spokenAudio": {
+        "seconds": 29.9,
+        "peak": 0.5477168560028076,
+        "finite": true
+      },
+      "firstPreviewMs": 546.6000000000931,
+      "previewCount": 36
+    },
+    {
+      "id": "LFM2.5-350M-q4-ONNX",
+      "loadMs": 1064.6000000000931,
+      "totalMs": 6002.899999999907,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "spokenGenerationMs": 571.7999999998137,
+      "spokenPreviews": 0,
+      "spokenAudio": {
+        "seconds": 21.05,
+        "peak": 0.536736249923706,
+        "finite": true
+      },
+      "firstPreviewMs": 586.6999999997206,
+      "previewCount": 42
+    },
+    {
+      "id": "LFM2.5-2.6B-q4f16-ONNX",
+      "loadMs": 3171.9000000003725,
+      "totalMs": 31829.299999999814,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "spokenGenerationMs": 4066.899999999907,
+      "spokenPreviews": 0,
+      "spokenAudio": {
+        "seconds": 27.1,
+        "peak": 0.8217345476150513,
+        "finite": true
+      },
+      "firstPreviewMs": 4435.799999999814,
+      "previewCount": 46
+    },
+    {
+      "id": "LFM2.5-2.6B-q4-ONNX",
+      "loadMs": 5507.700000000186,
+      "totalMs": 21504.200000000186,
+      "previewBeforeFinal": true,
+      "finalCallbacks": 1,
+      "firstPreviewMs": 5348.700000000186,
+      "previewCount": 29
+    }
+  ],
+  "voices": [
+    {
+      "id": "af_alloy",
+      "loadMs": 833.3000000002794,
+      "synthesisMs": 7159.100000000093,
+      "seconds": 4.775,
+      "rms": 0.07602301978238409,
+      "peak": 0.6212517023086548,
+      "finite": true
+    },
+    {
+      "id": "af_aoede",
+      "loadMs": 4.5,
+      "synthesisMs": 6605.700000000186,
+      "seconds": 4.425,
+      "rms": 0.12175018456989377,
+      "peak": 0.7943101525306702,
+      "finite": true
+    },
+    {
+      "id": "af_bella",
+      "loadMs": 3.8999999999068677,
+      "synthesisMs": 7258.4000000003725,
+      "seconds": 4.95,
+      "rms": 0.07349597131749508,
+      "peak": 0.5767415761947632,
+      "finite": true
+    },
+    {
+      "id": "af_heart",
+      "loadMs": 2.8999999999068677,
+      "synthesisMs": 6665.600000000093,
+      "seconds": 4.45,
+      "rms": 0.06896380918504086,
+      "peak": 0.5840235352516174,
+      "finite": true,
+      "playbackCompleted": true
+    },
+    {
+      "id": "af_jessica",
+      "loadMs": 4.399999999906868,
+      "synthesisMs": 6215.699999999721,
+      "seconds": 4.2,
+      "rms": 0.07444162935087516,
+      "peak": 0.6386062502861023,
+      "finite": true
+    },
+    {
+      "id": "af_kore",
+      "loadMs": 3.7999999998137355,
+      "synthesisMs": 6704.700000000186,
+      "seconds": 4.5,
+      "rms": 0.11163226119268034,
+      "peak": 0.635164201259613,
+      "finite": true
+    },
+    {
+      "id": "af_nicole",
+      "loadMs": 3.6000000000931323,
+      "synthesisMs": 9949.700000000186,
+      "seconds": 6.95,
+      "rms": 0.07277958756017525,
+      "peak": 0.6726201176643372,
+      "finite": true
+    },
+    {
+      "id": "af_nova",
+      "loadMs": 4,
+      "synthesisMs": 6706.200000000186,
+      "seconds": 4.575,
+      "rms": 0.04395229944050888,
+      "peak": 0.3517875671386719,
+      "finite": true
+    },
+    {
+      "id": "af_river",
+      "loadMs": 5,
+      "synthesisMs": 7252.899999999907,
+      "seconds": 4.3,
+      "rms": 0.0810540927520601,
+      "peak": 0.7464216947555542,
+      "finite": true
+    },
+    {
+      "id": "af_sarah",
+      "loadMs": 4.400000000372529,
+      "synthesisMs": 9258.19999999972,
+      "seconds": 4.975,
+      "rms": 0.08309772585804652,
+      "peak": 0.8754633665084839,
+      "finite": true
+    },
+    {
+      "id": "af_sky",
+      "loadMs": 6.400000000372529,
+      "synthesisMs": 7783.5999999996275,
+      "seconds": 4.475,
+      "rms": 0.06035749929695028,
+      "peak": 0.6310789585113525,
+      "finite": true
+    },
+    {
+      "id": "am_adam",
+      "loadMs": 4.2999999998137355,
+      "synthesisMs": 8016.600000000093,
+      "seconds": 4.55,
+      "rms": 0.11071965282639393,
+      "peak": 0.8666746020317078,
+      "finite": true
+    },
+    {
+      "id": "am_echo",
+      "loadMs": 5,
+      "synthesisMs": 8270.099999999627,
+      "seconds": 4.65,
+      "rms": 0.07242323109619078,
+      "peak": 0.5254973769187927,
+      "finite": true
+    },
+    {
+      "id": "am_eric",
+      "loadMs": 4.100000000093132,
+      "synthesisMs": 7326.5,
+      "seconds": 4.25,
+      "rms": 0.08462190951591549,
+      "peak": 0.45125359296798706,
+      "finite": true
+    },
+    {
+      "id": "am_fenrir",
+      "loadMs": 4.7999999998137355,
+      "synthesisMs": 6697.600000000093,
+      "seconds": 4.275,
+      "rms": 0.10160396348073712,
+      "peak": 1.012841820716858,
+      "finite": true
+    },
+    {
+      "id": "am_liam",
+      "loadMs": 3.3999999999068677,
+      "synthesisMs": 6446.699999999721,
+      "seconds": 4.325,
+      "rms": 0.07780725000984713,
+      "peak": 0.7573978900909424,
+      "finite": true
+    },
+    {
+      "id": "am_michael",
+      "loadMs": 3.8999999999068677,
+      "synthesisMs": 7240.200000000186,
+      "seconds": 4.925,
+      "rms": 0.0582062978920072,
+      "peak": 0.5911521315574646,
+      "finite": true,
+      "playbackCompleted": true
+    },
+    {
+      "id": "am_onyx",
+      "loadMs": 4,
+      "synthesisMs": 6898.199999999721,
+      "seconds": 4.65,
+      "rms": 0.07115179698004298,
+      "peak": 0.5254793167114258,
+      "finite": true
+    },
+    {
+      "id": "am_puck",
+      "loadMs": 4.2999999998137355,
+      "synthesisMs": 6468.700000000186,
+      "seconds": 4.35,
+      "rms": 0.11018376764283049,
+      "peak": 0.8083387613296509,
+      "finite": true
+    },
+    {
+      "id": "am_santa",
+      "loadMs": 3.5,
+      "synthesisMs": 6870.600000000093,
+      "seconds": 4.675,
+      "rms": 0.07089939863851293,
+      "peak": 0.5816022753715515,
+      "finite": true
+    },
+    {
+      "id": "bf_alice",
+      "loadMs": 4.300000000279397,
+      "synthesisMs": 6636.799999999814,
+      "seconds": 4.5,
+      "rms": 0.09185144123894658,
+      "peak": 0.6882049441337585,
+      "finite": true
+    },
+    {
+      "id": "bf_emma",
+      "loadMs": 3.8999999999068677,
+      "synthesisMs": 6783.199999999721,
+      "seconds": 4.6,
+      "rms": 0.08905717930528233,
+      "peak": 0.5700622797012329,
+      "finite": true,
+      "playbackCompleted": true
+    },
+    {
+      "id": "bf_isabella",
+      "loadMs": 3.6999999997206032,
+      "synthesisMs": 6767.300000000279,
+      "seconds": 4.6,
+      "rms": 0.1158578004947236,
+      "peak": 0.8893605470657349,
+      "finite": true
+    },
+    {
+      "id": "bf_lily",
+      "loadMs": 3.7999999998137355,
+      "synthesisMs": 6491.200000000186,
+      "seconds": 4.45,
+      "rms": 0.08422436107748837,
+      "peak": 0.7892823219299316,
+      "finite": true
+    },
+    {
+      "id": "bm_daniel",
+      "loadMs": 3.7000000001862645,
+      "synthesisMs": 6508.899999999907,
+      "seconds": 4.4,
+      "rms": 0.08198328729075624,
+      "peak": 0.5626505017280579,
+      "finite": true
+    },
+    {
+      "id": "bm_fable",
+      "loadMs": 3.7999999998137355,
+      "synthesisMs": 6972.5,
+      "seconds": 4.775,
+      "rms": 0.06474573860036378,
+      "peak": 0.7360299825668335,
+      "finite": true
+    },
+    {
+      "id": "bm_george",
+      "loadMs": 3.599999999627471,
+      "synthesisMs": 7044.5,
+      "seconds": 4.825,
+      "rms": 0.08355034500383754,
+      "peak": 0.5028750896453857,
+      "finite": true,
+      "playbackCompleted": true
+    },
+    {
+      "id": "bm_lewis",
+      "loadMs": 4,
+      "synthesisMs": 7311.799999999814,
+      "seconds": 5.05,
+      "rms": 0.059870996505787165,
+      "peak": 0.7300681471824646,
+      "finite": true
+    }
+  ],
+  "offline": {
+    "voiceId": "bf_emma",
+    "samples": 58800
+  },
+  "systemVoice": {
+    "name": "Samantha",
+    "completed": true
+  },
+  "cacheAndLatency": {
+    "invalid": "Choose an available English Kokoro voice.",
+    "corrupt": "Neural voice checksum failed. Clear speech caches and reload this voice.",
+    "uncachedOffline": "Selected neural voice is unavailable. Load this voice while online, then retry.",
+    "restored": {
+      "samples": 57000
+    },
+    "latency": {
+      "1000": {
+        "medianMs": 0.20000000018626451,
+        "p95Ms": 0.39999999990686774
+      },
+      "4000": {
+        "medianMs": 0.8000000002793968,
+        "p95Ms": 0.900000000372529
+      },
+      "16000": {
+        "medianMs": 3.2000000001862645,
+        "p95Ms": 3.3999999999068677
+      },
+      "32000": {
+        "medianMs": 6.2999999998137355,
+        "p95Ms": 6.7000000001862645
+      }
+    }
+  },
+  "conversations": [
+    {
+      "id": "gemma-4-E2B-it-web",
+      "turns": 1,
+      "previewCount": 0,
+      "outputTokens": 192,
+      "delivery": "complete",
+      "measurements": [
+        {
+          "silenceToSubmitMs": 2264.0999999996275,
+          "silenceToFirstAudioMs": 14105.700000000186
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.595009446144104,
+          "samples": 180600,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.9043415188789368,
+          "samples": 127800,
+          "microphoneOff": true
+        }
+      ],
+      "liveTracksAfterEnd": 0,
+      "loadFailures": []
+    },
+    {
+      "id": "gemma-4-E4B-it-web",
+      "turns": 1,
+      "previewCount": 0,
+      "outputTokens": 192,
+      "delivery": "complete",
+      "measurements": [
+        {
+          "silenceToSubmitMs": 2282.7999999998137,
+          "silenceToFirstAudioMs": 13819.399999999441
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.5027197003364563,
+          "samples": 151800,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.5062804818153381,
+          "samples": 142200,
+          "microphoneOff": true
+        }
+      ],
+      "liveTracksAfterEnd": 0,
+      "loadFailures": []
+    },
+    {
+      "id": "Qwen3-0.6B-q4f16_1-MLC",
+      "turns": 1,
+      "previewCount": 0,
+      "outputTokens": 192,
+      "delivery": "complete",
+      "measurements": [
+        {
+          "silenceToSubmitMs": 2267.5,
+          "silenceToFirstAudioMs": 12071
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.5545599460601807,
+          "samples": 151800,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.5300571322441101,
+          "samples": 38400,
+          "microphoneOff": true
+        }
+      ],
+      "liveTracksAfterEnd": 0,
+      "loadFailures": []
+    },
+    {
+      "id": "LFM2.5-230M-q4-ONNX",
+      "turns": 1,
+      "previewCount": 0,
+      "outputTokens": 192,
+      "delivery": "complete",
+      "measurements": [
+        {
+          "silenceToSubmitMs": 2324.4000000003725,
+          "silenceToFirstAudioMs": 18418.200000000186
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.4886641502380371,
+          "samples": 247200,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.6279834508895874,
+          "samples": 201000,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.4537625014781952,
+          "samples": 218400,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.5827412605285645,
+          "samples": 268800,
+          "microphoneOff": true
+        }
+      ],
+      "liveTracksAfterEnd": 0,
+      "loadFailures": []
+    },
+    {
+      "id": "LFM2.5-350M-q4-ONNX",
+      "turns": 1,
+      "previewCount": 0,
+      "outputTokens": 192,
+      "delivery": "complete",
+      "measurements": [
+        {
+          "silenceToSubmitMs": 2328.2999999998137,
+          "silenceToFirstAudioMs": 20890.400000000373
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.6276106238365173,
+          "samples": 282600,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.5020161271095276,
+          "samples": 213000,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.6900159120559692,
+          "samples": 95400,
+          "microphoneOff": true
+        }
+      ],
+      "liveTracksAfterEnd": 0,
+      "loadFailures": []
+    },
+    {
+      "id": "LFM2.5-2.6B-q4f16-ONNX",
+      "turns": 1,
+      "previewCount": 0,
+      "outputTokens": 1024,
+      "delivery": "complete",
+      "measurements": [
+        {
+          "silenceToSubmitMs": 2334.4000000003725,
+          "silenceToFirstAudioMs": 25817.400000000373
+        }
+      ],
+      "peaks": [
+        {
+          "peak": 0.6254938840866089,
+          "samples": 291000,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.5172062516212463,
+          "samples": 262200,
+          "microphoneOff": true
+        },
+        {
+          "peak": 0.5772775411605835,
+          "samples": 123000,
+          "microphoneOff": true
+        }
+      ],
+      "liveTracksAfterEnd": 0,
+      "loadFailures": []
+    }
+  ],
+  "productionUI": [
+    {
+      "width": 1440,
+      "voiceOptions": 28,
+      "sharedDelivery": true,
+      "overflow": false,
+      "assetRequests": [],
+      "cspViolations": []
+    },
+    {
+      "width": 390,
+      "voiceOptions": 28,
+      "sharedDelivery": true,
+      "overflow": false,
+      "assetRequests": [],
+      "cspViolations": []
+    }
+  ]
+}

@@ -17,7 +17,9 @@ import { BASELINE_MODEL_IDS, NEW_MODEL_IDS } from '@vanduo-oss/vwl-ai-chat';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = path.join(ROOT, 'qa/local-refresh/model-eval');
-const PROFILE = path.resolve(ROOT, '.models/.refresh-eval-profile');
+const PROFILE = path.resolve(
+  process.env.MODEL_EVAL_PROFILE || path.join(ROOT, '.models/.refresh-eval-profile'),
+);
 
 const args = process.argv.slice(2);
 const modelsIdx = args.indexOf('--models');
@@ -35,7 +37,7 @@ const isPair = args.includes('--pair');
 const reportName = process.env.MODEL_EVAL_REPORT_NAME || (isPair ? 'pair-report' : 'report');
 if (!/^[a-z0-9][a-z0-9._-]{0,63}$/i.test(reportName))
   throw new Error('Invalid MODEL_EVAL_REPORT_NAME.');
-const url = `${base}/demo/model-eval-harness.html?autorun=1&models=${encodeURIComponent(models)}&warm=${warmRepetitions}${args.includes('--cold') ? '&cold=1' : ''}${isPair ? '&pair=1' : ''}`;
+const url = `${base}/demo/model-eval-harness.html?autorun=1&models=${encodeURIComponent(models)}&warm=${warmRepetitions}${args.includes('--cold') ? '&cold=1' : ''}${isPair ? '&pair=1' : ''}${args.includes('--release-caches') ? '&releaseCaches=1' : ''}`;
 const reportPath = path.join(OUT_DIR, `${reportName}.json`);
 const htmlPath = path.join(OUT_DIR, reportName === 'report' ? 'index.html' : `${reportName}.html`);
 
@@ -52,6 +54,18 @@ const context = await chromium.launchPersistentContext(PROFILE, {
 });
 
 const page = context.pages()[0] || (await context.newPage());
+if (process.env.MODEL_EVAL_DISABLE_HTTP_CACHE === '1') {
+  await (
+    await context.newCDPSession(page)
+  ).send('Network.setCacheDisabled', { cacheDisabled: true });
+}
+if (process.env.MODEL_EVAL_STORAGE_QUOTA_BYTES) {
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Storage.overrideQuotaForOrigin', {
+    origin: new URL(base).origin,
+    quotaSize: Number(process.env.MODEL_EVAL_STORAGE_QUOTA_BYTES),
+  });
+}
 let lastWeightProgressAt = 0;
 let lastWeightProgressText = '';
 page.on('console', (msg) => {
@@ -69,7 +83,7 @@ page.on('console', (msg) => {
     }
     return;
   }
-  if (/Fetching model weights|Reading model weights/i.test(text)) {
+  if (/Fetching model weights|Reading(?: local| cached)? model weights/i.test(text)) {
     const now = Date.now();
     if (text === lastWeightProgressText && now - lastWeightProgressAt < 5000) return;
     lastWeightProgressAt = now;
@@ -92,18 +106,28 @@ page.on('requestfailed', (request) => {
   if (reason !== 'net::ERR_ABORTED') console.log(`[request-failed]`, request.url(), reason);
 });
 
-await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-await page.waitForFunction(() => window.__VWL_MODEL_EVAL_DONE__ === true, null, {
-  timeout: timeoutMs,
-});
-
-const payload = await page.evaluate(() => ({
-  report: window.__VWL_MODEL_EVAL_REPORT__ || null,
-  html: window.__VWL_MODEL_EVAL_HTML__ || '',
-  error: window.__VWL_MODEL_EVAL_ERROR__ || null,
-}));
-
-await context.close();
+let payload;
+try {
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await page.waitForFunction(() => window.__VWL_MODEL_EVAL_DONE__ === true, null, {
+    timeout: timeoutMs,
+  });
+  payload = await page.evaluate(() => ({
+    report: window.__VWL_MODEL_EVAL_REPORT__ || null,
+    html: window.__VWL_MODEL_EVAL_HTML__ || '',
+    error: window.__VWL_MODEL_EVAL_ERROR__ || null,
+  }));
+  if (payload.report)
+    payload.report.executionStorage = {
+      releaseCachesAfterModel: args.includes('--release-caches'),
+      httpCacheDisabled: process.env.MODEL_EVAL_DISABLE_HTTP_CACHE === '1',
+      quotaOverrideBytes: process.env.MODEL_EVAL_STORAGE_QUOTA_BYTES
+        ? Number(process.env.MODEL_EVAL_STORAGE_QUOTA_BYTES)
+        : null,
+    };
+} finally {
+  await context.close();
+}
 
 if (payload.error || !payload.report) {
   console.error('[model-eval] failed:', payload.error || 'missing report');
