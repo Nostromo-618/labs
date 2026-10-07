@@ -6,12 +6,14 @@ import {
   getChatDeviceCapabilities,
   getChatRuntimeVersion,
 } from './chat-runtime.js';
+import { readChatPreferences, saveChatPreferences } from './chat-preferences.js';
 const emptyPane = () => ({
   status: 'Not loaded',
   loaded: false,
   error: '',
   turns: [],
   progress: '',
+  preview: '',
 });
 const clone = (value) => structuredClone(value);
 const stopped = () => new DOMException('Comparison stopped.', 'AbortError');
@@ -37,6 +39,7 @@ export class CompareSession {
     this.state = {
       models: [getModelOption(modelA) ? modelA : 'gemma-4-E2B-it-web', ''],
       execution: 'together',
+      delivery: readChatPreferences().delivery,
       busy: false,
       loading: false,
       panes: [emptyPane(), emptyPane()],
@@ -47,6 +50,12 @@ export class CompareSession {
       contextTokens: 4096,
       activePane: 0,
     };
+  }
+  setDelivery(delivery) {
+    if (this.state.busy || this.state.loading) return;
+    this.state.delivery = delivery === 'complete' ? 'complete' : 'checked-stream';
+    saveChatPreferences({ delivery: this.state.delivery });
+    this.emit();
   }
   emit() {
     this.onChange(clone(this.state));
@@ -150,9 +159,13 @@ export class CompareSession {
     this.controllers[i] = controller;
     turn.status = 'running';
     turn.response = '';
+    pane.preview = '';
     turn.error = '';
     pane.error = '';
-    pane.status = 'Generating and checking reply';
+    pane.status =
+      this.state.delivery === 'complete'
+        ? 'Generating and checking reply'
+        : 'Generating checked reply';
     this.emit();
     const start = performance.now();
     try {
@@ -166,6 +179,13 @@ export class CompareSession {
         signal: controller.signal,
         contextTokenBudget: turn.contextTokens,
         maxOutputTokens: turn.outputTokens,
+        delivery: this.state.delivery,
+        onPreview: (text) => {
+          if (epoch !== this.epoch || controller.signal.aborted) return;
+          if (text) turn.firstPreviewMs ??= performance.now() - generateStart;
+          pane.preview = text;
+          this.emit();
+        },
         onUpdate: (text) => {
           if (epoch !== this.epoch || controller.signal.aborted) return;
           turn.firstAnswerMs ??= performance.now() - generateStart;
@@ -188,6 +208,7 @@ export class CompareSession {
       turn.error = error.message;
       pane.error = turn.status === 'failed' ? error.message : '';
     } finally {
+      pane.preview = '';
       turn.elapsedMs = performance.now() - start;
       pane.status = turn.status === 'complete' ? 'Ready' : turn.status;
       this.controllers[i] = null;
@@ -244,6 +265,7 @@ export class CompareSession {
     if (!turn || !['failed', 'stopped'].includes(turn.status)) return;
     turn.status = 'queued';
     turn.firstAnswerMs = null;
+    turn.firstPreviewMs = null;
     this.state.busy = true;
     const epoch = ++this.epoch;
     this.pending = this.runSide(i, turn, epoch);
@@ -304,7 +326,7 @@ export class CompareSession {
       turns: clone(this.state.panes.map((p) => p.turns)),
       exportedAt: new Date().toISOString(),
       timingNote:
-        'firstAnswerMs measures the complete checked reply. Together timings share GPU resources and are not isolated speed rankings.',
+        'firstAnswerMs measures the complete checked reply; firstPreviewMs measures first checked preview. Together timings share GPU resources and are not isolated speed rankings.',
     };
   }
   async suspend() {

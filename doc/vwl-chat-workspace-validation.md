@@ -1,5 +1,7 @@
 # Chat workspace validation — 2026-10-04
 
+> Historical workspace acceptance from October 4, 2026. For current reply delivery, paused model/voice settings and responsive controls, see [the latest feature validation](./vwl-checked-stream-conversation-validation.md).
+
 The shared Labs/standalone AI Chat now has a collapsible 320px controls panel, a full-height message column and a composer with compact dictation controls. Below 960px of workspace width, Settings opens an accessible right drawer. A stable settings destination keeps voice preferences and the existing speech session mounted. This change leaves public AiChat interfaces, inference workers and privacy behavior unchanged.
 
 ## Coverage
@@ -14,6 +16,6 @@ Installed Chrome completed three actual Gemma E2B/Whisper/Silero/Kokoro turns th
 
 The additional Firefox UI attempt could not launch the installed Playwright browser: it reported “Could not find profile folder” before visiting the application. Firefox layout acceptance therefore remains unverified in this run. Chrome and WebKit coverage does not certify actual-model Safari or mobile inference.
 
-Screenshots are saved under `qa/chat-workspace/`, including populated light/dark desktop and narrow workspaces. The developer preview remains at [Labs AI Chat](http://127.0.0.1:8792/#demos/aichat) and [standalone AI Chat](http://127.0.0.1:8792/demo/ai-chat-demo.html).
+Screenshots are saved under `qa/chat-workspace/`, including populated light/dark desktop and narrow workspaces. These are local QA artifacts, not published assets. Open [Labs AI Chat](../#demos/aichat) or [standalone AI Chat](../demo/ai-chat-demo.html) on the current host.
 
 No commit, push or deployment was made.

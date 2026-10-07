@@ -1,6 +1,6 @@
 # Private speech validation — 2026-10-01
 
-> Historical initial acceptance snapshot. Docs chat was retired and runtimes updated on 2026-10-04; see [the current refresh report](./dependency-refresh-2026-10-04.md).
+> Historical initial acceptance snapshot. The fixed model/voice defaults and runtime versions below describe the original feature. See [current chat instructions](./vwl-ai-chat.md), [the latest streaming/conversation validation](./vwl-checked-stream-conversation-validation.md) and [dependency refresh history](./dependency-refresh-2026-10-04.md).
 
 The implementation preserves AiChat's public text API and Labs' production CSP. QA ran on an Apple M4 with 24 GiB RAM. These are local snapshots, not a cross-device performance guarantee.
 

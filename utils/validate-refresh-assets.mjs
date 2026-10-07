@@ -97,10 +97,12 @@ for (const asset of wasmManifest.assets) {
 }
 const files = await fs.readdir('dist', { recursive: true });
 assert(
-  !files.some((f) =>
-    /(^|\/)(?:\.models|models|qa|tests|logs)(?:\/|$)|model-eval[^/]*\.(?:html|js|json)$|ai-draw-demo|\.litertlm$/.test(
-      f,
-    ),
+  !files.some(
+    (f) =>
+      f !== 'doc/vwl-model-eval.html' &&
+      /(^|\/)(?:\.models|models|qa|tests|logs)(?:\/|$)|model-eval[^/]*\.(?:html|js|json)$|ai-draw-demo|\.litertlm$/.test(
+        f,
+      ),
   ),
 );
 assert(

@@ -23,7 +23,7 @@ some calls. Fresh-worker offline reload and immutable URLs are covered by real Q
 
 Whisper model: onnx-community/whisper-tiny.en at
 2575352d61be1bf7225cf8f8b268a4678025fc58 (OpenAI Whisper, MIT).
-Kokoro model/af_heart: onnx-community/Kokoro-82M-v1.0-ONNX at
+Kokoro model and named English presets: onnx-community/Kokoro-82M-v1.0-ONNX at
 1939ad2a8e416c0acfeecc08a694d14ef25f2231 (Apache-2.0).
 Only preset voice data is used; no cloning encoder or user voice upload.
 
@@ -36,3 +36,18 @@ The model is verified before inference. ONNX Runtime Web is a direct exact
 version dependency shared with Transformers.js; the same local WASM assets
 are used. Voice detection, recording and transcripts stay in memory; only the
 pinned detector weights enter the clearable `vwl-speech-vad-v1` cache.
+
+## Named English voice catalog
+
+`voices.json` records all 28 named `af_`, `am_`, `bf_`, and `bm_` presets from
+[the same immutable Kokoro revision](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/tree/1939ad2a8e416c0acfeecc08a694d14ef25f2231/voices).
+Each record supplies the upstream identity, display name, American/British accent,
+phonemization language, exact 522,240-byte size and SHA-256 from upstream LFS
+metadata, verified against downloaded bytes. Attribution and Apache-2.0 licensing
+apply to the entire catalog, as described above. Names are derived from upstream
+preset identifiers; unnamed legacy presets and other languages are excluded.
+No voice weights are shipped with Labs. Load requests fetch one selected style;
+successful style switches reuse the already loaded shared Kokoro model. American
+presets use `a` phonemization and British presets use `b`. Default callers retain
+`af_heart`. `node utils/fetch-speech-models.mjs kokoro --all-voices` explicitly
+prepares all catalog styles for local QA; normal downloads retain just Heart.

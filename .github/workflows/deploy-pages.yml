@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: vanduo-oss/vwl-ai-chat
-          ref: d518433afea7d60fbca90777d0258dd4217dfc58
+          ref: 73de3fbf15dc9fc5527d6894958b06f7f420254d
           path: vwl-ai-chat
 
       - name: Checkout vwl-hex-earth

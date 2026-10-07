@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onActivated, onBeforeUnmount, ref } from 'vue';
 import {
   MODEL_OPTIONS,
   MODEL_GROUPS,
@@ -8,6 +8,7 @@ import {
   getModelChoiceLabel,
 } from '@vanduo-oss/vwl-ai-chat';
 import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
+import { readChatPreferences } from '../lib/chat-preferences.js';
 import { CompareSession } from '../lib/compare-session.js';
 import VwlModelDetails from './VwlModelDetails.vue';
 const props = defineProps({ modelA: { type: String, default: 'gemma-4-E2B-it-web' } });
@@ -22,6 +23,7 @@ const session = new CompareSession({
   },
 });
 session.emit();
+onActivated(() => session.setDelivery(readChatPreferences().delivery));
 const groups = MODEL_GROUPS.map((g) => ({
   ...g,
   models: PRIMARY_MODEL_OPTIONS.filter((m) => m.group === g.id),
@@ -78,6 +80,21 @@ onBeforeUnmount(() => {
     <p>
       One prompt, two ongoing chats. Each model remembers its own answers, so follow-up contexts may
       differ.
+    </p>
+    <label
+      >Reply delivery<select
+        class="vd-select"
+        :value="state.delivery"
+        :disabled="locked"
+        @change="session.setDelivery($event.target.value)"
+      >
+        <option value="checked-stream">Checked live text</option>
+        <option value="complete">Full-answer check</option>
+      </select></label
+    >
+    <p>
+      Live text is checked before display. Later context can still trigger a block after earlier
+      text appeared.
     </p>
     <div class="vwl-compare-pickers">
       <div v-for="i in [0, 1]" :key="i">
@@ -220,7 +237,10 @@ onBeforeUnmount(() => {
           <p v-if="!pane.turns.length">Answers will appear here.</p>
           <article v-for="(turn, n) in pane.turns" :key="n">
             <p class="vwl-compare-prompt">{{ turn.prompt }}</p>
-            <div class="labs-md-prose" v-html="labsMarkdownToHtml(turn.response)"></div>
+            <div v-if="turn.status === 'running' && pane.preview" class="vwl-checked-preview">
+              {{ pane.preview }}
+            </div>
+            <div v-else class="labs-md-prose" v-html="labsMarkdownToHtml(turn.response)"></div>
             <p v-if="turn.context?.omittedTurns">
               {{ turn.context.omittedTurns }} older turns omitted from context.
             </p>
@@ -231,7 +251,9 @@ onBeforeUnmount(() => {
             <p v-if="turn.error">{{ turn.error }}</p>
             <small
               >{{ turn.status
-              }}<template v-if="turn.firstAnswerMs != null">
+              }}<template v-if="turn.firstPreviewMs != null">
+                · First checked text {{ (turn.firstPreviewMs / 1000).toFixed(2) }}s</template
+              ><template v-if="turn.firstAnswerMs != null">
                 · Checked reply {{ (turn.firstAnswerMs / 1000).toFixed(2) }}s</template
               ><template v-if="turn.generationMs != null">
                 · Completed {{ (turn.generationMs / 1000).toFixed(2) }}s</template
@@ -273,6 +295,10 @@ onBeforeUnmount(() => {
   </section>
 </template>
 <style scoped>
+.vwl-checked-preview {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .vwl-compare {
   display: grid;
   gap: 1rem;

@@ -1,5 +1,7 @@
 # Model catalog and guardrail validation
 
+> Catalog/guardrail acceptance snapshot before checked previews and configurable conversations. Its measurements remain historical; see [the follow-up validation](./vwl-checked-stream-conversation-validation.md) and [current usage guide](./vwl-ai-chat.md).
+
 October 2026. Local validation on October 6–7, 2026, on development branches
 `codex/simplify-models-strengthen-guardrails` in Labs and `vwl-ai-chat`.
 These changes have not been published or deployed.
@@ -7,7 +9,7 @@ These changes have not been published or deployed.
 ## Delivered behavior
 
 The catalog contains six primary models and two compatibility precisions. Gemma 4
-E2B remains the default. General, Docs and Compare share the family picker,
+E2B remains the default. Chat and Compare share the family picker,
 precision controls, engine/download information, candidate labels and tool labels.
 Retired selections show a selection error and offer the default without downloading
 a replacement automatically.
@@ -50,8 +52,8 @@ without raw rejected text. Synchronous validators and result/error types remain.
 Pinned `obscenity@0.4.6` is the specifically approved runtime-dependency exception.
 The package records its integrity, selected MIT PyRIT source revision, Unicode 18
 source/derived SHA-256 checksums, licenses and adaptations in
-[`provenance.json`](../../vwl-ai-chat/src/guardrails/data/provenance.json) and
-[`THIRD_PARTY_NOTICES.md`](../../vwl-ai-chat/THIRD_PARTY_NOTICES.md). Five source/data
+[`provenance.json`](./chat-guardrail-provenance.json) and
+[`THIRD_PARTY_NOTICES.md`](./chat-third-party-notices.md). Five source/data
 checksums and the dependency exception are verified by `pnpm guardrails:verify`,
 also included in `test:ci`. Package packing includes notices, provenance and
 licenses; full upstream snapshots are development data.

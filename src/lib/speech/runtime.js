@@ -1,3 +1,4 @@
+import { getKokoroVoice } from './voices.js';
 const aborted = () => new DOMException('Speech stopped.', 'AbortError');
 
 /** Lazy host-owned worker RPC; no models or runtime imports on page entry. */
@@ -65,18 +66,38 @@ export function createSpeechRuntime({
   }
   return {
     isLoaded: (kind) => !!engines.get(kind)?.loaded,
+    isVoiceLoaded: (voiceId = 'af_heart') => engines.get('kokoro')?.voiceId === voiceId,
     async load(kind, options) {
-      if (engines.get(kind)?.loaded) return;
-      const result = await call(kind, 'load', { kind, remote: options?.remote === true }, options);
+      const voiceId = options?.voiceId || 'af_heart';
+      if (kind === 'kokoro') getKokoroVoice(voiceId);
+      if (engines.get(kind)?.loaded) {
+        if (kind !== 'kokoro' || engines.get(kind).voiceId === voiceId) return;
+        const result = await call(kind, 'loadVoice', { voiceId }, options);
+        engines.get(kind).voiceId = voiceId;
+        return result;
+      }
+      const result = await call(
+        kind,
+        'load',
+        { kind, remote: options?.remote === true, voiceId },
+        options,
+      );
       if (options?.signal?.aborted) throw aborted();
       engines.get(kind).loaded = true;
+      if (kind === 'kokoro') engines.get(kind).voiceId = voiceId;
       return result;
     },
     transcribe(audio, options) {
       return call('whisper', 'transcribe', { audio }, options, [audio.buffer]);
     },
     synthesize(text, options) {
-      return call('kokoro', 'synthesize', { text }, options);
+      getKokoroVoice(options?.voiceId || 'af_heart');
+      return call(
+        'kokoro',
+        'synthesize',
+        { text, voiceId: options?.voiceId || 'af_heart' },
+        options,
+      );
     },
     resetVad(options) {
       return call('vad', 'reset', {}, options);

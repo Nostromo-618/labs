@@ -73,7 +73,7 @@ test('split unsafe output never reaches DOM, saved history or speech', async ({ 
   expect(JSON.stringify(saved)).not.toContain('fucking');
   const settings = page.getByRole('button', { name: 'Settings', exact: true });
   if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
-  await page.getByText('Voice settings', { exact: true }).click();
+  await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
   await page.getByLabel('Read-aloud voice').selectOption('neural');
   await page.getByRole('button', { name: 'Load Neural voice', exact: true }).click();
   if ((await settings.getAttribute('aria-expanded')) === 'true')

@@ -26,6 +26,12 @@ export class ConversationSession {
   constructor({
     speech,
     preflight = () => {},
+    getSettings = () => ({
+      provider: 'neural',
+      voiceId: 'af_heart',
+      voiceURI: '',
+      maxOutputTokens: 192,
+    }),
     ensureChat,
     submitTurn,
     cancelChat = () => {},
@@ -39,6 +45,7 @@ export class ConversationSession {
     Object.assign(this, {
       speech,
       preflight,
+      getSettings,
       ensureChat,
       submitTurn,
       cancelChat,
@@ -75,9 +82,10 @@ export class ConversationSession {
     const epoch = ++this.epoch;
     this.controller = new AbortController();
     const signal = this.controller.signal;
-    this.update({ status: 'loading', error: '', progress: 'Checking Conversation Mode…' });
+    this.update({ status: 'loading', error: '', progress: 'Checking Voice Conversation Mode…' });
     try {
-      this.preflight();
+      this.settings = { ...this.getSettings() };
+      this.preflight(this.settings);
       if (
         reviewedText != null &&
         !validateLlmInput({ text: reviewedText, maxLength: 2000 }).allowed
@@ -109,18 +117,22 @@ export class ConversationSession {
       if (!this.current(epoch)) return;
       await this.ensureChat({
         signal,
+        settings: this.settings,
         onProgress: (progress) => {
           if (this.current(epoch)) this.update({ progress });
         },
       });
       if (!this.current(epoch)) return;
-      for (const kind of ['whisper', 'kokoro', 'vad']) {
+      for (const kind of this.settings.provider === 'neural'
+        ? ['whisper', 'kokoro', 'vad']
+        : ['whisper', 'vad']) {
         const result = await this.speech.runtime.load(kind, {
           signal,
+          voiceId: this.settings.voiceId,
           onProgress: (p) => {
             if (this.current(epoch))
               this.update({
-                progress: `${kind === 'vad' ? 'Voice detector' : kind === 'kokoro' ? 'Kokoro Heart' : 'Whisper'}: ${p.text}${Number.isFinite(p.percent) ? ` (${Math.round(p.percent)}%)` : ''}`,
+                progress: `${kind === 'vad' ? 'Voice detector' : kind === 'kokoro' ? `Kokoro ${this.settings.voiceId}` : 'Whisper'}: ${p.text}${Number.isFinite(p.percent) ? ` (${Math.round(p.percent)}%)` : ''}`,
                 ...(p.cacheAvailable != null
                   ? { cacheAvailable: p.cacheAvailable && this.state.cacheAvailable !== false }
                   : {}),
@@ -203,11 +215,17 @@ export class ConversationSession {
       silenceToSubmitMs: this.lastEndpoint == null ? null : performance.now() - this.lastEndpoint,
     };
     try {
-      const answer = await this.submitTurn(text, { signal, maxOutputTokens: 192 });
+      const answer = await this.submitTurn(text, {
+        signal,
+        maxOutputTokens: this.settings.maxOutputTokens || 192,
+        delivery: 'complete',
+      });
       if (!this.current(epoch)) return;
       this.update({ status: 'preparing-audio' });
       await this.speech.speak(answer, {
-        provider: 'neural',
+        provider: this.settings.provider,
+        voiceId: this.settings.voiceId,
+        voiceURI: this.settings.voiceURI,
         player: this.player,
         signal,
         throwOnError: true,
@@ -238,7 +256,7 @@ export class ConversationSession {
     if (!this.current(epoch)) return;
     this.pause();
     this.update({
-      error: error?.name === 'AbortError' ? '' : error.message || 'Conversation Mode failed.',
+      error: error?.name === 'AbortError' ? '' : error.message || 'Voice Conversation Mode failed.',
     });
   }
   pause() {
@@ -254,7 +272,15 @@ export class ConversationSession {
     this.player = null;
     this.speech.cancel();
     this.cancelChat();
-    if (this.state.status !== 'stopped') this.update({ status: 'paused', progress: '' });
+    if (this.state.status !== 'stopped') {
+      this.update({ status: 'paused', progress: '', settling: true });
+      const epoch = this.epoch;
+      this.pauseTask = Promise.resolve(this.task)
+        .catch(() => {})
+        .finally(() => {
+          if (this.epoch === epoch) this.update({ settling: false });
+        });
+    }
   }
   end() {
     if (this.state.ending) return this.endTask;

@@ -20,7 +20,7 @@ export default [
   {
     files: ['model-eval.js', 'utils/**/*.{js,mjs}', 'src/**/*.{js,mjs}'],
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: 2025,
       sourceType: 'module',
       globals: {
         window: 'readonly',

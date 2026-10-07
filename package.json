@@ -29,6 +29,7 @@
     "index": "node utils/hybrid-search-indexer.mjs",
     "models:fetch": "node utils/fetch-ai-models.mjs",
     "speech:fetch": "node utils/fetch-speech-models.mjs",
+    "docs:check": "node utils/check-chat-doc-links.mjs",
     "model-eval": "node utils/model-eval-runner.mjs",
     "lint": "eslint model-eval.js \"utils/**/*.{js,mjs}\" \"src/**/*.{js,mjs}\"",
     "format": "prettier --write \"model-eval.js\" \"utils/**/*.{js,mjs}\" \"src/**/*.{js,mjs,vue,css}\"",

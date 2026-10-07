@@ -1,6 +1,6 @@
 # Conversation Mode validation — 2026-10-03
 
-> Historical initial acceptance snapshot. Docs chat was retired and runtimes updated on 2026-10-04; see [the current refresh report](./dependency-refresh-2026-10-04.md).
+> Historical initial acceptance snapshot. The fixed model/voice defaults and runtime versions below describe the original feature. See [current chat instructions](./vwl-ai-chat.md), [the latest streaming/conversation validation](./vwl-checked-stream-conversation-validation.md) and [dependency refresh history](./dependency-refresh-2026-10-04.md).
 
 Implemented on `codex/chat-conversation-mode` through OpenSpec `chat-conversation-mode`.
 
@@ -10,11 +10,11 @@ Installed Chrome 154 on macOS ran three consecutive automatic turns using actual
 
 The first turn asked Gemma to remember blue; the next asked for the favorite color and correctly retained that history. The third requested a short goodbye. Four microphone streams were opened across three turns, with zero live tracks during transcription, generation and playback, and zero after End. Capture reopened after the 400 ms settling period. No assistant audio entered an active microphone stream. PCM peaks were 0.50–0.85, and the actual output analyser reached 0.85. The page cannot certify physical speaker volume or browser mute settings.
 
-| Turn | Silence to automatic submission | Silence to first audio |
-|---|---:|---:|
-| Remember blue | 2.31 s | 7.36 s |
-| Recall blue | 2.24 s | 7.74 s |
-| Goodbye | 2.24 s | 4.49 s |
+| Turn          | Silence to automatic submission | Silence to first audio |
+| ------------- | ------------------------------: | ---------------------: |
+| Remember blue |                          2.31 s |                 7.36 s |
+| Recall blue   |                          2.24 s |                 7.74 s |
+| Goodbye       |                          2.24 s |                 4.49 s |
 
 These include the ~1.2 s VAD endpoint; the silence timestamp is estimated from processed VAD frames. After endpointing, transcription took about one second. First audio for the same first response was 11.06 s before the one-sentence preparation change. This is one machine/run comparison, not a universal performance guarantee. CPU neural synthesis can still cause gaps when look-ahead is slower than playback; the visible spinner identifies preparation between sentences.
 

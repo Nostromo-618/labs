@@ -70,4 +70,4 @@ Removed the General/Docs selector, Docs semantic controls, retrieval and insuffi
 - ESLint: zero errors, 10 existing warnings in draw-stencils/draw-tools. Changed code formatted; OpenSpec strict validation passed.
 - Actual-model Safari/Firefox speech certification was not added by this change.
 
-Review locally: [AI Chat](http://127.0.0.1:8792/demo/ai-chat-demo.html). No commit, push or deployment was made.
+Review locally: [AI Chat](../demo/ai-chat-demo.html). No commit, push or deployment was made.

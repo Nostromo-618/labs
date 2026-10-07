@@ -80,4 +80,4 @@ Hex Earth's existing pinned Git CBUN dependency arrives without its `dist` expor
 
 Actual-model inference was validated during the preceding Labs runtime refresh. This interaction follow-up did not repeat full actual-model inference or certify microphone capture in the Codex in-app browser.
 
-Review [AI Chat](http://127.0.0.1:8792/demo/ai-chat-demo.html) and [Code editor](http://127.0.0.1:8792/#widgets/code-editor). Sibling changes are on `codex/labs-interaction-dependency-fixes`; Labs remains on its existing development branch. No commit, push or deployment was made.
+Review [AI Chat](../demo/ai-chat-demo.html) and [Code editor](../#widgets/code-editor). Sibling changes are on `codex/labs-interaction-dependency-fixes`; Labs remains on its existing development branch. No commit, push or deployment was made.

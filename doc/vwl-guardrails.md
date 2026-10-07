@@ -281,3 +281,15 @@ AiChat defaults to `guardrailProfile: 'family-friendly'`; `'general'` relaxes th
 `onUpdate` keeps its signature and now delivers the complete checked answer once. Output is buffered before display/history/speech, canceled output is discarded, and blocked output becomes a fixed safe answer while backend context is rebuilt.
 
 Pinned `obscenity@0.4.6`, adapted Microsoft PyRIT rules and Unicode data are documented in the sibling notices/provenance manifest. This local policy supplies limited semantic moderation, without a classifier or remote service. See [chat validation](./vwl-model-guardrails-validation.md).
+
+## Checked previews
+
+Labs explicitly opts into checked previews for text Chat/Compare; the package
+default remains complete-answer delivery. Every released prefix is checked with
+all preceding visible context and a held trailing buffer. A later violation
+can withdraw the preview but cannot undo earlier exposure. Select Full-answer
+check for the stronger exposure boundary. Conversation transcripts and all
+speech remain behind final checking. Previews are inert plain text; final
+Markdown uses the existing safe-link renderer. No NVIDIA runtime or remote
+moderation service is introduced. Deterministic rules have limited semantic
+moderation in both modes.

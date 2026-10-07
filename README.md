@@ -45,6 +45,16 @@ In-browser AI chat (Gemma default on LiteRT, Tiny on WebLLM and LFM candidates o
 
 See [doc/vwl-ai-chat.md](./doc/vwl-ai-chat.md).
 
+The demo resolves documentation links from `/doc/`. Linked Markdown reports open as
+readable, script-free HTML pages; original Markdown, JSON evidence and license texts
+remain available. Notices, guardrail provenance and the pinned voice catalog are
+copied from their authoritative workspace sources during build.
+
+After `pnpm build`, run `pnpm docs:check` to validate the chat guide's complete local
+link graph (also checked in CI). For a running production preview, use
+`pnpm docs:check http://127.0.0.1:4173` to verify served content as well. Live external
+checks are separate from CI because third-party availability can change.
+
 ```bash
 pnpm models:fetch   # optional local .models/ mirror for faster dev
 pnpm model-eval     # local CLI eval harness — see doc/vwl-model-eval.md

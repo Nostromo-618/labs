@@ -6,6 +6,7 @@ import {
   Tensor,
 } from '@huggingface/transformers';
 import { SPEECH_MODELS, assetURL, openSpeechCache } from '../lib/speech/assets.js';
+import { getKokoroVoice, verifyVoiceBytes } from '../lib/speech/voices.js';
 import { splitSpeechTokens } from '../lib/speech/text.js';
 
 env.backends.onnx.wasm.wasmPaths = '/transformers-wasm/';
@@ -13,7 +14,7 @@ env.backends.onnx.wasm.numThreads = 1;
 env.useBrowserCache = false;
 env.allowLocalModels = false;
 env.useCustomCache = true;
-let kind, cache, transcriber, model, tokenizer, voiceData, phonemize;
+let kind, cache, transcriber, model, tokenizer, voiceData, phonemize, modelSource, selectedVoice;
 
 async function sourceFor(spec, remote) {
   if (!remote && (import.meta.env.DEV || import.meta.env.MODE === 'qa')) {
@@ -72,27 +73,46 @@ async function load(args, progress) {
     ({ phonemize } = await import('../lib/speech/kokoro-phonemize.js'));
     model = await StyleTextToSpeech2Model.from_pretrained(source, options);
     tokenizer = await AutoTokenizer.from_pretrained(source, options);
-    const url = source.startsWith('/')
-      ? source + 'voices/af_heart.bin'
-      : assetURL(spec, 'voices/af_heart.bin');
-    let response = await cache.match(url);
-    if (!response) {
-      response = await fetch(url);
-      if (!response.ok) throw new Error('Neural voice file could not be downloaded.');
-      await cache.put(url, response.clone());
-    }
-    const bytes = await response.arrayBuffer();
-    if (bytes.byteLength !== 510 * 256 * 4)
-      throw new Error('Neural voice file is incomplete or incompatible.');
-    voiceData = new Float32Array(bytes);
+    modelSource = source;
+    await loadVoice(args.voiceId);
   }
   return { cacheAvailable: cache.available };
 }
 
-async function synthesize(text) {
+async function loadVoice(id = 'af_heart') {
+  if (!model) throw new Error('Load Neural voice first.');
+  const voice = getKokoroVoice(id);
+  const spec = SPEECH_MODELS.kokoro;
+  const source = modelSource;
+  const url = source.startsWith('/') ? source + voice.path : assetURL(spec, voice.path);
+  let response = await cache.match(url);
+  if (!response) {
+    try {
+      response = await fetch(url);
+      if (!response.ok && source.startsWith('/'))
+        response = await fetch(assetURL(spec, voice.path));
+      if (!response.ok) throw new Error('Voice asset unavailable.');
+    } catch {
+      throw new Error(
+        'Selected neural voice is unavailable. Load this voice while online, then retry.',
+      );
+    }
+  }
+  const bytes = await response.arrayBuffer();
+  await verifyVoiceBytes(bytes, voice);
+  await cache.put(url, new globalThis.Response(bytes));
+  voiceData = new Float32Array(bytes);
+  selectedVoice = voice;
+  return { cacheAvailable: cache.available, voiceId: voice.id };
+}
+
+async function synthesize(text, voiceId = 'af_heart') {
   if (!model) throw new Error('Load Neural voice first.');
   if (!text || text.length > 1000) throw new Error('Speech sentence is too long.');
-  const phonemes = await phonemize(text, 'a');
+  const voice = getKokoroVoice(voiceId);
+  if (selectedVoice?.id !== voice.id)
+    throw new Error('Load the selected neural voice before speaking.');
+  const phonemes = await phonemize(text, voice.language);
   const encoded = tokenizer(phonemes, { truncation: false }).input_ids;
   const ids = Array.from(encoded.data);
   encoded.dispose();
@@ -137,7 +157,8 @@ self.onmessage = async ({ data: { id, method, args } }) => {
         !args.audio.length || Math.sqrt(energy / args.audio.length) < 0.0005
           ? ''
           : (await transcriber(args.audio, { chunk_length_s: 30, stride_length_s: 5 })).text.trim();
-    } else if (method === 'synthesize') value = await synthesize(args.text);
+    } else if (method === 'loadVoice') value = await loadVoice(args.voiceId);
+    else if (method === 'synthesize') value = await synthesize(args.text, args.voiceId);
     else throw new Error('Unknown speech operation.');
     self.postMessage({ id, type: 'result', value }, value?.chunks?.map((pcm) => pcm.buffer) || []);
   } catch (error) {
