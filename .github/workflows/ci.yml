@@ -1,12 +1,16 @@
 name: CI
 
+# Minimal gate: lint/format + production build (+ dist hygiene).
+# Playwright unit/e2e is expensive (~4 of ~5 CI minutes historically) and is
+# not run here — use the "Playwright" workflow (workflow_dispatch) when needed.
+
 on:
   push:
     branches: [main, master]
   pull_request:
 
 # Labs dogfoods sibling vwl-* repos via link:../vwl-*. Check them out beside
-# labs/ and build dist/ (gitignored) before install/test/build.
+# labs/ and build dist/ (gitignored) before install/build.
 
 permissions:
   contents: read
@@ -16,9 +20,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: labs
@@ -90,14 +94,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Run Playwright unit + e2e
-        run: pnpm exec playwright test --project="Chromium Desktop"
-        env:
-          CI: true
 
       - name: Format and lint
         run: pnpm format:check && pnpm lint

@@ -1,0 +1,102 @@
+name: Playwright
+
+# Optional / manual only — keeps default CI cheap.
+# Runs Chromium Desktop unit + e2e (same suite previously in CI).
+# Trigger from Actions → Playwright → Run workflow.
+
+on:
+  workflow_dispatch:
+
+# Labs dogfoods sibling vwl-* repos via link:../vwl-*. Check them out beside
+# labs/ and build dist/ (gitignored) before install/test.
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwright-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: labs
+    steps:
+      - name: Checkout Labs
+        uses: actions/checkout@v7
+        with:
+          path: labs
+
+      - name: Checkout vwl-cbun
+        uses: actions/checkout@v7
+        with:
+          repository: nostromo-618/vwl-cbun
+          ref: 9db112b0bbc2c0ddc9d72818c422c311d35f2623
+          path: vwl-cbun
+
+      - name: Checkout vwl-hybrid-search
+        uses: actions/checkout@v7
+        with:
+          repository: nostromo-618/vwl-hybrid-search
+          ref: 01ff2c2eba19cab43bb2a77c6771b781c4ee4bd7
+          path: vwl-hybrid-search
+
+      - name: Checkout vwl-ai-chat
+        uses: actions/checkout@v7
+        with:
+          repository: nostromo-618/vwl-ai-chat
+          ref: 73de3fbf15dc9fc5527d6894958b06f7f420254d
+          path: vwl-ai-chat
+
+      - name: Checkout vwl-hex-earth
+        uses: actions/checkout@v7
+        with:
+          repository: nostromo-618/vwl-hex-earth
+          ref: fe97ecdedf413700663a234186963f25d793e70c
+          path: vwl-hex-earth
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.34.6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.17.0
+          cache: pnpm
+          cache-dependency-path: |
+            labs/pnpm-lock.yaml
+            vwl-cbun/pnpm-lock.yaml
+            vwl-hybrid-search/pnpm-lock.yaml
+            vwl-ai-chat/pnpm-lock.yaml
+            vwl-hex-earth/pnpm-lock.yaml
+
+      - name: Install and build Labs siblings
+        working-directory: ${{ github.workspace }}
+        run: |
+          for pkg in vwl-cbun vwl-hybrid-search vwl-ai-chat vwl-hex-earth; do
+            echo "::group::Build $pkg"
+            if [ "$pkg" = vwl-hex-earth ]; then
+              # The pinned Git dependency needs its allowlisted prepack build.
+              pnpm install --frozen-lockfile --ignore-scripts=false --dir "$pkg"
+            else
+              pnpm install --frozen-lockfile --dir "$pkg"
+            fi
+            pnpm run --dir "$pkg" build
+            echo "::endgroup::"
+          done
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright unit + e2e
+        run: pnpm exec playwright test --project="Chromium Desktop"
+        env:
+          CI: true
