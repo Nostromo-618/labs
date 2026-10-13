@@ -26,7 +26,7 @@ export class HybridSearchDomUI {
     this.autofocus = options.autofocus ?? true;
     this.baseUrl = options.baseUrl ?? 'https://vanduo-oss.github.io/vd3-docs';
     this.emptyMessage =
-      options.emptyMessage ?? 'No docs found. Try another query or pick a category filter.';
+      options.emptyMessage ?? 'No docs found. Try another query.';
 
     this._mounted = false;
     this._elements = {};

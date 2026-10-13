@@ -23,7 +23,7 @@ const props = defineProps({
   autofocus: { type: Boolean, default: true },
   emptyMessage: {
     type: String,
-    default: 'No docs found. Try another query or pick a category filter.',
+    default: 'No docs found. Try another query.',
   },
 });
 
@@ -45,8 +45,6 @@ const statusMessage = ref('');
 const modelLoading = ref(false);
 const modelProgressMessage = ref('');
 const modelProgressPct = ref(0);
-const activeCategory = ref('all');
-const categories = ref([]);
 const shortQueryHint = ref(false);
 const listboxId = `vwl-neptune-results-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -60,11 +58,6 @@ let didEnrichOnReady = false;
 let unsubscribeSemantic = null;
 let keyboardHandler = null;
 let clickOutsideHandler = null;
-
-const filteredResults = computed(() => {
-  if (activeCategory.value === 'all') return results.value;
-  return results.value.filter((r) => r.doc?.category === activeCategory.value);
-});
 
 const activeDescendant = computed(() =>
   selectedIndex.value >= 0 ? `${listboxId}-opt-${selectedIndex.value}` : '',
@@ -105,14 +98,6 @@ async function ensureEngine() {
     engine = eng;
     ownsEngine = !external;
     subscribeSemantic(eng);
-    const counts = new Map();
-    for (const doc of eng.getDocuments()) {
-      const key = doc.category || 'Other';
-      counts.set(key, (counts.get(key) || 0) + 1);
-    }
-    categories.value = [...counts.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([name, count]) => ({ name, count }));
     return eng;
   })();
   enginePending = pending;
@@ -309,7 +294,7 @@ function onInput() {
 
 function onKeyDown(e) {
   if (e.isComposing) return;
-  const list = filteredResults.value;
+  const list = results.value;
   if (dropdownOpen.value && list.length > 0) {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -341,12 +326,6 @@ function selectResult(result) {
     window.open(href, '_blank', 'noopener,noreferrer');
   }
   closeDropdown();
-}
-
-function setCategory(name) {
-  activeCategory.value = name;
-  selectedIndex.value = -1;
-  if (query.value.trim()) openDropdown();
 }
 
 function subscribeSemantic(eng) {
@@ -472,34 +451,6 @@ defineExpose({
       </button>
       <p role="status">{{ semanticStatus }}</p>
     </div>
-    <div
-      v-if="categories.length"
-      class="vwl-neptune-filters"
-      role="list"
-      aria-label="Filter by category"
-    >
-      <button
-        type="button"
-        class="vwl-neptune-filter-chip"
-        :class="{ 'is-active': activeCategory === 'all' }"
-        role="listitem"
-        @click="setCategory('all')"
-      >
-        All
-      </button>
-      <button
-        v-for="cat in categories"
-        :key="cat.name"
-        type="button"
-        class="vwl-neptune-filter-chip"
-        :class="{ 'is-active': activeCategory === cat.name }"
-        role="listitem"
-        @click="setCategory(cat.name)"
-      >
-        {{ cat.name }}
-        <span class="vwl-neptune-filter-count">{{ cat.count }}</span>
-      </button>
-    </div>
 
     <div class="vwl-neptune-input-wrap">
       <VdIcon name="magnifying-glass" class="vwl-neptune-input-icon" aria-hidden="true" />
@@ -538,7 +489,7 @@ defineExpose({
       </p>
 
       <div
-        v-for="(result, index) in filteredResults"
+        v-for="(result, index) in results"
         :id="`${listboxId}-opt-${index}`"
         :key="result.doc.id"
         class="vwl-neptune-result"
@@ -623,38 +574,6 @@ defineExpose({
 .vwl-neptune-search {
   position: relative;
   width: 100%;
-}
-
-.vwl-neptune-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-bottom: 0.85rem;
-}
-
-.vwl-neptune-filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  font: inherit;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.vwl-neptune-filter-chip.is-active {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background: var(--color-primary-alpha-10, rgba(var(--vd-color-primary-rgb), 0.12));
-}
-
-.vwl-neptune-filter-count {
-  opacity: 0.7;
-  font-size: 0.72rem;
 }
 
 .vwl-neptune-input-wrap {
