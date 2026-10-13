@@ -2,7 +2,7 @@
   "name": "@vanduo-oss/labs",
   "version": "0.1.1",
   "private": true,
-  "description": "Vanduo Web Labs \u2014 demo playground for VWL engines and vwl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
+  "description": "Vanduo Web Labs — demo playground for VWL engines and vwl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -43,26 +43,26 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@playwright/test": "1.63.0",
-    "@vitejs/plugin-vue": "6.0.9",
+    "@playwright/test": "1.64.0",
+    "@vitejs/plugin-vue": "6.0.10",
     "eslint": "10.12.0",
-    "prettier": "3.9.9",
-    "vite": "8.3.2"
+    "prettier": "3.9.10",
+    "vite": "8.3.4"
   },
   "dependencies": {
-    "@huggingface/transformers": "4.3.0",
-    "@litert-lm/core": "0.17.1",
-    "@vanduo-oss/vd3": "1.7.5",
+    "@huggingface/transformers": "4.3.1",
+    "@litert-lm/core": "0.18.0",
+    "@mlc-ai/web-llm": "0.2.86",
+    "@vanduo-oss/vd3": "1.7.6",
     "@vanduo-oss/vd3-charts": "1.1.1",
     "@vanduo-oss/vwl-ai-chat": "link:../vwl-ai-chat",
     "@vanduo-oss/vwl-cbun": "link:../vwl-cbun",
+    "@vanduo-oss/vwl-hex-earth": "link:../vwl-hex-earth",
     "@vanduo-oss/vwl-hybrid-search": "link:../vwl-hybrid-search",
     "fuse.js": "7.5.0",
-    "phonemizer": "1.2.1",
     "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
-    "vue": "3.5.43",
-    "@mlc-ai/web-llm": "0.2.85",
-    "@vanduo-oss/vwl-hex-earth": "link:../vwl-hex-earth"
+    "phonemizer": "1.2.1",
+    "vue": "3.5.43"
   },
   "packageManager": "pnpm@10.34.6",
   "pnpm": {
