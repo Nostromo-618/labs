@@ -335,42 +335,6 @@ body:has(main[data-labs-route]) {
   min-height: calc(100vh - 80px);
 }
 
-.hero .hero-wiki-link {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-  border-bottom: 1px solid rgba(var(--vd-color-primary-rgb), 0.35);
-  transition:
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.hero .hero-wiki-link:hover {
-  border-bottom-color: var(--color-primary);
-}
-
-.hero .hero-home-quote {
-  max-width: 36rem;
-  margin: 0.65rem auto 0;
-  padding: 0 1rem;
-  min-height: 1.6em;
-  transition: opacity 0.18s ease;
-}
-
-[data-theme='dark'] .hero .hero-home-quote {
-  color: var(--vd-text-secondary, var(--text-secondary));
-}
-
-.hero .hero-home-quote-fading {
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero .hero-home-quote {
-    transition: none;
-  }
-}
-
 .labs-main {
   padding-bottom: 4rem;
 }
@@ -953,12 +917,20 @@ main[data-labs-route='about'] .labs-view-about .labs-section {
   .hero-title {
     flex-direction: column !important;
     align-items: center !important;
+    line-height: 1;
   }
 
   .hero-title svg {
     transform: none !important;
     margin-right: 0 !important;
     margin-bottom: 0.25em;
+  }
+
+  /* Slightly subordinate “web labs”; negative margin collapses the &nbsp; flex gap. */
+  .hero-title .vd-text-muted {
+    font-size: 0.82em;
+    margin-top: -0.7em;
+    line-height: 1;
   }
 }
 

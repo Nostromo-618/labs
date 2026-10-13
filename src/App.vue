@@ -32,11 +32,6 @@ import WidgetDraw from './pages/widgets/Draw.vue';
 import WidgetHex from './pages/widgets/Hex.vue';
 import WidgetCodeEditor from './pages/widgets/CodeEditor.vue';
 import WidgetMusicPlayer from './pages/widgets/MusicPlayer.vue';
-import {
-  isGladosHomeQuote,
-  nextHomeQuoteIntervalMs,
-  pickNextHomeQuote,
-} from './vwl-home-quotes.js';
 
 const HexEarthDemo = defineAsyncComponent(async () => {
   const mod = await import('@vanduo-oss/vwl-hex-earth');
@@ -47,7 +42,6 @@ const DEMO_SLUGS = new Set(['neptune', 'aichat', 'hex-earth']);
 const WIDGET_SLUGS = new Set(['draw', 'hex', 'code-editor', 'music-player']);
 const ROUTES = ['home', 'about', 'demos', 'widgets'];
 const DOCS_BASE_URL = DEFAULT_DOCS_BASE_URL;
-const HOME_QUOTE_FADE_MS = 180;
 
 /** @typedef {'gate' | 'farewell' | 'accepted'} ConsentView */
 
@@ -65,10 +59,6 @@ const docHtml = ref('');
 const docLoading = ref(false);
 const docError = ref('');
 const liveRegionText = ref('');
-/** @type {import('vue').Ref<{ id: string, text: string } | null>} */
-const homeQuoteEntry = ref(null);
-const homeQuoteVisible = ref(true);
-const homeQuoteIsGlados = computed(() => isGladosHomeQuote(homeQuoteEntry.value));
 
 const showGate = computed(() => consentHydrated.value && consentView.value === 'gate');
 const showFarewell = computed(() => consentHydrated.value && consentView.value === 'farewell');
@@ -76,58 +66,8 @@ const appUnlocked = computed(() => consentHydrated.value && consentView.value ==
 
 const docHtmlCache = { neptune: null, aichat: null };
 let docLoadSeq = 0;
-/** Empty until first hash sync so the initial `#home` visit advances the quote bag. */
+/** Empty until first hash sync so the initial route change scrolls to top. */
 let lastTopLevelRoute = '';
-let homeQuoteTimer = null;
-let homeQuoteFadeTimer = null;
-
-function clearHomeQuoteTimers() {
-  if (homeQuoteTimer != null) {
-    clearTimeout(homeQuoteTimer);
-    homeQuoteTimer = null;
-  }
-  if (homeQuoteFadeTimer != null) {
-    clearTimeout(homeQuoteFadeTimer);
-    homeQuoteFadeTimer = null;
-  }
-}
-
-function applyHomeQuotePick(animate) {
-  if (homeQuoteFadeTimer != null) {
-    clearTimeout(homeQuoteFadeTimer);
-    homeQuoteFadeTimer = null;
-  }
-  const { entry } = pickNextHomeQuote();
-  if (!animate || !homeQuoteEntry.value) {
-    homeQuoteEntry.value = entry;
-    homeQuoteVisible.value = true;
-    return;
-  }
-  homeQuoteVisible.value = false;
-  homeQuoteFadeTimer = window.setTimeout(() => {
-    homeQuoteEntry.value = entry;
-    homeQuoteVisible.value = true;
-    homeQuoteFadeTimer = null;
-  }, HOME_QUOTE_FADE_MS);
-}
-
-function scheduleHomeQuoteTick() {
-  clearTimeout(homeQuoteTimer);
-  homeQuoteTimer = window.setTimeout(() => {
-    applyHomeQuotePick(true);
-    scheduleHomeQuoteTick();
-  }, nextHomeQuoteIntervalMs());
-}
-
-function startHomeQuoteRotation() {
-  clearHomeQuoteTimers();
-  applyHomeQuotePick(false);
-  scheduleHomeQuoteTick();
-}
-
-function stopHomeQuoteRotation() {
-  clearHomeQuoteTimers();
-}
 
 const neptuneVersion = computed(() => `v${COMPONENT_VERSION_MAP.neptune}`);
 const aichatVersion = computed(() => `v${COMPONENT_VERSION_MAP.aichat}`);
@@ -253,12 +193,6 @@ function applyLabsRoute(nextRoute, nextDemoSlug, nextWidgetSlug) {
 
   if (routeChanged) window.scrollTo(0, 0);
 
-  if (nextRoute === 'home') {
-    if (routeChanged) startHomeQuoteRotation();
-  } else if (routeChanged) {
-    stopHomeQuoteRotation();
-  }
-
   if (nextRoute === 'demos') {
     if (nextDemoSlug) {
       const nameMap = {
@@ -323,7 +257,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('hashchange', syncLabsRouteFromHash);
-  stopHomeQuoteRotation();
 });
 
 watch(demoSlug, (slug) => {
@@ -409,23 +342,6 @@ watch(demoSlug, (slug) => {
               >web labs</span
             >
           </h2>
-          <p
-            class="vd-text-base vd-text-muted hero-home-quote"
-            :class="{ 'hero-home-quote-fading': !homeQuoteVisible }"
-            aria-live="polite"
-          >
-            <template v-if="homeQuoteIsGlados">
-              We are not yet building
-              <a
-                href="https://en.wikipedia.org/wiki/GLaDOS"
-                class="hero-wiki-link"
-                rel="noopener noreferrer"
-                title="GLaDOS — Wikipedia (article)"
-                >GLaDOS</a
-              >, but we might soon…
-            </template>
-            <template v-else-if="homeQuoteEntry">{{ homeQuoteEntry.text }}</template>
-          </p>
         </section>
       </div>
 
