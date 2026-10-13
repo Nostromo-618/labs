@@ -277,7 +277,7 @@ test('Compare keeps preview timing and text outside committed answers and export
       createChat: () => new Chat(),
     });
     session.system = { webgpuSupported: true, shaderF16: true };
-    session.state.models[1] = 'LFM2.5-230M-q4-ONNX';
+    session.state.models[1] = 'LFM2.5-2.6B-q4f16-ONNX';
     await session.loadPair();
     await session.send('Hello');
     const panes = session.state.panes.map((p) => ({ preview: p.preview, turn: p.turns[0] }));

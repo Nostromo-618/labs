@@ -73,38 +73,6 @@
       "previewCount": 18
     },
     {
-      "id": "LFM2.5-230M-q4-ONNX",
-      "loadMs": 882.7000000001863,
-      "totalMs": 5525.299999999814,
-      "previewBeforeFinal": true,
-      "finalCallbacks": 1,
-      "spokenGenerationMs": 728.7000000001863,
-      "spokenPreviews": 0,
-      "spokenAudio": {
-        "seconds": 29.9,
-        "peak": 0.5477168560028076,
-        "finite": true
-      },
-      "firstPreviewMs": 546.6000000000931,
-      "previewCount": 36
-    },
-    {
-      "id": "LFM2.5-350M-q4-ONNX",
-      "loadMs": 1064.6000000000931,
-      "totalMs": 6002.899999999907,
-      "previewBeforeFinal": true,
-      "finalCallbacks": 1,
-      "spokenGenerationMs": 571.7999999998137,
-      "spokenPreviews": 0,
-      "spokenAudio": {
-        "seconds": 21.05,
-        "peak": 0.536736249923706,
-        "finite": true
-      },
-      "firstPreviewMs": 586.6999999997206,
-      "previewCount": 42
-    },
-    {
       "id": "LFM2.5-2.6B-q4f16-ONNX",
       "loadMs": 3171.9000000003725,
       "totalMs": 31829.299999999814,
@@ -498,75 +466,6 @@
         {
           "peak": 0.5300571322441101,
           "samples": 38400,
-          "microphoneOff": true
-        }
-      ],
-      "liveTracksAfterEnd": 0,
-      "loadFailures": []
-    },
-    {
-      "id": "LFM2.5-230M-q4-ONNX",
-      "turns": 1,
-      "previewCount": 0,
-      "outputTokens": 192,
-      "delivery": "complete",
-      "measurements": [
-        {
-          "silenceToSubmitMs": 2324.4000000003725,
-          "silenceToFirstAudioMs": 18418.200000000186
-        }
-      ],
-      "peaks": [
-        {
-          "peak": 0.4886641502380371,
-          "samples": 247200,
-          "microphoneOff": true
-        },
-        {
-          "peak": 0.6279834508895874,
-          "samples": 201000,
-          "microphoneOff": true
-        },
-        {
-          "peak": 0.4537625014781952,
-          "samples": 218400,
-          "microphoneOff": true
-        },
-        {
-          "peak": 0.5827412605285645,
-          "samples": 268800,
-          "microphoneOff": true
-        }
-      ],
-      "liveTracksAfterEnd": 0,
-      "loadFailures": []
-    },
-    {
-      "id": "LFM2.5-350M-q4-ONNX",
-      "turns": 1,
-      "previewCount": 0,
-      "outputTokens": 192,
-      "delivery": "complete",
-      "measurements": [
-        {
-          "silenceToSubmitMs": 2328.2999999998137,
-          "silenceToFirstAudioMs": 20890.400000000373
-        }
-      ],
-      "peaks": [
-        {
-          "peak": 0.6276106238365173,
-          "samples": 282600,
-          "microphoneOff": true
-        },
-        {
-          "peak": 0.5020161271095276,
-          "samples": 213000,
-          "microphoneOff": true
-        },
-        {
-          "peak": 0.6900159120559692,
-          "samples": 95400,
           "microphoneOff": true
         }
       ],

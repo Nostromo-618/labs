@@ -48,11 +48,12 @@ local deterministic semantic moderation.
 ## Fresh Chrome text inference
 
 Installed Chrome **154.0.8037.98**, macOS, WebGPU. Dedicated QA profile,
-local pinned model mirrors; browser HTTP cache disabled. All six primary models and
+local pinned model mirrors; browser HTTP cache disabled. The four primary models and
 both compatibility variants released previews before completion and delivered one
 final callback. Same long friendly-story prompt, 768 output tokens (1536 for required
 reasoning). These differing output lengths and shared machine conditions do not
-establish a model ranking.
+establish a model ranking. Earlier LFM 230M/350M timings from this run are omitted
+because those sizes are no longer in the catalog.
 
 | Configuration | First checked preview | Complete checked reply | Previews |
 | --- | --- | --- | --- |
@@ -60,8 +61,6 @@ establish a model ranking.
 | gemma-4-E4B-it-web | 3.65 s | 30.26 s | 30 |
 | Qwen3-0.6B-q4f16_1-MLC | 0.78 s | 5.26 s | 18 |
 | Qwen3-0.6B-q4f32_1-MLC | 1.01 s | 5.85 s | 18 |
-| LFM2.5-230M-q4-ONNX | 0.55 s | 5.53 s | 36 |
-| LFM2.5-350M-q4-ONNX | 0.59 s | 6.00 s | 42 |
 | LFM2.5-2.6B-q4f16-ONNX | 4.44 s | 31.83 s | 46 |
 | LFM2.5-2.6B-q4-ONNX | 5.35 s | 21.50 s | 29 |
 
@@ -73,13 +72,14 @@ regression-tested; these benign timing samples are not a worst-case bound.
 
 ## Spoken pipeline and voice catalog
 
-All **six primary models** completed a spoken turn using real Kokoro input speech
-into a synthetic 48 kHz MediaStream, actual worklet/resampler, Silero VAD, Whisper,
-model inference and checked Kokoro/Web Audio playback. No preview callback fired.
-Output allowances were 192 tokens, or 1024 for LFM 2.6B. Every playback began with
-microphone tracks stopped; all tracks were ended after End. No load retry was needed.
-Silence-to-first-audio ranged from about 12.1 to 25.8 seconds. This is synthetic
-pipeline acceptance, not certification of physical microphone acoustics or speaker volume.
+All **four primary models** (plus the two compatibility variants) completed a spoken
+turn using real Kokoro input speech into a synthetic 48 kHz MediaStream, actual
+worklet/resampler, Silero VAD, Whisper, model inference and checked Kokoro/Web Audio
+playback. No preview callback fired. Output allowances were 192 tokens, or 1024 for
+LFM 2.6B. Every playback began with microphone tracks stopped; all tracks were ended
+after End. No load retry was needed. Silence-to-first-audio ranged from about 12.1 to
+25.8 seconds. This is synthetic pipeline acceptance, not certification of physical
+microphone acoustics or speaker volume.
 
 All **28 named English presets** produced finite, non-silent PCM. Shared model load
 was about 0.83 seconds from local assets; subsequent selected-style

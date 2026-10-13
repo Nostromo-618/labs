@@ -12,9 +12,9 @@ test.describe('paired local chat session', () => {
       const { CompareSession } = await import('/src/lib/compare-session.js');
       const pairings = [
         ['Qwen3-0.6B-q4f16_1-MLC', 'Qwen3-0.6B-q4f16_1-MLC'],
-        ['LFM2.5-230M-q4-ONNX', 'LFM2.5-350M-q4-ONNX'],
-        ['Qwen3-0.6B-q4f16_1-MLC', 'LFM2.5-230M-q4-ONNX'],
-        ['gemma-4-E2B-it-web', 'LFM2.5-230M-q4-ONNX'],
+        ['LFM2.5-2.6B-q4f16-ONNX', 'LFM2.5-2.6B-q4-ONNX'],
+        ['Qwen3-0.6B-q4f16_1-MLC', 'LFM2.5-2.6B-q4f16-ONNX'],
+        ['gemma-4-E2B-it-web', 'LFM2.5-2.6B-q4f16-ONNX'],
         ['gemma-4-E2B-it-web', 'gemma-4-E4B-it-web'],
       ];
       const observations = [];
@@ -199,7 +199,7 @@ test.describe('paired local chat session', () => {
         createChat: (id, index) => new FakeChat(id, index),
       });
       session.system = { webgpuSupported: true, shaderF16: true };
-      session.state.models[1] = 'LFM2.5-230M-q4-ONNX';
+      session.state.models[1] = 'LFM2.5-2.6B-q4f16-ONNX';
       await session.loadPair();
       const pending = session.send('shared turn');
       await firstStarted;
@@ -334,7 +334,7 @@ test.describe('paired local chat session', () => {
         createChat: (id) => new FakeChat(id),
         getDeviceSignals: async () => ({ webgpuSupported: false, shaderF16: false }),
       });
-      blocked.state.models[1] = 'LFM2.5-230M-q4-ONNX';
+      blocked.state.models[1] = 'LFM2.5-2.6B-q4f16-ONNX';
       await blocked.loadPair();
       const missingGpu = blocked.state.error;
       await blocked.dispose();
@@ -349,7 +349,7 @@ test.describe('paired local chat session', () => {
           hardwareConcurrency: 2,
         }),
       });
-      limitedRam.state.models[1] = 'LFM2.5-230M-q4-ONNX';
+      limitedRam.state.models[1] = 'LFM2.5-2.6B-q4f16-ONNX';
       await limitedRam.loadPair();
       const loadedDespiteEstimate = limitedRam.chats.every((chat) => chat?.isLoaded());
       await limitedRam.dispose();

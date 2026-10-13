@@ -1,7 +1,7 @@
 # Tasks
 
 ## 1. Catalog and cleanup
-- [x] 1.1 Curate eight configurations, metadata and manifests; verify catalog tests and document retained engines.
+- [x] 1.1 Curate six configurations, metadata and manifests; verify catalog tests and document retained engines.
 - [x] 1.2 Remove retired workarounds/assets and AI Draw; verify build and no live references.
 
 ## 2. Safety boundaries

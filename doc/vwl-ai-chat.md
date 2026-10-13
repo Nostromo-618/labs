@@ -11,20 +11,18 @@ On-device browser chat with LiteRT 0.17.1, WebLLM 0.2.85 and Transformers.js 4.3
 
 ## Models and compatibility
 
-Chat and Compare share six primary choices grouped by family. A separate precision control exposes two compatibility variants; selecting a model never starts a download. Labels include engine, download size, candidate status and tool capability.
+Chat and Compare share four primary choices grouped by family. A separate precision control exposes two compatibility variants; selecting a model never starts a download. Labels include engine, download size, candidate status and tool capability.
 
-| Primary choice  | Engine                        | Role                                      | Tools                                         |
-| --------------- | ----------------------------- | ----------------------------------------- | --------------------------------------------- |
-| Gemma 4 E2B     | LiteRT                        | Default, about 2.0 GB                     | Native execution available                    |
-| Gemma 4 E4B     | LiteRT                        | Quality, about 3.0 GB                     | Native execution available                    |
-| Qwen3 0.6B Tiny | WebLLM                        | Small assistant, about 352 MB             | Documented model support; integration pending |
-| LFM2.5 230M     | Transformers.js → ONNX WebGPU | Extraction candidate, about 216 MB        | Documented model support; integration pending |
-| LFM2.5 350M     | Transformers.js → ONNX WebGPU | Structured-output candidate, about 297 MB | Documented model support; integration pending |
-| LFM2.5 2.6B     | Transformers.js → ONNX WebGPU | Reasoning candidate, about 1.55 GB        | Documented model support; integration pending |
+| Primary choice  | Engine                        | Role                               | Tools                                         |
+| --------------- | ----------------------------- | ---------------------------------- | --------------------------------------------- |
+| Gemma 4 E2B     | LiteRT                        | Default, about 2.0 GB              | Native execution available                    |
+| Gemma 4 E4B     | LiteRT                        | Quality, about 3.0 GB              | Native execution available                    |
+| Qwen3 0.6B Tiny | WebLLM                        | Small assistant, about 352 MB      | Documented model support; integration pending |
+| LFM2.5 2.6B     | Transformers.js → ONNX WebGPU | Reasoning candidate, about 1.55 GB | Documented model support; integration pending |
 
-Tiny Q4F32 and LFM 2.6B Q4 remain explicit precision variants. Missing WebGPU disables loading; shader-f16 compatibility is checked before load. Retired selections display an explanation and offer the default without silently downloading it. All three engines retain worker/runtime isolation; no working model is migrated. Retired spikes, Gemma MLC peers and optional model families are removed. Existing downloaded models, chats and historical reports remain intact.
+Tiny Q4F32 and LFM 2.6B Q4 remain explicit precision variants. Missing WebGPU disables loading; shader-f16 compatibility is checked before load. Retired selections display an explanation and offer the default without silently downloading it. All three engines retain worker/runtime isolation; no working model is migrated. Retired spikes, Gemma MLC peers, LFM 230M/350M and optional model families are removed. Existing downloaded models, chats and historical reports remain intact.
 
-Official model-level tool support is recorded with [Gemma](https://deepmind.google/models/gemma/gemma-4/), [Qwen](https://huggingface.co/Qwen/Qwen3-0.6B#agentic-use) and Liquid's [230M](https://huggingface.co/LiquidAI/LFM2.5-230M#tool-use), [350M](https://huggingface.co/LiquidAI/LFM2.5-350M#tool-use) and [2.6B](https://huggingface.co/LiquidAI/LFM2.5-2.6B#tool-use) cards in the catalog. It does not certify our quantized builds or enable adapters. Only Gemma's integration currently executes tools. Candidate labels remain until fresh validation supports promotion.
+Official model-level tool support is recorded with [Gemma](https://deepmind.google/models/gemma/gemma-4/), [Qwen](https://huggingface.co/Qwen/Qwen3-0.6B#agentic-use) and Liquid's [2.6B](https://huggingface.co/LiquidAI/LFM2.5-2.6B#tool-use) cards in the catalog. It does not certify our quantized builds or enable adapters. Only Gemma's integration currently executes tools. Candidate labels remain until fresh validation supports promotion.
 
 Device and storage details are expandable. Browser-reported memory is approximate and does not establish GPU capacity. See [model and guardrail validation](./vwl-model-guardrails-validation.md) for measured browser/model limitations; phone layout emulation does not establish physical phone inference support.
 

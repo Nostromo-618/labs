@@ -72,7 +72,7 @@ test('Compare is lazy, keeps two pane statuses on mobile, and does not load mode
   await expect(modelA).toHaveValue('gemma-4-E2B-it-web');
   await expect(modelB).toHaveValue('');
   await expect(page.getByRole('button', { name: 'Load pair' })).toBeDisabled();
-  await modelB.selectOption('LFM2.5-230M-q4-ONNX');
+  await modelB.selectOption('LFM2.5-2.6B-q4f16-ONNX');
   await expect(page.getByRole('button', { name: 'Load pair' })).toBeEnabled();
   const tabs = page.locator('.vwl-compare-tabs');
   await expect(tabs.locator('[role="tab"]')).toHaveCount(2);

@@ -4,7 +4,7 @@
 The catalog contains unsupported models and redundant runtime workarounds. Guardrails miss Unicode attacks, expose partial replies, and do not cover every untrusted model boundary.
 
 ## What Changes
-- Keep six primary models and two compatibility variants; show engine and model-level versus integrated tool support.
+- Keep four primary models and two compatibility variants; show engine and model-level versus integrated tool support.
 - Remove AI Draw and retired model assets/workarounds.
 - Add pinned obscenity 0.4.6, attributed PyRIT rules and Unicode data; scan references, history, tool boundaries and complete output.
 - **BREAKING behavior:** onUpdate emits checked complete replies rather than partial text; retired model IDs cannot load.

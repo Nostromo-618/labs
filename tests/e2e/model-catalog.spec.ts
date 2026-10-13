@@ -3,18 +3,16 @@ const primary = [
   'gemma-4-E2B-it-web',
   'gemma-4-E4B-it-web',
   'Qwen3-0.6B-q4f16_1-MLC',
-  'LFM2.5-230M-q4-ONNX',
-  'LFM2.5-350M-q4-ONNX',
   'LFM2.5-2.6B-q4f16-ONNX',
 ];
-test('chat picker exposes six families and explicit precision without downloads', async ({
+test('chat picker exposes four families and explicit precision without downloads', async ({
   page,
 }) => {
   await page.goto('/tests/fixtures/chat-vue-harness.html');
   const settings = page.getByRole('button', { name: 'Settings', exact: true });
   if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
   const picker = page.locator('#vwl-ai-model-select');
-  await expect(picker.locator('option')).toHaveCount(6);
+  await expect(picker.locator('option')).toHaveCount(4);
   expect(
     await picker
       .locator('option')
@@ -27,8 +25,8 @@ test('chat picker exposes six families and explicit precision without downloads'
   await precision.selectOption('Qwen3-0.6B-q4f32_1-MLC');
   await expect(picker).toHaveValue(primary[2]);
   await expect(precision).toHaveValue('Qwen3-0.6B-q4f32_1-MLC');
-  await expect(picker.locator('option', { hasText: 'integration pending' })).toHaveCount(4);
-  await expect(picker.locator('option', { hasText: 'Candidate' })).toHaveCount(3);
+  await expect(picker.locator('option', { hasText: 'integration pending' })).toHaveCount(2);
+  await expect(picker.locator('option', { hasText: 'Candidate' })).toHaveCount(1);
   expect(await page.evaluate(() => window['chatQA'].loads)).toBe(0);
 });
 test('retired chat selection explains removal and offers an unloaded default', async ({ page }) => {
@@ -44,11 +42,11 @@ test('retired chat selection explains removal and offers an unloaded default', a
 test('Compare shares primary labels and precision choices without loading', async ({ page }) => {
   await page.goto('/tests/fixtures/model-catalog-harness.html');
   for (const id of [0, 1])
-    await expect(page.locator(`#vwl-compare-model-${id} optgroup option`)).toHaveCount(6);
-  await page.locator('#vwl-compare-model-1').selectOption(primary[5]);
+    await expect(page.locator(`#vwl-compare-model-${id} optgroup option`)).toHaveCount(4);
+  await page.locator('#vwl-compare-model-1').selectOption(primary[3]);
   await expect(page.locator('#vwl-compare-precision-1 option')).toHaveCount(2);
   await page.locator('#vwl-compare-precision-1').selectOption('LFM2.5-2.6B-q4-ONNX');
-  await expect(page.locator('#vwl-compare-model-1')).toHaveValue(primary[5]);
+  await expect(page.locator('#vwl-compare-model-1')).toHaveValue(primary[3]);
   await expect(
     page.getByText('Integration pending; this build has not been certified for tools.'),
   ).toBeVisible();

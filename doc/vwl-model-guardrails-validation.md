@@ -8,17 +8,18 @@ These changes have not been published or deployed.
 
 ## Delivered behavior
 
-The catalog contains six primary models and two compatibility precisions. Gemma 4
+The catalog contains four primary models and two compatibility precisions. Gemma 4
 E2B remains the default. Chat and Compare share the family picker,
 precision controls, engine/download information, candidate labels and tool labels.
 Retired selections show a selection error and offer the default without downloading
-a replacement automatically.
+a replacement automatically. LFM 230M and 350M were dropped after this snapshot for
+subpar demo quality; the table below records what was measured at the time.
 
-| Family     | Engine                                      | Retained configurations                             | Tool execution                                |
-| ---------- | ------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
-| Gemma 4    | LiteRT 0.17.1                               | E2B, E4B                                            | Native tools available                        |
-| Qwen3 Tiny | WebLLM 0.2.85                               | 0.6B Q4F16, Q4F32 compatibility                     | Model support documented; integration pending |
-| LFM2.5     | Transformers.js 4.3.0 / ONNX Runtime WebGPU | 230M Q4, 350M Q4, 2.6B Q4F16, 2.6B Q4 compatibility | Model support documented; integration pending |
+| Family     | Engine                                      | Retained configurations (at snapshot)           | Tool execution                                |
+| ---------- | ------------------------------------------- | ----------------------------------------------- | --------------------------------------------- |
+| Gemma 4    | LiteRT 0.17.1                               | E2B, E4B                                        | Native tools available                        |
+| Qwen3 Tiny | WebLLM 0.2.85                               | 0.6B Q4F16, Q4F32 compatibility                 | Model support documented; integration pending |
+| LFM2.5     | Transformers.js 4.3.0 / ONNX Runtime WebGPU | 2.6B Q4F16, 2.6B Q4 compatibility (now retained) | Model support documented; integration pending |
 
 LFM models remain candidates. Model-card tool claims do not certify a quantized
 artifact or enable a new adapter. `capabilities.tools` still means that this
@@ -115,36 +116,36 @@ guarantees or individual-scan percentiles. The machine was also running QA.
 
 ## Fresh desktop Chrome inference
 
-All eight configurations loaded in installed desktop Chrome 154 with WebGPU and
-`shader-f16`. Each ran multiple turns, stop/recovery, reset, warm reload, grounded
-answers and injected-reference checks. Both Gemmas passed native tool execution;
-Qwen/LFM tool checks were skipped because their integrations do not execute tools.
+All eight configurations (including later-retired LFM 230M/350M) loaded in installed
+desktop Chrome 154 with WebGPU and `shader-f16`. Each ran multiple turns,
+stop/recovery, reset, warm reload, grounded answers and injected-reference checks.
+Both Gemmas passed native tool execution; Qwen/LFM tool checks were skipped because
+their integrations do not execute tools. Only the six configurations still in the
+catalog are summarized below.
 
-| Configuration                | Strict smoke cases passed | Material observations                                                                                            |
-| ---------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Gemma 4 E2B                  | 12/14                     | Lifecycle and tools passed; branding and exact wording failed                                                    |
-| Gemma 4 E4B                  | 13/14                     | Lifecycle and tools passed; branding failed                                                                      |
-| Tiny Q4F16                   | 9/13                      | Lifecycle/grounding passed; arithmetic, exact formatting and extracted ID failed                                 |
-| LFM2.5 230M Q4               | 8/13                      | Recovery and warm generation completed but exact-word checks failed; grounded reply omitted the supported status |
-| LFM2.5 350M Q4               | 7/13                      | Cancellation recovery and warm reload passed; summary/grounding and general answer checks failed                 |
-| LFM2.5 2.6B Q4F16            | 11/13                     | Lifecycle/grounding passed; branding and honesty failed                                                          |
-| Tiny Q4F32 compatibility     | 8/13                      | Lifecycle/grounding passed; arithmetic/formatting and extracted priority casing failed                           |
-| LFM2.5 2.6B Q4 compatibility | 11/13                     | Lifecycle/grounding passed; branding and honesty failed                                                          |
+| Configuration                | Strict smoke cases passed | Material observations                                                                            |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| Gemma 4 E2B                  | 12/14                     | Lifecycle and tools passed; branding and exact wording failed                                    |
+| Gemma 4 E4B                  | 13/14                     | Lifecycle and tools passed; branding failed                                                      |
+| Tiny Q4F16                   | 9/13                      | Lifecycle/grounding passed; arithmetic, exact formatting and extracted ID failed                 |
+| LFM2.5 2.6B Q4F16            | 11/13                     | Lifecycle/grounding passed; branding and honesty failed                                          |
+| Tiny Q4F32 compatibility     | 8/13                      | Lifecycle/grounding passed; arithmetic/formatting and extracted priority casing failed           |
+| LFM2.5 2.6B Q4 compatibility | 11/13                     | Lifecycle/grounding passed; branding and honesty failed                                          |
 
-These include strict punctuation/wording checks and are not rankings. LFM 230M's
-recovery failure is an answer failure, not a generation hang. LFM 2.6B emitted
+These include strict punctuation/wording checks and are not rankings. LFM 2.6B emitted
 unsupported textual tool-call markup in an honesty case; no tool executed. The
 historical September 27 smoke scores remain unchanged and are not directly
-comparable with this expanded lifecycle suite.
+comparable with this expanded lifecycle suite. Earlier snapshot rows for LFM 230M/350M
+are omitted because those sizes are no longer in the catalog.
 
-Actual Tiny/LFM 350M Compare checks passed simultaneous residency, paired recall,
+Actual Tiny/LFM Compare checks passed simultaneous residency, paired recall,
 independent cancellation and retry of the stopped side without modifying the
 completed side. A separate engine-switch check covers Gemma → Tiny → LFM → Gemma
 using Labs' explicit history-reset policy.
 
 Local review artifacts are under `qa/local-refresh/model-eval/`:
 
-- `guardrails-acceptance-2026-10-07.json` and `.html`: all eight configurations.
+- `guardrails-acceptance-2026-10-07.json` and `.html`: original eight-configuration snapshot (includes later-retired LFM 230M/350M).
 - `guardrails-pair-2026-10-07.json` and `.html`: four Compare checks.
 - `guardrails-switch-2026-10-07.json`: model switching.
 - `guardrails-fixtures-2026-10-07.json`: baseline/current guardrail comparison.

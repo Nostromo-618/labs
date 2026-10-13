@@ -1,7 +1,7 @@
 # Design
 
 ## Context and goals
-Use the approved plan: six models, eight precision configurations and three injected runtimes. Gemma E2B stays default; LFM remains candidate. Preserve generic tools and browser-local privacy.
+Use the approved plan: four primary models, six precision configurations and three injected runtimes. Gemma E2B stays default; LFM 2.6B remains candidate (230M/350M dropped). Preserve generic tools and browser-local privacy.
 
 ## Decisions
 - Catalog owns primary/variant and documented tool metadata; integrated capabilities.tools stays true only for Gemma.
