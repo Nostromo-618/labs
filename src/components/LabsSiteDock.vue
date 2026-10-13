@@ -4,6 +4,7 @@ import { VdDock, VdThemeSwitcher, dockOrientationOf, useTooltips } from '@vanduo
 import LabsBrandMark from './LabsBrandMark.vue';
 import LabsThemeCustomizer from '../overlays/LabsThemeCustomizer.vue';
 import {
+  LABS_DOCK_DEFAULT_PLACEMENT,
   LABS_DOCK_RADIUS,
   LABS_DOCK_STORAGE_KEY,
   LABS_DOCK_TOOLTIP_DELAY_MS,
@@ -26,11 +27,11 @@ const BRAND_EDGE_TIP = {
   right: 'Move dock to bottom',
 };
 
-const placement = ref('top');
+const placement = ref(LABS_DOCK_DEFAULT_PLACEMENT);
 const tooltipRoot = ref(null);
 const dockEl = ref(null);
 const dockInst = ref(null);
-const lastWidePlacement = ref('top');
+const lastWidePlacement = ref(LABS_DOCK_DEFAULT_PLACEMENT);
 
 const { dockTint } = useLabsDockTint();
 

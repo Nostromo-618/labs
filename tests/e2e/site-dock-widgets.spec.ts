@@ -19,6 +19,31 @@ async function acceptDisclaimer(page) {
 }
 
 test.describe('Labs site dock', () => {
+  test('first-time default is right vertical (stack) when unset', async ({ page }, testInfo) => {
+    test.skip(
+      testInfo.project.name.toLowerCase().includes('mobile') ||
+        (page.viewportSize()?.width ?? 0) < 768,
+      'Vertical dock edges are desktop-only; mobile forces horizontal edges',
+    );
+
+    await page.addInitScript(() => {
+      try {
+        localStorage.removeItem('vwl-site-dock');
+      } catch {
+        /* ignore */
+      }
+    });
+    await acceptDisclaimer(page);
+
+    const dock = page.locator('nav.vd-site-dock.vd-dock-fixed').first();
+    await expect(dock).toHaveClass(/vd-dock-edge-right/);
+    await expect(dock).toHaveClass(/is-vertical/);
+    await expect(dock).toHaveClass(/vd-dock-items-stack/);
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.getAttribute('data-labs-dock')))
+      .toBe('right');
+  });
+
   // Narrow viewports force the dock to top/bottom (horizontal), so vertical-edge
   // wordmark hiding only applies on desktop-width projects.
   test('vertical edges hide brand wordmark (logo only)', async ({ page }, testInfo) => {
