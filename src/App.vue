@@ -432,7 +432,7 @@ watch(demoSlug, (slug) => {
                 <span class="labs-demo-card-desc" id="labs-card-neptune-desc"
                   >In-browser hybrid fuzzy + semantic search over vd3 docs—no server required</span
                 >
-                <span class="labs-demo-card-source">Source: nostromo-618/labs</span>
+                <span class="labs-demo-card-source">Source: nostromo-618/weekend-web-labs</span>
                 <span class="labs-demo-card-badge-row">
                   <span class="labs-demo-card-badge">Experimental</span>
                   <span class="labs-demo-card-badge labs-demo-card-badge-version">{{
@@ -459,7 +459,7 @@ watch(demoSlug, (slug) => {
                 <span class="labs-demo-card-desc" id="labs-card-aichat-desc"
                   >In-browser AI chat with Gemma 4 and FOSS guardrails—no server required</span
                 >
-                <span class="labs-demo-card-source">Source: nostromo-618/labs</span>
+                <span class="labs-demo-card-source">Source: nostromo-618/weekend-web-labs</span>
                 <span class="labs-demo-card-badge-row">
                   <span class="labs-demo-card-badge">Experimental</span>
                   <span class="labs-demo-card-badge labs-demo-card-badge-version">{{

@@ -8,7 +8,7 @@ const escape = (text) =>
     (value) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[value],
   );
 
-/** `/` in dev, `/labs/` on GitHub Pages. A trailing slash is required. */
+/** `/` in dev, `/weekend-web-labs/` on GitHub Pages. A trailing slash is required. */
 function joinBase(siteBase, pathname) {
   const root = siteBase.endsWith('/') ? siteBase.slice(0, -1) : siteBase;
   return `${root}${pathname}`;

@@ -104,7 +104,7 @@ const vdlCbunAlias = useLocalVdlCbun
 export default defineConfig(({ command, mode }) => ({
   // Project site: https://nostromo-618.github.io/weekend-web-labs/
   // Dev and Playwright keep `/` so the Vite server stays at the host root.
-  base: command === 'build' ? '/labs/' : '/',
+  base: command === 'build' ? '/weekend-web-labs/' : '/',
   plugins: [
     {
       name: 'labs-csp',

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
-const pagesBase = '/labs';
+const pagesBase = '/weekend-web-labs';
 const pending = ['/doc/wwl-ai-chat.html'];
 const visited = new Set();
 const external = new Set();
@@ -26,7 +26,7 @@ while (pending.length) {
       external.add(target.href);
       continue;
     }
-    // Built pages prefix links with `/labs`. Files in dist/ stay unprefixed.
+    // Built pages prefix links with `/weekend-web-labs`. Files in dist/ stay unprefixed.
     const logical =
       target.pathname === pagesBase || target.pathname === `${pagesBase}/`
         ? '/'
