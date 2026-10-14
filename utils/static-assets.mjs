@@ -7,8 +7,8 @@ export function staticAssetsPlugin({ root, litertRoot, ortRoot }) {
   const files = new Map();
   // Publish the exact sources used by this checkout without duplicating attribution data.
   for (const [url, source] of [
-    ['/doc/chat-third-party-notices.md', '../vwl-ai-chat/THIRD_PARTY_NOTICES.md'],
-    ['/doc/chat-guardrail-provenance.json', '../vwl-ai-chat/src/guardrails/data/provenance.json'],
+    ['/doc/chat-third-party-notices.md', '../wwl-ai-chat/THIRD_PARTY_NOTICES.md'],
+    ['/doc/chat-guardrail-provenance.json', '../wwl-ai-chat/src/guardrails/data/provenance.json'],
     ['/doc/speech-source-provenance.md', 'src/lib/speech/PROVENANCE.md'],
     ['/doc/kokoro-english-voices.json', 'src/lib/speech/voices.json'],
   ])

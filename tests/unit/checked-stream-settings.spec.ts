@@ -10,7 +10,7 @@ test('checked previews are plain text, unavailable to speech, and become Markdow
   const input = page.getByRole('textbox', { name: 'Message', exact: true });
   await input.fill('preview');
   await input.press('Enter');
-  const preview = page.locator('.vwl-checked-preview');
+  const preview = page.locator('.wwl-checked-preview');
   await expect(preview).toContainText('**Checked** <img');
   await expect(preview.locator('img,a,strong')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Read aloud', exact: true })).toHaveCount(0);
@@ -86,12 +86,12 @@ test('paused model and voice edits preserve draft/history and reasoning uses the
       .getAttribute('aria-expanded')) === 'false'
   )
     await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  const model = page.locator('#vwl-ai-model-select');
+  const model = page.locator('#wwl-ai-model-select');
   await expect(model).toBeEnabled();
   await model.selectOption('LFM2.5-2.6B-q4f16-ONNX');
   await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
   await page.getByLabel('English Kokoro voice').selectOption('bf_emma');
-  if ((await page.locator('.vwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
+  if ((await page.locator('.wwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
     await page.getByRole('button', { name: 'Close settings', exact: true }).click();
   await page.getByRole('button', { name: 'Resume conversation', exact: true }).click();
   await expect(page.getByText(/Listening… Pause/)).toBeVisible();
@@ -297,9 +297,9 @@ for (const action of ['Stop', 'New conversation']) {
     const input = page.getByRole('textbox', { name: 'Message', exact: true });
     await input.fill('preview');
     await input.press('Enter');
-    await expect(page.locator('.vwl-checked-preview')).toBeVisible();
+    await expect(page.locator('.wwl-checked-preview')).toBeVisible();
     await page.getByRole('button', { name: action, exact: true }).click();
-    await expect(page.locator('.vwl-checked-preview')).toHaveCount(0);
+    await expect(page.locator('.wwl-checked-preview')).toHaveCount(0);
     await expect(page.locator('[data-role="assistant"] strong')).toHaveCount(0);
   });
 }
@@ -307,7 +307,7 @@ for (const action of ['Stop', 'New conversation']) {
 test('manual system playback never substitutes an unselected voice', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
-      'vwl-chat-settings-v1',
+      'wwl-chat-settings-v1',
       JSON.stringify({ provider: 'system', voiceURI: '' }),
     );
     Object.defineProperty(window, 'speechSynthesis', {

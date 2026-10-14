@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const pagesBase = '/labs';
-const pending = ['/doc/vwl-ai-chat.html'];
+const pending = ['/doc/wwl-ai-chat.html'];
 const visited = new Set();
 const external = new Set();
 const errors = [];

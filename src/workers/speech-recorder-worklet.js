@@ -1,5 +1,5 @@
 /* global AudioWorkletProcessor, registerProcessor, sampleRate */
-class VwlSpeechRecorder extends AudioWorkletProcessor {
+class WwlSpeechRecorder extends AudioWorkletProcessor {
   constructor() {
     super();
     this.remaining = Math.ceil(sampleRate * 60);
@@ -27,4 +27,4 @@ class VwlSpeechRecorder extends AudioWorkletProcessor {
     return true;
   }
 }
-registerProcessor('vwl-speech-recorder', VwlSpeechRecorder);
+registerProcessor('wwl-speech-recorder', WwlSpeechRecorder);

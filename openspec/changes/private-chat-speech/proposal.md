@@ -14,7 +14,7 @@ Chat currently requires typing and reading. Add private English dictation and ma
 
 ### New Capabilities
 
-- `vwl-chat-speech`: Private dictation, manual playback, model loading and lifecycle cleanup.
+- `wwl-chat-speech`: Private dictation, manual playback, model loading and lifecycle cleanup.
 
 ### Modified Capabilities
 

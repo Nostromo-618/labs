@@ -1,6 +1,6 @@
-import { validateLlmInput } from '@vanduo-oss/vwl-ai-chat/guardrails/llm';
-import { toGuardrailError } from '@vanduo-oss/vwl-ai-chat';
-import { AiChat, getModelOption } from '@vanduo-oss/vwl-ai-chat';
+import { validateLlmInput } from '@wwl/wwl-ai-chat/guardrails/llm';
+import { toGuardrailError } from '@wwl/wwl-ai-chat';
+import { AiChat, getModelOption } from '@wwl/wwl-ai-chat';
 import {
   chatRuntimeOptions,
   getChatDeviceCapabilities,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Headed Chromium runner for vwl-model-eval.
+ * Headed Chromium runner for wwl-model-eval.
  *
  * Usage:
  *   pnpm model-eval
@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
-import { BASELINE_MODEL_IDS, NEW_MODEL_IDS } from '@vanduo-oss/vwl-ai-chat';
+import { BASELINE_MODEL_IDS, NEW_MODEL_IDS } from '@wwl/wwl-ai-chat';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = path.join(ROOT, 'qa/local-refresh/model-eval');
@@ -70,7 +70,7 @@ let lastWeightProgressAt = 0;
 let lastWeightProgressText = '';
 page.on('console', (msg) => {
   const text = msg.text();
-  const checkpointPrefix = '[VWL_EVAL_CHECKPOINT]';
+  const checkpointPrefix = '[WWL_EVAL_CHECKPOINT]';
   if (text.startsWith(checkpointPrefix)) {
     try {
       const report = JSON.parse(text.slice(checkpointPrefix.length));
@@ -109,13 +109,13 @@ page.on('requestfailed', (request) => {
 let payload;
 try {
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForFunction(() => window.__VWL_MODEL_EVAL_DONE__ === true, null, {
+  await page.waitForFunction(() => window.__WWL_MODEL_EVAL_DONE__ === true, null, {
     timeout: timeoutMs,
   });
   payload = await page.evaluate(() => ({
-    report: window.__VWL_MODEL_EVAL_REPORT__ || null,
-    html: window.__VWL_MODEL_EVAL_HTML__ || '',
-    error: window.__VWL_MODEL_EVAL_ERROR__ || null,
+    report: window.__WWL_MODEL_EVAL_REPORT__ || null,
+    html: window.__WWL_MODEL_EVAL_HTML__ || '',
+    error: window.__WWL_MODEL_EVAL_ERROR__ || null,
   }));
   if (payload.report)
     payload.report.executionStorage = {

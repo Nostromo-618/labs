@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const settings = (page) => page.getByRole('button', { name: 'Settings', exact: true });
-const panel = (page) => page.locator('.vwl-ai-settings-panel');
+const panel = (page) => page.locator('.wwl-ai-settings-panel');
 const composer = (page) => page.getByRole('textbox', { name: 'Message', exact: true });
 async function resize(page, viewport) {
   await page.setViewportSize(viewport);
@@ -9,8 +9,8 @@ async function resize(page, viewport) {
     .poll(() =>
       panel(page).evaluate(
         (el) =>
-          el.classList.contains('vwl-ai-settings-drawer') ===
-          document.querySelector('.vwl-ai-workspace-host').getBoundingClientRect().width < 960,
+          el.classList.contains('wwl-ai-settings-drawer') ===
+          document.querySelector('.wwl-ai-workspace-host').getBoundingClientRect().width < 960,
       ),
     )
     .toBe(true);
@@ -23,7 +23,7 @@ async function settle(page) {
           stable = 0,
           frames = 0;
         function check() {
-          const rect = document.querySelector('.vwl-ai-chat-wrap').getBoundingClientRect();
+          const rect = document.querySelector('.wwl-ai-chat-wrap').getBoundingClientRect();
           const current = `${rect.top.toFixed(1)},${rect.height.toFixed(1)},${window.scrollY}`;
           stable = current === previous ? stable + 1 : 0;
           previous = current;
@@ -69,7 +69,7 @@ for (const theme of ['light', 'dark']) {
         await expect(page.locator('[data-role="assistant"]')).toHaveCount(i + 1);
       }
       await composer(page).fill('Keep my draft');
-      const before = await page.locator('.vwl-ai-messages').boundingBox();
+      const before = await page.locator('.wwl-ai-messages').boundingBox();
       await openSettings(page);
       await expect(page.getByText('Model details', { exact: true }).locator('..')).toHaveAttribute(
         'open',
@@ -81,7 +81,7 @@ for (const theme of ['light', 'dark']) {
       );
       await expect(page.getByLabel('Read-aloud voice')).toBeVisible();
       await page.getByLabel('Read-aloud voice').selectOption('neural');
-      const after = await page.locator('.vwl-ai-messages').boundingBox();
+      const after = await page.locator('.wwl-ai-messages').boundingBox();
       expect(Math.abs(before.height - after.height)).toBeLessThan(2);
       if (viewport.width >= 960) expect(before.width - after.width).toBeGreaterThan(315);
       else await expect(panel(page)).toHaveAttribute('aria-modal', 'true');
@@ -108,7 +108,7 @@ test('live playback status stays below the composer while a long transcript scro
 }, info) => {
   await page.goto('/tests/fixtures/chat-vue-harness.html');
   await closeSettings(page);
-  const status = page.locator('.vwl-ai-live-status');
+  const status = page.locator('.wwl-ai-live-status');
   const idle = await status.boundingBox();
   for (let i = 0; i < 3; i++) {
     await composer(page).fill(`Turn ${i}: ${'Long conversation text. '.repeat(55)}`);
@@ -126,10 +126,10 @@ test('live playback status stays below the composer while a long transcript scro
   await composer(page).scrollIntoViewIfNeeded();
   await expect(status).toBeInViewport();
   const before = await status.boundingBox();
-  const form = await page.locator('.vwl-ai-form').boundingBox();
+  const form = await page.locator('.wwl-ai-form').boundingBox();
   expect(before.y).toBeGreaterThanOrEqual(form.y + form.height - 1);
   expect(Math.abs(before.height - idle.height)).toBeLessThan(2);
-  await page.locator('.vwl-ai-messages').evaluate((el) => {
+  await page.locator('.wwl-ai-messages').evaluate((el) => {
     el.scrollTop = 0;
   });
   const after = await status.boundingBox();
@@ -249,7 +249,7 @@ test('both real demo hosts keep a lazy workspace with documentation below', asyn
     await page.goto(url);
     if (await page.getByTestId('disclaimer-gate').isVisible())
       await page.getByTestId('disclaimer-accept').click();
-    await expect(page.locator('.vwl-ai-chat-wrap')).toBeVisible();
+    await expect(page.locator('.wwl-ai-chat-wrap')).toBeVisible();
     await expect(panel(page)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Open Settings', exact: true })).toHaveCount(0);
     await expect(
@@ -258,9 +258,9 @@ test('both real demo hosts keep a lazy workspace with documentation below', asyn
       ),
     ).toBeVisible();
     await settle(page);
-    const before = await page.locator('.vwl-ai-messages').boundingBox();
+    const before = await page.locator('.wwl-ai-messages').boundingBox();
     await page.getByRole('button', { name: 'Close settings' }).click();
-    const after = await page.locator('.vwl-ai-messages').boundingBox();
+    const after = await page.locator('.wwl-ai-messages').boundingBox();
     expect(Math.abs(before.height - after.height)).toBeLessThan(2);
     expect(after.width - before.width).toBeGreaterThan(315);
     await expect(page.getByRole('button', { name: 'Open Settings', exact: true })).toBeVisible();

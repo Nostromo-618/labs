@@ -14,4 +14,4 @@
 - [x] 3.2 Run package checks and Labs build; record results and footprint.
 - [x] 3.3 Run retained-model Chrome inference and compatibility checks; record limitations and results.
 
-Validation evidence and hardware/storage limitations: doc/vwl-model-guardrails-validation.md.
+Validation evidence and hardware/storage limitations: doc/wwl-model-guardrails-validation.md.

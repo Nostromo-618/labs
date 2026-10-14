@@ -271,7 +271,7 @@ test('one click preserves history/draft, automatically submits consecutive turns
       window.speechQA.transcript = text;
       window.conversationQA.utterance();
     }, text);
-    await expect(page.locator('.vwl-ai-message-body').last()).toHaveText('Answer: ' + text);
+    await expect(page.locator('.wwl-ai-message-body').last()).toHaveText('Answer: ' + text);
     await expect(
       page.getByText('Listening… Pause for about 1.2 seconds to send.', { exact: true }),
     ).toBeVisible();
@@ -286,7 +286,7 @@ test('one click preserves history/draft, automatically submits consecutive turns
   await page.getByRole('button', { name: 'End conversation', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'Message', exact: true })).toBeEditable();
   expect(await page.evaluate(() => window.chatQA.instructions)).toEqual({});
-  expect(await page.locator('.vwl-ai-message').count()).toBe(4);
+  expect(await page.locator('.wwl-ai-message').count()).toBe(4);
 });
 
 for (const [name, transcript, limit] of [
@@ -341,11 +341,11 @@ test('permission denial pauses with an actionable error; pending Kokoro has an i
   await page.evaluate(() => {
     window.conversationQA.utterance();
   });
-  await expect(page.locator('.vwl-ai-voice-progress')).toContainText('Preparing voice…');
-  await expect(page.locator('.vwl-ai-voice-progress .vd-spinner')).toBeVisible();
+  await expect(page.locator('.wwl-ai-voice-progress')).toContainText('Preparing voice…');
+  await expect(page.locator('.wwl-ai-voice-progress .vd-spinner')).toBeVisible();
   await page.getByRole('button', { name: 'Pause conversation', exact: true }).click();
   await page.evaluate(() => window.speechQA.finish());
-  await expect(page.locator('.vwl-ai-voice-progress')).toHaveCount(0);
+  await expect(page.locator('.wwl-ai-voice-progress')).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: 'Resume conversation', exact: true }),
   ).toBeVisible();

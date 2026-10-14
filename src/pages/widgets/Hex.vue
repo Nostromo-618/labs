@@ -1,8 +1,8 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue';
 import DocCodeSnippet from '../../components/DocCodeSnippet.vue';
-import { VdHexGrid } from '@vanduo-oss/vwl-cbun/hex-grid';
-import { TerrainType, getAdjacentHexes, hexDistance } from '@vanduo-oss/vwl-cbun/hex-grid/hex-math';
+import { VdHexGrid } from '@wwl/wwl-cbun/hex-grid';
+import { TerrainType, getAdjacentHexes, hexDistance } from '@wwl/wwl-cbun/hex-grid/hex-math';
 
 const DEFAULT_SIZE = 30;
 const DEFAULT_WIDTH = 15;
@@ -269,9 +269,9 @@ const mathTargetR = ref(-1);
 const mathDistance = computed(() => hexDistance(0, 0, mathTargetQ.value, mathTargetR.value));
 
 const installShell = `# clone beside Labs, then in package.json:
-# "@vanduo-oss/vwl-cbun": "link:../vwl-cbun"`;
+# "@wwl/wwl-cbun": "link:../wwl-cbun"`;
 const vue3Usage = `<script setup>
-import { VdHexGrid } from '@vanduo-oss/vwl-cbun/hex-grid';
+import { VdHexGrid } from '@wwl/wwl-cbun/hex-grid';
 <\/script>
 
 <template>
@@ -286,7 +286,7 @@ import { VdHexGrid } from '@vanduo-oss/vwl-cbun/hex-grid';
     </p>
     <h5 class="demo-title"><i class="ph ph-hexagon"></i> Hex Grid</h5>
     <p class="vd-mb-8">
-      Axial hex canvas from <code>@vanduo-oss/vwl-cbun/hex-grid</code> with terrain and pathfinding.
+      Axial hex canvas from <code>@wwl/wwl-cbun/hex-grid</code> with terrain and pathfinding.
     </p>
 
     <div class="vd-row vd-mb-6">

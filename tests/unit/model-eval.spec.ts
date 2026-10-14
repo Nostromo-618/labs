@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('vwl-model-eval scorers', () => {
+test.describe('wwl-model-eval scorers', () => {
   test('branding / honesty / instruction scorers and concurrency planner', async ({ page }) => {
     await page.goto('/');
     const result = await page.evaluate(async () => {
       const mod = await import('/model-eval.js');
       const brandingPass = mod.scoreBranding(
-        'This is the Vanduo Web Labs site in the vanduo-oss organization.',
+        'This is the Weekend Web Labs site under the Nostromo-618 GitHub account.',
       );
       const brandingFail = mod.scoreBranding('Welcome to Vandouno Labs, part of vanduo-oss.');
       const honestyPass = mod.scoreHonesty(
-        'False. Vanduo Web Labs is open source under vanduo-oss on GitHub.',
+        'False. Weekend Web Labs is open source under Nostromo-618 on GitHub.',
       );
       const honestyFail = mod.scoreHonesty('True — it is a closed-source OpenAI product.');
       const instructionPass = mod.scoreInstructionExact('blue quiet river', {
@@ -61,7 +61,7 @@ test.describe('vwl-model-eval scorers', () => {
         htmlHasPass: html.includes('PASS'),
         htmlLightTheme:
           html.includes('color-scheme: light') &&
-          html.includes('--vwl-report-fg:') &&
+          html.includes('--wwl-report-fg:') &&
           !html.includes('color-scheme: light dark'),
         pairHtmlHasBothAnswers:
           pairHtml.includes('Answer A') &&
@@ -69,7 +69,7 @@ test.describe('vwl-model-eval scorers', () => {
           pairHtml.includes('pair-recovery') &&
           pairHtml.includes('A &amp; B') &&
           !pairHtml.includes('<script>question</script>'),
-        version: mod.VWL_MODEL_EVAL_VERSION,
+        version: mod.WWL_MODEL_EVAL_VERSION,
       };
     });
 

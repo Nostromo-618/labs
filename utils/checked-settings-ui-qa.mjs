@@ -36,9 +36,9 @@ try {
     const voice = page.getByLabel('English Kokoro voice');
     assert.equal(await voice.locator('option').count(), 28);
     await voice.selectOption('bf_emma');
-    await page.locator('#vwl-ai-model-select').selectOption('LFM2.5-2.6B-q4f16-ONNX');
+    await page.locator('#wwl-ai-model-select').selectOption('LFM2.5-2.6B-q4f16-ONNX');
     if (width === 390) {
-      const drawer = await page.locator('.vwl-ai-settings-panel').evaluate((el) => ({
+      const drawer = await page.locator('.wwl-ai-settings-panel').evaluate((el) => ({
         parent: el.parentElement.tagName,
         top: el.getBoundingClientRect().top,
       }));
@@ -47,7 +47,7 @@ try {
     }
     await voice.scrollIntoViewIfNeeded();
     await page.screenshot({ path: `qa/checked-stream/settings-${width}.png` });
-    if ((await page.locator('.vwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
+    if ((await page.locator('.wwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
       await page.getByRole('button', { name: 'Close settings', exact: true }).click();
     await page.getByRole('button', { name: 'Compare', exact: true }).click();
     const delivery = page.getByRole('combobox', { name: 'Reply delivery', exact: true });

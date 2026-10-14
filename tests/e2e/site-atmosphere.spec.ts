@@ -7,8 +7,8 @@ for (const theme of ['light', 'dark'] as const) {
     }, info) => {
       await page.emulateMedia({ colorScheme: theme, reducedMotion });
       await page.addInitScript((theme) => {
-        localStorage.setItem('vwl-theme-preference', theme);
-        localStorage.setItem('vwl-primary-color', 'blue');
+        localStorage.setItem('wwl-theme-preference', theme);
+        localStorage.setItem('wwl-primary-color', 'blue');
         window.atmosphereQA = { uniforms: {}, draws: 0 };
         const names = new WeakMap();
         const proto = WebGLRenderingContext.prototype;
@@ -21,14 +21,14 @@ for (const theme of ['light', 'dark'] as const) {
         for (const method of ['uniform3f', 'uniform1f']) {
           const original = proto[method];
           proto[method] = function (location, ...values) {
-            if (this.canvas.classList.contains('vwl-home-atmosphere-canvas'))
+            if (this.canvas.classList.contains('wwl-home-atmosphere-canvas'))
               window.atmosphereQA.uniforms[names.get(location)] = values;
             return original.call(this, location, ...values);
           };
         }
         const originalDraw = proto.drawArrays;
         proto.drawArrays = function (...args) {
-          if (this.canvas.classList.contains('vwl-home-atmosphere-canvas'))
+          if (this.canvas.classList.contains('wwl-home-atmosphere-canvas'))
             window.atmosphereQA.draws++;
           return originalDraw.apply(this, args);
         };
@@ -36,7 +36,7 @@ for (const theme of ['light', 'dark'] as const) {
       await page.goto('/#home');
       if (await page.getByTestId('disclaimer-gate').isVisible())
         await page.getByTestId('disclaimer-accept').click();
-      await expect(page.locator('.vwl-home-atmosphere-active')).toBeVisible();
+      await expect(page.locator('.wwl-home-atmosphere-active')).toBeVisible();
       await expect.poll(() => page.evaluate(() => window.atmosphereQA.draws)).toBeGreaterThan(0);
       expect(await page.evaluate(() => window.atmosphereQA.uniforms.uSpeed[0])).toBe(
         reducedMotion === 'reduce' ? 0 : 0.07,

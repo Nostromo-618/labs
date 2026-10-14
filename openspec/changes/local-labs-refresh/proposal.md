@@ -14,13 +14,13 @@ Labs has drifted from its sibling engines and current documentation: semantic ve
 ## Capabilities
 
 ### New Capabilities
-- `vwl-hex-earth`: full-page sibling demo with responsive panels and lifecycle cleanup.
+- `wwl-hex-earth`: full-page sibling demo with responsive panels and lifecycle cleanup.
 
 ### Modified Capabilities
-- `vwl-ai-chat`: cancellable, bounded chat with curated models and cited docs mode.
-- `vwl-neptune-search`: canonical dual-preset corpus and opt-in semantic loading.
-- `vwl-guardrails`: validated tool schemas, bounded execution, and safe streaming.
+- `wwl-ai-chat`: cancellable, bounded chat with curated models and cited docs mode.
+- `wwl-neptune-search`: canonical dual-preset corpus and opt-in semantic loading.
+- `wwl-guardrails`: validated tool schemas, bounded execution, and safe streaming.
 
 ## Impact
 
-Labs-owned vdl surfaces and sibling vwl-ai-chat, vwl-hybrid-search, vwl-hex-earth implementations change. Public vd3 APIs remain unchanged. Existing callback APIs and the standalone Earth app remain supported. The user explicitly authorized coordinated sibling edits and implementation of the previously reviewed plan; no commit, push, or publishing is authorized.
+Labs-owned vdl surfaces and sibling wwl-ai-chat, wwl-hybrid-search, wwl-hex-earth implementations change. Public vd3 APIs remain unchanged. Existing callback APIs and the standalone Earth app remain supported. The user explicitly authorized coordinated sibling edits and implementation of the previously reviewed plan; no commit, push, or publishing is authorized.

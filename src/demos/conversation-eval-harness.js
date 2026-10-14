@@ -1,4 +1,4 @@
-import { AiChat, getModelOption } from '@vanduo-oss/vwl-ai-chat';
+import { AiChat, getModelOption } from '@wwl/wwl-ai-chat';
 import { chatRuntimeOptions, getChatDeviceCapabilities } from '../lib/chat-runtime.js';
 import { SpeechSession } from '../lib/speech/session.js';
 import { ConversationSession } from '../lib/speech/conversation.js';

@@ -35,7 +35,7 @@ SHA-256 2623a2953f6ff3d2c1e61740c6cdb7168133479b267dfef114a4a3cc5bdd788f.
 The model is verified before inference. ONNX Runtime Web is a direct exact
 version dependency shared with Transformers.js; the same local WASM assets
 are used. Voice detection, recording and transcripts stay in memory; only the
-pinned detector weights enter the clearable `vwl-speech-vad-v1` cache.
+pinned detector weights enter the clearable `wwl-speech-vad-v1` cache.
 
 ## Named English voice catalog
 

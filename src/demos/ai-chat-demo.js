@@ -2,14 +2,14 @@ import { createApp, h } from 'vue';
 import { VanduoVue, VdCard, VdThemeSwitcher } from '@vanduo-oss/vd3';
 import '@vanduo-oss/vd3/css';
 import '../styles/legacy-bridge.css';
-import { installResolvedTheme } from '../vwl-resolved-theme.js';
-import VwlChatWorkbench from '../components/VwlChatWorkbench.vue';
+import { installResolvedTheme } from '../wwl-resolved-theme.js';
+import WwlChatWorkbench from '../components/WwlChatWorkbench.vue';
 
 const DemoApp = {
   name: 'AiChatDemo',
   setup() {
     return () =>
-      h('div', { class: 'demo-root vwl-chat-demo' }, [
+      h('div', { class: 'demo-root wwl-chat-demo' }, [
         h('header', { class: 'demo-header' }, [
           h('h1', 'AI Chat (WebGPU)'),
           h('p', [
@@ -19,10 +19,10 @@ const DemoApp = {
           ]),
           h(VdThemeSwitcher, { menu: false }),
         ]),
-        h('div', { class: 'demo-chat-wrap' }, [h(VwlChatWorkbench)]),
+        h('div', { class: 'demo-chat-wrap' }, [h(WwlChatWorkbench)]),
         h(
           VdCard,
-          { class: 'demo-info-section vwl-card-glow vd-glass' },
+          { class: 'demo-info-section wwl-card-glow vd-glass' },
           {
             default: () => [
               h('h3', 'How it Works'),
@@ -126,7 +126,11 @@ const DemoApp = {
             ],
           },
         ),
-        h('footer', { class: 'demo-footer' }, 'AI Chat — Experimental Labs Component for Vanduo'),
+        h(
+          'footer',
+          { class: 'demo-footer' },
+          'AI Chat — Experimental Labs Component for Weekend Web Labs',
+        ),
       ]);
   },
 };
@@ -213,7 +217,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-installResolvedTheme({ storagePrefix: 'vanduo-', defaultTheme: 'dark' });
+installResolvedTheme({ storagePrefix: 'wwl-', defaultTheme: 'dark' });
 
 createApp(DemoApp)
   .use(VanduoVue, {

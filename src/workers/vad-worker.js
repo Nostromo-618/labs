@@ -13,10 +13,10 @@ function reset() {
 }
 async function load(args, progress) {
   const spec = SPEECH_MODELS.vad;
-  const cache = await openSpeechCache('vwl-speech-vad-v1');
+  const cache = await openSpeechCache('wwl-speech-vad-v1');
   let url = assetURL(spec, spec.files[0]);
   if (!args.remote && (import.meta.env.DEV || import.meta.env.MODE === 'qa')) {
-    const base = new URL('/models/vwl-speech-vad/', self.location.href).href;
+    const base = new URL('/models/wwl-speech-vad/', self.location.href).href;
     const marker = base + '.labs-model.json';
     let response = await cache.match(marker);
     if (!response) {

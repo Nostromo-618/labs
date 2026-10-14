@@ -20,4 +20,4 @@ class ConversationCapture extends AudioWorkletProcessor {
     return true;
   }
 }
-registerProcessor('vwl-conversation-capture', ConversationCapture);
+registerProcessor('wwl-conversation-capture', ConversationCapture);

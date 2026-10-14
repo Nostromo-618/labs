@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import {
   buildCanonicalCorpus,
   hash,
-} from '../../vwl-hybrid-search/scripts/lib/canonical-index.mjs';
+} from '../../wwl-hybrid-search/scripts/lib/canonical-index.mjs';
 
 const require = createRequire(import.meta.url);
 const sourceRoot = path.resolve(process.env.VD3_DOCS_ROOT || '../../vd3/vd3-docs');
@@ -99,7 +99,7 @@ const files = await fs.readdir('dist', { recursive: true });
 assert(
   !files.some(
     (f) =>
-      f !== 'doc/vwl-model-eval.html' &&
+      f !== 'doc/wwl-model-eval.html' &&
       /(^|\/)(?:\.models|models|qa|tests|logs)(?:\/|$)|model-eval[^/]*\.(?:html|js|json)$|ai-draw-demo|\.litertlm$/.test(
         f,
       ),

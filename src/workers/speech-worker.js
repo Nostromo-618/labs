@@ -19,7 +19,7 @@ let kind, cache, transcriber, model, tokenizer, voiceData, phonemize, modelSourc
 
 async function sourceFor(spec, remote) {
   if (!remote && (import.meta.env.DEV || import.meta.env.MODE === 'qa')) {
-    const base = `/models/vwl-speech-${kind}/`;
+    const base = `/models/wwl-speech-${kind}/`;
     const marker = new URL(base + '.labs-model.json', self.location.href).href;
     let response = await cache.match(marker);
     if (!response) {
@@ -49,7 +49,7 @@ async function load(args, progress) {
   // several internal calls. Pin this worker's template too, so discovery and
   // inference use the same immutable assets and can find them offline.
   env.remotePathTemplate = `{model}/resolve/${spec.revision}/`;
-  cache = await openSpeechCache(`vwl-speech-${kind}-v1`);
+  cache = await openSpeechCache(`wwl-speech-${kind}-v1`);
   env.customCache = cache;
   progress({
     text: cache.available

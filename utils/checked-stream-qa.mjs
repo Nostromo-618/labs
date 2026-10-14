@@ -4,7 +4,7 @@ import { chromium } from '@playwright/test';
 const base = process.env.CHECKED_QA_URL || 'http://127.0.0.1:3001';
 const root = 'qa/checked-stream';
 await fs.mkdir(root, { recursive: true });
-const context = await chromium.launchPersistentContext('/tmp/vwl-checked-stream-profile', {
+const context = await chromium.launchPersistentContext('/tmp/wwl-checked-stream-profile', {
   channel: 'chrome',
   headless: false,
   viewport: { width: 1280, height: 900 },

@@ -1,5 +1,5 @@
 import { dependencies } from '../../package.json';
-import { collectDeviceSignals, MODEL_OPTIONS } from '@vanduo-oss/vwl-ai-chat';
+import { collectDeviceSignals, MODEL_OPTIONS } from '@wwl/wwl-ai-chat';
 import { loadTransformers } from './transformers-chat.js';
 import { publicUrl } from './public-url.js';
 /** Labs owns injected runtimes; report installed versions rather than catalog defaults. */
@@ -127,10 +127,10 @@ export const chatRuntimeOptions = {
 /** Exact chat-owned cache names and model identities; never scan unrelated databases. */
 export async function clearChatCaches(modelIds = MODEL_OPTIONS.map((m) => m.id)) {
   const selectedIds = new Set(modelIds);
-  const { LITERT_MODEL_CACHE_NAME } = await import('@vanduo-oss/vwl-ai-chat');
+  const { LITERT_MODEL_CACHE_NAME } = await import('@wwl/wwl-ai-chat');
   if (activeEngines.size) throw new Error('Unload chat models before clearing their cache.');
   const selectedModels = MODEL_OPTIONS.filter((m) => selectedIds.has(m.id));
-  for (const name of [LITERT_MODEL_CACHE_NAME, 'vwl-chat-onnx-v1']) {
+  for (const name of [LITERT_MODEL_CACHE_NAME, 'wwl-chat-onnx-v1']) {
     try {
       const cache = await caches.open(name);
       for (const request of await cache.keys()) {
@@ -150,7 +150,7 @@ export async function clearChatCaches(modelIds = MODEL_OPTIONS.map((m) => m.id))
   }
   for (const id of selectedIds) {
     try {
-      localStorage.removeItem('vwl-ai-chat-model-cached:' + id);
+      localStorage.removeItem('wwl-ai-chat-model-cached:' + id);
     } catch {
       /* storage denied */
     }

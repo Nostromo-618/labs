@@ -1,5 +1,5 @@
 import { KOKORO_VOICES } from './speech/voices.js';
-const KEY = 'vwl-chat-settings-v1';
+const KEY = 'wwl-chat-settings-v1';
 const defaults = {
   delivery: 'checked-stream',
   provider: 'neural',

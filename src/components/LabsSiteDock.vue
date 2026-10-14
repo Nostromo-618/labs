@@ -299,10 +299,10 @@ onUnmounted(() => {
     <template #actions>
       <a
         class="labs-dock-github"
-        href="https://github.com/nostromo-618/labs"
+        href="https://github.com/nostromo-618/weekend-web-labs"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Open Vanduo Web Labs GitHub repository"
+        aria-label="Open Weekend Web Labs GitHub repository"
         :data-tooltip="showDockTooltips ? 'GitHub' : undefined"
         v-bind="dockTooltipBind"
       >

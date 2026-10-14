@@ -20,7 +20,7 @@ const kinds = requested.length ? requested : Object.keys(SPEECH_MODELS);
 for (const kind of kinds) {
   const spec = SPEECH_MODELS[kind];
   if (!spec) throw new Error('Choose whisper, kokoro and/or vad.');
-  const directory = path.join(root, '.models', `vwl-speech-${kind}`);
+  const directory = path.join(root, '.models', `wwl-speech-${kind}`);
   const metadata = spec.artifacts
     ? null
     : await fetch(

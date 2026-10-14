@@ -165,7 +165,7 @@ body {
   background: var(--vd-bg-secondary, var(--bg-secondary));
 }
 
-.vwl-theme-customizer {
+.wwl-theme-customizer {
   display: inline-flex;
   align-items: center;
 }
@@ -286,7 +286,7 @@ body:has(main[data-labs-route]) {
   background-image: none;
 }
 
-.vwl-home-atmosphere {
+.wwl-home-atmosphere {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -304,12 +304,12 @@ body:has(main[data-labs-route]) {
   --vd-liquid-neutral-weight: 1.15;
 }
 
-.vwl-home-atmosphere-active {
+.wwl-home-atmosphere-active {
   opacity: 1;
   visibility: visible;
 }
 
-.vwl-home-atmosphere-canvas {
+.wwl-home-atmosphere-canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -935,22 +935,22 @@ main[data-labs-route='about'] .labs-view-about .labs-section {
 }
 
 /* Chat's workspace needs width and a compact host; other demo cards keep their layout. */
-.labs-demos-detail.vwl-chat-detail {
+.labs-demos-detail.wwl-chat-detail {
   max-width: 90rem;
   padding: 0.75rem;
 }
-.vwl-chat-detail .labs-demos-detail-header {
+.wwl-chat-detail .labs-demos-detail-header {
   margin-bottom: 0.6rem;
 }
-.vwl-chat-detail .labs-demos-detail-header h2 {
+.wwl-chat-detail .labs-demos-detail-header h2 {
   font-size: 1.1rem;
 }
-.vwl-chat-detail #labs-demo-heading {
+.wwl-chat-detail #labs-demo-heading {
   display: none;
 }
-.vwl-chat-detail .labs-detail-stack-section {
+.wwl-chat-detail .labs-detail-stack-section {
   margin-bottom: 1rem;
 }
-.vwl-chat-detail .vwl-chat-workbench {
+.wwl-chat-detail .wwl-chat-workbench {
   scroll-margin-top: 6rem;
 }

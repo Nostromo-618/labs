@@ -1,4 +1,4 @@
-import { HybridSearch } from '@vanduo-oss/vwl-hybrid-search';
+import { HybridSearch } from '@wwl/wwl-hybrid-search';
 import Fuse from 'fuse.js';
 import { publicUrl } from './public-url.js';
 

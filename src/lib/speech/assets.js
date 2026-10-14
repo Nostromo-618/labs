@@ -42,9 +42,9 @@ export const SPEECH_MODELS = Object.freeze({
   },
 });
 export const SPEECH_CACHE_NAMES = [
-  'vwl-speech-whisper-v1',
-  'vwl-speech-kokoro-v1',
-  'vwl-speech-vad-v1',
+  'wwl-speech-whisper-v1',
+  'wwl-speech-kokoro-v1',
+  'wwl-speech-vad-v1',
 ];
 export const RECORDING_LIMIT_SECONDS = 60;
 export function assetURL(model, file) {

@@ -1,8 +1,8 @@
 {
-  "name": "@vanduo-oss/labs",
+  "name": "@wwl/weekend-web-labs",
   "version": "0.1.1",
   "private": true,
-  "description": "Vanduo Web Labs — demo playground for VWL engines and vwl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
+  "description": "Weekend Web Labs — demo playground for WWL engines and wwl-cbun widgets (hybrid search, AiChat, draw, hex, code editor, music player)",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -10,10 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nostromo-618/labs.git"
+    "url": "https://github.com/nostromo-618/weekend-web-labs.git"
   },
   "keywords": [
-    "vanduo",
+    "wwl",
+    "weekend-web-labs",
     "labs",
     "demo",
     "hybrid-search",
@@ -55,10 +56,10 @@
     "@mlc-ai/web-llm": "0.2.86",
     "@vanduo-oss/vd3": "1.7.6",
     "@vanduo-oss/vd3-charts": "1.1.1",
-    "@vanduo-oss/vwl-ai-chat": "link:../vwl-ai-chat",
-    "@vanduo-oss/vwl-cbun": "link:../vwl-cbun",
-    "@vanduo-oss/vwl-hex-earth": "link:../vwl-hex-earth",
-    "@vanduo-oss/vwl-hybrid-search": "link:../vwl-hybrid-search",
+    "@wwl/wwl-ai-chat": "link:../wwl-ai-chat",
+    "@wwl/wwl-cbun": "link:../wwl-cbun",
+    "@wwl/wwl-hex-earth": "link:../wwl-hex-earth",
+    "@wwl/wwl-hybrid-search": "link:../wwl-hybrid-search",
     "fuse.js": "7.5.0",
     "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
     "phonemizer": "1.2.1",

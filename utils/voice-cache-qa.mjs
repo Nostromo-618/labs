@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import { chromium } from '@playwright/test';
 const base = process.env.CHECKED_QA_URL || 'http://127.0.0.1:3001';
-const context = await chromium.launchPersistentContext('/tmp/vwl-checked-stream-profile', {
+const context = await chromium.launchPersistentContext('/tmp/wwl-checked-stream-profile', {
   channel: 'chrome',
   headless: false,
 });
@@ -22,9 +22,9 @@ try {
       rt.dispose();
     }
   });
-  const url = `${base}/models/vwl-speech-kokoro/voices/af_alloy.bin`;
+  const url = `${base}/models/wwl-speech-kokoro/voices/af_alloy.bin`;
   await page.evaluate(async (url) => {
-    const cache = await caches.open('vwl-speech-kokoro-v1');
+    const cache = await caches.open('wwl-speech-kokoro-v1');
     const response = await cache.match(url);
     window.savedVoiceBytes = await response.arrayBuffer();
     await cache.put(url, new globalThis.Response(new Uint8Array(522240)));
@@ -41,7 +41,7 @@ try {
     }
   });
   await page.evaluate(async (url) => {
-    const cache = await caches.open('vwl-speech-kokoro-v1');
+    const cache = await caches.open('wwl-speech-kokoro-v1');
     await cache.delete(url);
   }, url);
   await context.route(/\/(?:models\/|resolve\/)/, (r) => r.abort('internetdisconnected'));
@@ -58,7 +58,7 @@ try {
   });
   await context.unroute(/\/(?:models\/|resolve\/)/);
   await page.evaluate(async (url) => {
-    const cache = await caches.open('vwl-speech-kokoro-v1');
+    const cache = await caches.open('wwl-speech-kokoro-v1');
     await cache.put(url, new globalThis.Response(window.savedVoiceBytes));
     window.savedVoiceBytes = null;
   }, url);
@@ -74,7 +74,7 @@ try {
   });
   report.latency = await page.evaluate(async () => {
     const { CheckedDeliveryGate } =
-      await import('/@fs/Users/misteruser/Documents/GitHub/0_vanduo/vdl/vwl-ai-chat/src/checked-delivery.ts');
+      await import('/@fs/Users/misteruser/Documents/GitHub/0_vanduo/vdl/wwl-ai-chat/src/checked-delivery.ts');
     const results = {};
     for (const size of [1000, 4000, 16000, 32000]) {
       const text = 'Flowers grow in a friendly garden. '

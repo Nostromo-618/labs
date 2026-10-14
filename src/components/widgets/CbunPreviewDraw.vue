@@ -1,5 +1,5 @@
 <script setup>
-import { VdDraw } from '@vanduo-oss/vwl-cbun/draw';
+import { VdDraw } from '@wwl/wwl-cbun/draw';
 import { drawSeedDoc, fitDrawDemoView } from '../../constants/drawSeed.js';
 
 function onReady(instance) {

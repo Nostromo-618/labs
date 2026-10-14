@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import { chromium } from '@playwright/test';
 const base = process.env.CHECKED_QA_URL || 'http://127.0.0.1:3001';
-const context = await chromium.launchPersistentContext('/tmp/vwl-checked-conversation-profile', {
+const context = await chromium.launchPersistentContext('/tmp/wwl-checked-conversation-profile', {
   channel: 'chrome',
   headless: false,
   args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--disk-cache-size=1'],

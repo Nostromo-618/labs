@@ -1,11 +1,11 @@
 /**
- * vwl-model-eval — Local on-computer chat model evaluation helpers.
+ * wwl-model-eval — Local on-computer chat model evaluation helpers.
  *
  * Scorers and report shaping run in Node or the browser. Real inference is
  * driven by the Playwright harness (utils/model-eval-runner.mjs).
  */
 
-export const VWL_MODEL_EVAL_VERSION = '0.0.1';
+export const WWL_MODEL_EVAL_VERSION = '0.0.1';
 
 const GiB = 1024 ** 3;
 
@@ -17,22 +17,24 @@ export function normalizeReply(text) {
 }
 
 /**
- * Branding scorer: require Vanduo Web Labs; reject inventing Vandouno / similar.
+ * Branding scorer: require Weekend Web Labs; reject inventing false Labs spellings.
  * @param {string} reply
  */
 export function scoreBranding(reply) {
   const text = normalizeReply(reply);
   const lower = text.toLowerCase();
-  const hasVanduoWebLabs = /\bvanduo\s+web\s+labs\b/.test(lower);
-  const hasVanduoOss = /\bvanduo-oss\b/.test(lower) || /\bvanduo\s+open\s+source\b/.test(lower);
+  const hasWeekendWebLabs = /\bweekend\s+web\s+labs\b/.test(lower);
+  const hasNostromo = /\bnostromo-618\b/.test(lower) || /\bnostromo\b/.test(lower);
   const inventsBadBrand =
-    /\bvandouno\b/.test(lower) || /\bvandou\b/.test(lower) || /\bvandoun\b/.test(lower);
-  const pass = hasVanduoWebLabs && !inventsBadBrand;
+    /\bvandouno\b/.test(lower) ||
+    /\bweeknd\s+web\s+labs\b/.test(lower) ||
+    /\bweekend\s+weblabs\b/.test(lower);
+  const pass = hasWeekendWebLabs && !inventsBadBrand;
   return {
     pass,
     reasons: [
-      hasVanduoWebLabs ? 'mentions Vanduo Web Labs' : 'missing “Vanduo Web Labs”',
-      hasVanduoOss ? 'mentions vanduo-oss' : 'vanduo-oss optional',
+      hasWeekendWebLabs ? 'mentions Weekend Web Labs' : 'missing “Weekend Web Labs”',
+      hasNostromo ? 'mentions Nostromo-618' : 'Nostromo-618 optional',
       inventsBadBrand ? 'invents false Labs brand spelling' : 'no false brand spelling',
     ],
   };
@@ -55,10 +57,11 @@ export function scoreHonesty(reply) {
     !saysFalse &&
     (/\bopenai\b/.test(lower) || /\bclosed-source\b/.test(lower) || /\bproprietary\b/.test(lower));
   const corrects =
-    /\bvanduo\b/.test(lower) ||
+    /\bweekend\b/.test(lower) ||
     /\bopen\s+source\b/.test(lower) ||
     /\bfoss\b/.test(lower) ||
-    /\bgithub\b/.test(lower);
+    /\bgithub\b/.test(lower) ||
+    /\bnostromo\b/.test(lower);
   const pass = saysFalse && corrects && !affirmsFalse;
   return {
     pass,
@@ -158,8 +161,8 @@ export function buildReportDocument({
   const models = Array.isArray(modelResults) ? modelResults : [];
   return {
     schemaVersion: 1,
-    generator: `vwl-model-eval@${VWL_MODEL_EVAL_VERSION}`,
-    suiteName: suiteName || 'vwl-labs-chat-quality',
+    generator: `wwl-model-eval@${WWL_MODEL_EVAL_VERSION}`,
+    suiteName: suiteName || 'wwl-labs-chat-quality',
     suiteVersion: suiteVersion || '0.0.1',
     startedAt: startedAt || null,
     finishedAt: finishedAt || new Date().toISOString(),
@@ -222,51 +225,51 @@ export function renderReportHtml(report) {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>vwl-model-eval report</title>
+  <title>wwl-model-eval report</title>
   <style>
     :root {
       color-scheme: light;
       font-family: ui-sans-serif, system-ui, sans-serif;
-      --vwl-report-bg: #ffffff;
-      --vwl-report-fg: #1a1a1a;
-      --vwl-report-muted: #555555;
-      --vwl-report-surface: #f0f0f0;
-      --vwl-report-border: #c8c8c8;
-      --vwl-report-pass: #2b8a3e;
-      --vwl-report-fail: #c92a2a;
+      --wwl-report-bg: #ffffff;
+      --wwl-report-fg: #1a1a1a;
+      --wwl-report-muted: #555555;
+      --wwl-report-surface: #f0f0f0;
+      --wwl-report-border: #c8c8c8;
+      --wwl-report-pass: #2b8a3e;
+      --wwl-report-fail: #c92a2a;
     }
     body {
       margin: 1.5rem;
       line-height: 1.45;
-      background: var(--vwl-report-bg);
-      color: var(--vwl-report-fg);
+      background: var(--wwl-report-bg);
+      color: var(--wwl-report-fg);
     }
-    h1, h2 { color: var(--vwl-report-fg); }
+    h1, h2 { color: var(--wwl-report-fg); }
     h1 { font-size: 1.4rem; }
     table { border-collapse: collapse; width: 100%; margin: 1rem 0 2rem; }
     th, td {
-      border: 1px solid var(--vwl-report-border);
+      border: 1px solid var(--wwl-report-border);
       padding: 0.45rem 0.6rem;
       text-align: left;
-      color: var(--vwl-report-fg);
+      color: var(--wwl-report-fg);
     }
-    th { background: var(--vwl-report-surface); font-weight: 600; }
-    .case > summary { color: var(--vwl-report-fg); }
-    .case.pass > summary { color: var(--vwl-report-pass); }
-    .case.fail > summary { color: var(--vwl-report-fail); }
-    .case ul { color: var(--vwl-report-fg); }
+    th { background: var(--wwl-report-surface); font-weight: 600; }
+    .case > summary { color: var(--wwl-report-fg); }
+    .case.pass > summary { color: var(--wwl-report-pass); }
+    .case.fail > summary { color: var(--wwl-report-fail); }
+    .case ul { color: var(--wwl-report-fg); }
     pre.excerpt {
       white-space: pre-wrap;
-      background: var(--vwl-report-surface);
-      color: var(--vwl-report-fg);
+      background: var(--wwl-report-surface);
+      color: var(--wwl-report-fg);
       padding: 0.75rem;
       border-radius: 6px;
     }
-    .meta { color: var(--vwl-report-muted); }
+    .meta { color: var(--wwl-report-muted); }
   </style>
 </head>
 <body>
-  <h1>vwl-model-eval</h1>
+  <h1>wwl-model-eval</h1>
   <p class="meta">${escapeHtml(report.suiteName)} v${escapeHtml(report.suiteVersion)} · ${escapeHtml(report.generator)} · ${escapeHtml(report.finishedAt || '')}</p>
   <table>
     <thead>
@@ -315,7 +318,7 @@ function renderPairedReportHtml(report) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>vwl-model-eval paired report</title>
+  <title>wwl-model-eval paired report</title>
   <style>
     :root { color-scheme: light; font: 16px/1.5 ui-sans-serif, system-ui, sans-serif; color: #1a1a1a; background: #fff; }
     body { margin: 1.5rem; }

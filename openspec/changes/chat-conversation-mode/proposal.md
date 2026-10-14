@@ -15,7 +15,7 @@ Manual dictation and read-aloud work well together but require clicks for every 
 
 ### New Capabilities
 
-- `vwl-chat-conversation`: Explicit private foreground automatic voice turns.
+- `wwl-chat-conversation`: Explicit private foreground automatic voice turns.
 
 ### Modified Capabilities
 

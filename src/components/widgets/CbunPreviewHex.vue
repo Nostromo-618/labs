@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { VdHexGrid } from '@vanduo-oss/vwl-cbun/hex-grid';
+import { VdHexGrid } from '@wwl/wwl-cbun/hex-grid';
 
 const themeTick = ref(0);
 

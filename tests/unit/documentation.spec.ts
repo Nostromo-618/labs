@@ -27,16 +27,16 @@ test('workspace report opens from inline chat docs and its onward links work', a
   await page.goto('/#demos/aichat');
   await page.getByRole('button', { name: 'I understand and accept' }).click();
   const link = page.getByRole('link', { name: 'workspace validation', exact: true }).first();
-  await expect(link).toHaveAttribute('href', '/doc/vwl-chat-workspace-validation.html');
+  await expect(link).toHaveAttribute('href', '/doc/wwl-chat-workspace-validation.html');
   await link.click();
-  await expect(page).toHaveURL(/\/doc\/vwl-chat-workspace-validation\.html$/);
+  await expect(page).toHaveURL(/\/doc\/wwl-chat-workspace-validation\.html$/);
   await expect(page.locator('main h1')).toContainText('workspace validation');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
   await expect(page.getByRole('link', { name: 'the latest feature validation' })).toHaveAttribute(
     'href',
-    '/doc/vwl-checked-stream-conversation-validation.html',
+    '/doc/wwl-checked-stream-conversation-validation.html',
   );
   await page.getByRole('link', { name: 'the latest feature validation' }).click();
   await expect(page.locator('main h1')).toContainText('validation');

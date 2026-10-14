@@ -34,7 +34,7 @@ window.speechEvaluation = {
     try {
       if (document.getElementById('with-chat').checked && !chat) {
         const [{ AiChat }, { chatRuntimeOptions }] = await Promise.all([
-          import('@vanduo-oss/vwl-ai-chat'),
+          import('@wwl/wwl-ai-chat'),
           import('../lib/chat-runtime.js'),
         ]);
         chat = new AiChat(chatRuntimeOptions);

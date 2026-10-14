@@ -12,8 +12,8 @@
       import { VanduoVue } from '@vanduo-oss/vd3';
       import '@vanduo-oss/vd3/css';
       import '/src/styles/legacy-bridge.css';
-      import Chat from '/src/components/VwlAiChatUI.vue';
-      import { AiChat } from '@vanduo-oss/vwl-ai-chat';
+      import Chat from '/src/components/WwlAiChatUI.vue';
+      import { AiChat } from '@wwl/wwl-ai-chat';
       let history = [],
         pending = null;
       window.chatQA = {
@@ -199,7 +199,7 @@
       const app = createApp({
         render: () => h(Chat, { chat, speechOptions, conversationOptions }),
       });
-      app.use(VanduoVue, { storagePrefix: 'vwl-' });
+      app.use(VanduoVue, { storagePrefix: 'wwl-' });
       app.mount('#app');
     </script>
   </body>

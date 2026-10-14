@@ -11,7 +11,7 @@ test('chat picker exposes four families and explicit precision without downloads
   await page.goto('/tests/fixtures/chat-vue-harness.html');
   const settings = page.getByRole('button', { name: 'Settings', exact: true });
   if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
-  const picker = page.locator('#vwl-ai-model-select');
+  const picker = page.locator('#wwl-ai-model-select');
   await expect(picker.locator('option')).toHaveCount(4);
   expect(
     await picker
@@ -20,7 +20,7 @@ test('chat picker exposes four families and explicit precision without downloads
   ).toEqual(primary);
   await expect(picker.locator('optgroup')).toHaveCount(3);
   await picker.selectOption(primary[2]);
-  const precision = page.locator('#vwl-ai-precision-select');
+  const precision = page.locator('#wwl-ai-precision-select');
   await expect(precision.locator('option')).toHaveCount(2);
   await precision.selectOption('Qwen3-0.6B-q4f32_1-MLC');
   await expect(picker).toHaveValue(primary[2]);
@@ -36,17 +36,17 @@ test('retired chat selection explains removal and offers an unloaded default', a
   ).toBeVisible();
   const settings = page.getByRole('button', { name: 'Settings', exact: true });
   if ((await settings.getAttribute('aria-expanded')) === 'false') await settings.click();
-  await expect(page.locator('#vwl-ai-model-select')).toHaveValue(primary[0]);
+  await expect(page.locator('#wwl-ai-model-select')).toHaveValue(primary[0]);
   expect(await page.evaluate(() => window['chatQA'].loads)).toBe(0);
 });
 test('Compare shares primary labels and precision choices without loading', async ({ page }) => {
   await page.goto('/tests/fixtures/model-catalog-harness.html');
   for (const id of [0, 1])
-    await expect(page.locator(`#vwl-compare-model-${id} optgroup option`)).toHaveCount(4);
-  await page.locator('#vwl-compare-model-1').selectOption(primary[3]);
-  await expect(page.locator('#vwl-compare-precision-1 option')).toHaveCount(2);
-  await page.locator('#vwl-compare-precision-1').selectOption('LFM2.5-2.6B-q4-ONNX');
-  await expect(page.locator('#vwl-compare-model-1')).toHaveValue(primary[3]);
+    await expect(page.locator(`#wwl-compare-model-${id} optgroup option`)).toHaveCount(4);
+  await page.locator('#wwl-compare-model-1').selectOption(primary[3]);
+  await expect(page.locator('#wwl-compare-precision-1 option')).toHaveCount(2);
+  await page.locator('#wwl-compare-precision-1').selectOption('LFM2.5-2.6B-q4-ONNX');
+  await expect(page.locator('#wwl-compare-model-1')).toHaveValue(primary[3]);
   await expect(
     page.getByText('Integration pending; this build has not been certified for tools.'),
   ).toBeVisible();
@@ -57,7 +57,7 @@ test('Compare replaces a retired preset with a selectable unloaded default', asy
   await expect(
     page.getByText('This model is no longer supported. Choose a retained model and load it.'),
   ).toBeVisible();
-  await expect(page.locator('#vwl-compare-model-0')).toHaveValue(primary[0]);
+  await expect(page.locator('#wwl-compare-model-0')).toHaveValue(primary[0]);
   await expect(page.getByText('Not loaded', { exact: true })).toHaveCount(2);
 });
 

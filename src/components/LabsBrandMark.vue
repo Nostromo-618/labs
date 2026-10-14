@@ -1,6 +1,6 @@
 <script setup>
 /**
- * Atom mark + “vanduo web labs” wordmark for the site dock brand slot.
+ * Atom mark + “weekend web labs” wordmark for the site dock brand slot.
  * Vertical edges and narrow horizontal docks hide the wordmark via CSS (logo only).
  */
 defineProps({
@@ -45,7 +45,7 @@ defineProps({
       <circle cx="50" cy="50" r="5.5" fill="currentColor"></circle>
     </svg>
     <span class="labs-dock-brand-title">
-      <span class="hero-title-brand">vanduo</span>&nbsp;<span class="vd-text-muted">web labs</span>
+      <span class="hero-title-brand">weekend</span>&nbsp;<span class="vd-text-muted">web labs</span>
     </span>
   </span>
 </template>

@@ -15,8 +15,8 @@ The catalog contains unsupported models and redundant runtime workarounds. Guard
 None.
 
 ### Modified Capabilities
-- `vwl-ai-chat`: curated local chat and safe content boundaries.
-- `vwl-guardrails`: curated local chat and safe content boundaries.
+- `wwl-ai-chat`: curated local chat and safe content boundaries.
+- `wwl-guardrails`: curated local chat and safe content boundaries.
 
 ## Impact
 Shared headless package and linked Labs host; no vd3 API changes. Existing signatures remain compatible for ts-school; hosts depending on streaming must adapt. This private pre-1.0 change is recorded in the changelog without publishing or a release version bump. The user explicitly approved the obscenity runtime dependency exception.

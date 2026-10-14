@@ -1,6 +1,6 @@
 /**
  * Test-only DOM UI harness for HybridSearch.
- * Production labs UI is Vue `VwlHybridSearchUI`; this preserves Playwright e2e coverage
+ * Production labs UI is Vue `WwlHybridSearchUI`; this preserves Playwright e2e coverage
  * of the former NeptuneSearchUI behaviors against the published engine.
  */
 import {
@@ -8,7 +8,7 @@ import {
   safeDocHref,
   sanitizeIconClass,
   validateSearchQuery,
-} from '/node_modules/@vanduo-oss/vwl-hybrid-search/dist/guardrails/search.js';
+} from '/node_modules/@wwl/wwl-hybrid-search/dist/guardrails/search.js';
 
 // NeptuneSearchUI — DOM Component
 // ═══════════════════════════════════════════════════════════════════════
@@ -85,12 +85,12 @@ export class HybridSearchDomUI {
 
   _buildDOM() {
     const wrapper = document.createElement('div');
-    wrapper.className = 'vwl-neptune-search';
+    wrapper.className = 'wwl-neptune-search';
     wrapper.innerHTML = `
-      <div class="vwl-neptune-input-wrap">
+      <div class="wwl-neptune-input-wrap">
         <input
           type="text"
-          class="vwl-neptune-input"
+          class="wwl-neptune-input"
           placeholder="${this._esc(this.placeholder)}"
           autocomplete="off"
           autocapitalize="off"
@@ -100,24 +100,24 @@ export class HybridSearchDomUI {
           aria-autocomplete="list"
           aria-haspopup="listbox"
           aria-expanded="false"
-          aria-controls="vwl-neptune-results"
+          aria-controls="wwl-neptune-results"
           aria-activedescendant=""
         />
-        <span class="vwl-neptune-hint" aria-hidden="true">
+        <span class="wwl-neptune-hint" aria-hidden="true">
           ${this.showSemanticHint ? 'AI · fuzzy' : ''}
         </span>
       </div>
-      <div class="vwl-neptune-dropdown" id="vwl-neptune-results" role="listbox" hidden>
-        <div class="vwl-neptune-loader" hidden>
-          <span class="vwl-neptune-spinner"></span>
-          <span class="vwl-neptune-loader-text">Searching with AI…</span>
+      <div class="wwl-neptune-dropdown" id="wwl-neptune-results" role="listbox" hidden>
+        <div class="wwl-neptune-loader" hidden>
+          <span class="wwl-neptune-spinner"></span>
+          <span class="wwl-neptune-loader-text">Searching with AI…</span>
         </div>
-        <div class="vwl-neptune-results"></div>
-        <div class="vwl-neptune-empty" hidden>${this._esc(this.emptyMessage)}</div>
+        <div class="wwl-neptune-results"></div>
+        <div class="wwl-neptune-empty" hidden>${this._esc(this.emptyMessage)}</div>
       </div>
-      <div class="vwl-neptune-progress" hidden>
-        <div class="vwl-neptune-progress-bar"></div>
-        <span class="vwl-neptune-progress-text"></span>
+      <div class="wwl-neptune-progress" hidden>
+        <div class="wwl-neptune-progress-bar"></div>
+        <span class="wwl-neptune-progress-text"></span>
       </div>
     `;
 
@@ -125,15 +125,15 @@ export class HybridSearchDomUI {
 
     this._elements = {
       wrapper,
-      input: wrapper.querySelector('.vwl-neptune-input'),
-      dropdown: wrapper.querySelector('.vwl-neptune-dropdown'),
-      results: wrapper.querySelector('.vwl-neptune-results'),
-      empty: wrapper.querySelector('.vwl-neptune-empty'),
-      loader: wrapper.querySelector('.vwl-neptune-loader'),
-      progress: wrapper.querySelector('.vwl-neptune-progress'),
-      progressBar: wrapper.querySelector('.vwl-neptune-progress-bar'),
-      progressText: wrapper.querySelector('.vwl-neptune-progress-text'),
-      hint: wrapper.querySelector('.vwl-neptune-hint'),
+      input: wrapper.querySelector('.wwl-neptune-input'),
+      dropdown: wrapper.querySelector('.wwl-neptune-dropdown'),
+      results: wrapper.querySelector('.wwl-neptune-results'),
+      empty: wrapper.querySelector('.wwl-neptune-empty'),
+      loader: wrapper.querySelector('.wwl-neptune-loader'),
+      progress: wrapper.querySelector('.wwl-neptune-progress'),
+      progressBar: wrapper.querySelector('.wwl-neptune-progress-bar'),
+      progressText: wrapper.querySelector('.wwl-neptune-progress-text'),
+      hint: wrapper.querySelector('.wwl-neptune-hint'),
     };
   }
 
@@ -322,7 +322,7 @@ export class HybridSearchDomUI {
     this._elements.empty.hidden = true;
     this._elements.results.innerHTML = '';
     this._elements.loader.hidden = false;
-    const loaderText = this._elements.loader.querySelector('.vwl-neptune-loader-text');
+    const loaderText = this._elements.loader.querySelector('.wwl-neptune-loader-text');
     if (loaderText) {
       loaderText.textContent = useHybrid ? 'Searching with AI…' : 'Searching…';
     }
@@ -375,7 +375,7 @@ export class HybridSearchDomUI {
     results.innerHTML = this._results.map((r, i) => this._renderResultCard(r, i)).join('');
 
     // Bind click handlers
-    results.querySelectorAll('.vwl-neptune-result').forEach((el, i) => {
+    results.querySelectorAll('.wwl-neptune-result').forEach((el, i) => {
       el.addEventListener('click', () => this._selectResult(this._results[i]));
       el.addEventListener('mouseenter', () => {
         this._selectedIndex = i;
@@ -390,37 +390,37 @@ export class HybridSearchDomUI {
     const href = safeDocHref(this.baseUrl, doc.route);
     const badge =
       source === 'semantic'
-        ? '<span class="vwl-neptune-badge vwl-neptune-badge-semantic">AI</span>'
-        : '<span class="vwl-neptune-badge vwl-neptune-badge-fuzzy">Fuzzy</span>';
+        ? '<span class="wwl-neptune-badge wwl-neptune-badge-semantic">AI</span>'
+        : '<span class="wwl-neptune-badge wwl-neptune-badge-fuzzy">Fuzzy</span>';
 
     const keywords = (doc.keywords || [])
       .slice(0, 3)
-      .map((k) => `<span class="vwl-neptune-keyword">${this._esc(k)}</span>`)
+      .map((k) => `<span class="wwl-neptune-keyword">${this._esc(k)}</span>`)
       .join('');
 
     return `
       <div
-        class="vwl-neptune-result"
-        id="vwl-neptune-result-${index}"
+        class="wwl-neptune-result"
+        id="wwl-neptune-result-${index}"
         role="option"
         data-index="${index}"
         tabindex="-1"
       >
-        <div class="vwl-neptune-result-header">
-          <span class="vwl-neptune-result-icon"><i class="ph ph-${this._esc(safeIcon)}"></i></span>
-          <span class="vwl-neptune-result-title">${this._esc(doc.title)}</span>
-          <span class="vwl-neptune-result-trail">
-            <span class="vwl-neptune-result-category">${this._esc(doc.category)}</span>
+        <div class="wwl-neptune-result-header">
+          <span class="wwl-neptune-result-icon"><i class="ph ph-${this._esc(safeIcon)}"></i></span>
+          <span class="wwl-neptune-result-title">${this._esc(doc.title)}</span>
+          <span class="wwl-neptune-result-trail">
+            <span class="wwl-neptune-result-category">${this._esc(doc.category)}</span>
             ${badge}
           </span>
         </div>
-        <div class="vwl-neptune-result-body">
+        <div class="wwl-neptune-result-body">
           ${this._esc(doc.bodyText?.slice(0, 100) || '')}…
         </div>
-        <div class="vwl-neptune-result-footer">
-          <div class="vwl-neptune-result-keywords">${keywords}</div>
+        <div class="wwl-neptune-result-footer">
+          <div class="wwl-neptune-result-keywords">${keywords}</div>
           <a
-            class="vwl-neptune-result-link"
+            class="wwl-neptune-result-link"
             href="${this._esc(href)}"
             target="_blank"
             rel="noopener noreferrer"
@@ -432,7 +432,7 @@ export class HybridSearchDomUI {
   }
 
   _updateSelection() {
-    const items = this._elements.results.querySelectorAll('.vwl-neptune-result');
+    const items = this._elements.results.querySelectorAll('.wwl-neptune-result');
     items.forEach((el, i) => {
       el.classList.toggle('is-selected', i === this._selectedIndex);
       el.setAttribute('aria-selected', String(i === this._selectedIndex));
@@ -441,7 +441,7 @@ export class HybridSearchDomUI {
     if (this._selectedIndex >= 0 && items[this._selectedIndex]) {
       const activeId =
         items[this._selectedIndex].getAttribute('id') ||
-        `vwl-neptune-result-${this._selectedIndex}`;
+        `wwl-neptune-result-${this._selectedIndex}`;
       items[this._selectedIndex].setAttribute('id', activeId);
       input.setAttribute('aria-activedescendant', activeId);
       input.setAttribute('aria-expanded', 'true');
@@ -502,7 +502,7 @@ export class HybridSearchDomUI {
 // ═══════════════════════════════════════════════════════════════════════
 
 const NEPTUNE_STYLES = `
-.vwl-neptune-search {
+.wwl-neptune-search {
   position: relative;
   font-family: var(--font-family-sans, system-ui, sans-serif);
   width: 100%;
@@ -510,11 +510,11 @@ const NEPTUNE_STYLES = `
   margin: 0;
 }
 
-.vwl-neptune-input-wrap {
+.wwl-neptune-input-wrap {
   position: relative;
 }
 
-.vwl-neptune-input {
+.wwl-neptune-input {
   width: 100%;
   padding: 0.75rem 1rem;
   padding-right: 7rem;
@@ -527,13 +527,13 @@ const NEPTUNE_STYLES = `
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.vwl-neptune-input:focus {
+.wwl-neptune-input:focus {
   outline: none;
   border-color: var(--color-primary, #3b82f6);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-.vwl-neptune-hint {
+.wwl-neptune-hint {
   position: absolute;
   right: 0.75rem;
   top: 50%;
@@ -546,7 +546,7 @@ const NEPTUNE_STYLES = `
   gap: 0.25rem;
 }
 
-.vwl-neptune-hint kbd {
+.wwl-neptune-hint kbd {
   display: inline-block;
   padding: 0.125rem 0.375rem;
   font-size: 0.6875rem;
@@ -557,7 +557,7 @@ const NEPTUNE_STYLES = `
   color: var(--text-muted, #6b7280);
 }
 
-.vwl-neptune-dropdown {
+.wwl-neptune-dropdown {
   margin-top: 0.5rem;
   max-height: min(60vh, 28rem);
   overflow-x: hidden;
@@ -568,23 +568,23 @@ const NEPTUNE_STYLES = `
   box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1));
 }
 
-.vwl-neptune-result {
+.wwl-neptune-result {
   padding: 0.75rem 1rem;
   cursor: pointer;
   border-bottom: 1px solid var(--border-color, #f0f0f0);
   transition: background 0.1s ease;
 }
 
-.vwl-neptune-result:last-child {
+.wwl-neptune-result:last-child {
   border-bottom: none;
 }
 
-.vwl-neptune-result:hover,
-.vwl-neptune-result.is-selected {
+.wwl-neptune-result:hover,
+.wwl-neptune-result.is-selected {
   background: var(--bg-secondary, #f8f9fa);
 }
 
-.vwl-neptune-result-header {
+.wwl-neptune-result-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -592,21 +592,21 @@ const NEPTUNE_STYLES = `
   margin-bottom: 0.25rem;
 }
 
-.vwl-neptune-result-icon {
+.wwl-neptune-result-icon {
   color: var(--color-primary, #3b82f6);
   font-size: 1.125rem;
   line-height: 1;
   flex-shrink: 0;
 }
 
-.vwl-neptune-result-title {
+.wwl-neptune-result-title {
   font-weight: 600;
   color: var(--text-primary, #1f2937);
   flex: 1 1 12rem;
   min-width: 0;
 }
 
-.vwl-neptune-result-trail {
+.wwl-neptune-result-trail {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
@@ -614,7 +614,7 @@ const NEPTUNE_STYLES = `
   margin-left: auto;
 }
 
-.vwl-neptune-result-category {
+.wwl-neptune-result-category {
   font-size: 0.75rem;
   color: var(--text-muted, #6b7280);
   background: var(--bg-secondary, #f5f5f5);
@@ -622,7 +622,7 @@ const NEPTUNE_STYLES = `
   border-radius: var(--radius-sm, 0.25rem);
 }
 
-.vwl-neptune-badge {
+.wwl-neptune-badge {
   font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -631,36 +631,36 @@ const NEPTUNE_STYLES = `
   border-radius: var(--radius-sm, 0.25rem);
 }
 
-.vwl-neptune-badge-semantic {
+.wwl-neptune-badge-semantic {
   background: rgba(59, 130, 246, 0.1);
   color: var(--color-primary, #3b82f6);
 }
 
-.vwl-neptune-badge-fuzzy {
+.wwl-neptune-badge-fuzzy {
   background: rgba(107, 114, 128, 0.1);
   color: var(--text-muted, #6b7280);
 }
 
-.vwl-neptune-result-body {
+.wwl-neptune-result-body {
   font-size: 0.8125rem;
   color: var(--text-muted, #6b7280);
   line-height: 1.4;
   margin-bottom: 0.375rem;
 }
 
-.vwl-neptune-result-footer {
+.wwl-neptune-result-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.vwl-neptune-result-keywords {
+.wwl-neptune-result-keywords {
   display: flex;
   gap: 0.375rem;
   flex-wrap: wrap;
 }
 
-.vwl-neptune-keyword {
+.wwl-neptune-keyword {
   font-size: 0.6875rem;
   color: var(--text-muted, #6b7280);
   background: var(--bg-secondary, #f5f5f5);
@@ -668,25 +668,25 @@ const NEPTUNE_STYLES = `
   border-radius: var(--radius-sm, 0.25rem);
 }
 
-.vwl-neptune-result-link {
+.wwl-neptune-result-link {
   font-size: 0.8125rem;
   color: var(--color-primary, #3b82f6);
   text-decoration: none;
   font-weight: 500;
 }
 
-.vwl-neptune-result-link:hover {
+.wwl-neptune-result-link:hover {
   text-decoration: underline;
 }
 
-.vwl-neptune-empty {
+.wwl-neptune-empty {
   padding: 2rem 1rem;
   text-align: center;
   font-size: 0.875rem;
   color: var(--text-muted, #6b7280);
 }
 
-.vwl-neptune-loader {
+.wwl-neptune-loader {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -696,26 +696,26 @@ const NEPTUNE_STYLES = `
   background: var(--bg-secondary, #f8f9fa);
 }
 
-.vwl-neptune-spinner {
+.wwl-neptune-spinner {
   display: inline-block;
   width: 1rem;
   height: 1rem;
   border: 2px solid var(--border-color, #e0e0e0);
   border-top-color: var(--color-primary, #3b82f6);
   border-radius: 50%;
-  animation: vwl-neptune-spin 0.8s linear infinite;
+  animation: wwl-neptune-spin 0.8s linear infinite;
 }
 
-@keyframes vwl-neptune-spin {
+@keyframes wwl-neptune-spin {
   to { transform: rotate(360deg); }
 }
 
-.vwl-neptune-loader-text {
+.wwl-neptune-loader-text {
   font-size: 0.875rem;
   color: var(--text-muted, #6b7280);
 }
 
-.vwl-neptune-progress {
+.wwl-neptune-progress {
   margin-top: 0.75rem;
   padding: 0.75rem;
   background: var(--bg-secondary, #f8f9fa);
@@ -723,7 +723,7 @@ const NEPTUNE_STYLES = `
   border: 1px solid var(--border-color, #e0e0e0);
 }
 
-.vwl-neptune-progress-bar {
+.wwl-neptune-progress-bar {
   height: 4px;
   background: var(--color-primary, #3b82f6);
   border-radius: 2px;
@@ -731,7 +731,7 @@ const NEPTUNE_STYLES = `
   transition: width 0.3s ease;
 }
 
-.vwl-neptune-progress-text {
+.wwl-neptune-progress-text {
   display: block;
   margin-top: 0.375rem;
   font-size: 0.75rem;

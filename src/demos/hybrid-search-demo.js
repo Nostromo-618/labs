@@ -2,9 +2,9 @@ import { createApp, h, ref } from 'vue';
 import { VanduoVue, VdThemeSwitcher } from '@vanduo-oss/vd3';
 import '@vanduo-oss/vd3/css';
 import '../styles/legacy-bridge.css';
-import { installResolvedTheme } from '../vwl-resolved-theme.js';
-import { DEFAULT_DOCS_BASE_URL } from '@vanduo-oss/vwl-hybrid-search';
-import VwlHybridSearchUI from '../components/VwlHybridSearchUI.vue';
+import { installResolvedTheme } from '../wwl-resolved-theme.js';
+import { DEFAULT_DOCS_BASE_URL } from '@wwl/wwl-hybrid-search';
+import WwlHybridSearchUI from '../components/WwlHybridSearchUI.vue';
 
 const lastDebug = ref('Type a query to see hybrid results (AI + fuzzy)…');
 
@@ -32,7 +32,7 @@ const DemoApp = {
     return () =>
       h('div', { class: 'demo-root' }, [
         h('header', { class: 'demo-header' }, [
-          h('h1', 'Vwl Hybrid Search'),
+          h('h1', 'Wwl Hybrid Search'),
           h('p', [
             'Instant fuzzy search + semantic AI search over ',
             h('strong', 'vd3 docs'),
@@ -48,7 +48,7 @@ const DemoApp = {
           h(VdThemeSwitcher, { menu: false }),
         ]),
         h('div', { class: 'demo-search-wrap' }, [
-          h(VwlHybridSearchUI, {
+          h(WwlHybridSearchUI, {
             baseUrl: DEFAULT_DOCS_BASE_URL,
             placeholder: 'Search vd3 docs…',
             onResultClick,
@@ -61,7 +61,7 @@ const DemoApp = {
         h(
           'footer',
           { class: 'demo-footer' },
-          'Hybrid Search — Experimental Labs demo using @vanduo-oss/vwl-hybrid-search',
+          'Hybrid Search — Experimental Labs demo using @wwl/wwl-hybrid-search',
         ),
       ]);
   },
@@ -134,7 +134,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-installResolvedTheme({ storagePrefix: 'vanduo-', defaultTheme: 'dark' });
+installResolvedTheme({ storagePrefix: 'wwl-', defaultTheme: 'dark' });
 
 createApp(DemoApp)
   .use(VanduoVue, {

@@ -12,7 +12,7 @@ const entries = [
     title: 'Draw',
     icon: 'pencil-simple',
     blurb:
-      'An SVG whiteboard with pressure-aware brushes, shapes, sticky notes, and export — from @vanduo-oss/vwl-cbun/draw.',
+      'An SVG whiteboard with pressure-aware brushes, shapes, sticky notes, and export — from @wwl/wwl-cbun/draw.',
     strengths: [
       'Pressure-aware brushes for freehand sketching',
       'Shapes, sticky notes, and structured export',
@@ -25,8 +25,7 @@ const entries = [
     id: 'hex',
     title: 'Hex grid',
     icon: 'hexagon',
-    blurb:
-      'Axial hex canvases with terrain helpers and pathfinding math — @vanduo-oss/vwl-cbun/hex-grid.',
+    blurb: 'Axial hex canvases with terrain helpers and pathfinding math — @wwl/wwl-cbun/hex-grid.',
     strengths: [
       'Axial hex math with terrain helpers',
       'DPR-aware canvas and viewport culling',
@@ -40,7 +39,7 @@ const entries = [
     title: 'Code editor',
     icon: 'code',
     blurb:
-      'Lightweight syntax-highlighted editor for playgrounds and snippets — @vanduo-oss/vwl-cbun/code-editor.',
+      'Lightweight syntax-highlighted editor for playgrounds and snippets — @wwl/wwl-cbun/code-editor.',
     strengths: [
       'First-party highlighter (no highlight.js)',
       'Tokenizer-only highlight subpath',
@@ -54,7 +53,7 @@ const entries = [
     title: 'Music player',
     icon: 'music-note',
     blurb:
-      'HTML5 audio with playlist, progress, and detachable floating modes — @vanduo-oss/vwl-cbun/music-player.',
+      'HTML5 audio with playlist, progress, and detachable floating modes — @wwl/wwl-cbun/music-player.',
     strengths: [
       'Playlist, progress, shuffle, and repeat',
       'Detachable floating playback',
@@ -66,7 +65,7 @@ const entries = [
 ];
 
 const installShell = `# clone beside Labs, then in package.json:
-# "@vanduo-oss/vwl-cbun": "link:../vwl-cbun"`;
+# "@wwl/wwl-cbun": "link:../wwl-cbun"`;
 </script>
 
 <template>
@@ -74,8 +73,8 @@ const installShell = `# clone beside Labs, then in package.json:
     <div class="labs-page-header about-header">
       <h2><i class="ph ph-package" aria-hidden="true"></i> Widgets</h2>
       <p class="vd-text-lg vd-text-muted">
-        Live previews from <code>@vanduo-oss/vwl-cbun</code> — draw, hex grid, code editor, and
-        music player.
+        Live previews from <code>@wwl/wwl-cbun</code> — draw, hex grid, code editor, and music
+        player.
       </p>
     </div>
 

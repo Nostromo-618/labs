@@ -40,7 +40,7 @@ export async function createRecorder({ signal, onLimit }) {
     await context.audioWorklet.addModule(recorderURL);
     if (closed || signal.aborted) throw aborted();
     source = context.createMediaStreamSource(stream);
-    node = new globalThis.AudioWorkletNode(context, 'vwl-speech-recorder');
+    node = new globalThis.AudioWorkletNode(context, 'wwl-speech-recorder');
     sink = context.createGain();
     sink.gain.value = 0;
     node.port.onmessage = ({ data }) => {

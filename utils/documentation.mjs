@@ -1,4 +1,4 @@
-import { labsMarkdownToHtml } from '@vanduo-oss/vwl-ai-chat/markdown';
+import { labsMarkdownToHtml } from '@wwl/wwl-ai-chat/markdown';
 
 const entities = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
 const decode = (text) => text.replace(/&(?:amp|lt|gt|quot|#39);/g, (value) => entities[value]);

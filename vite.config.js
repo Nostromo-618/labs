@@ -22,7 +22,7 @@ const ortRoot = path.resolve(
 );
 
 const localModelsDir = path.join(root, '.models');
-const vdlCbunRoot = path.resolve(root, '../vwl-cbun');
+const vdlCbunRoot = path.resolve(root, '../wwl-cbun');
 const vdlCbunDist = path.join(vdlCbunRoot, 'dist');
 const useLocalVdlCbun = fs.existsSync(path.join(vdlCbunDist, 'index.js'));
 
@@ -79,30 +79,30 @@ function localModelsPlugin(preview = false) {
 
 const vdlCbunAlias = useLocalVdlCbun
   ? {
-      '@vanduo-oss/vwl-cbun/code-editor/css': path.join(
+      '@wwl/wwl-cbun/code-editor/css': path.join(
         vdlCbunDist,
         'code-editor/vd3-code-editor.css',
       ),
-      '@vanduo-oss/vwl-cbun/code-editor/highlight': path.join(
+      '@wwl/wwl-cbun/code-editor/highlight': path.join(
         vdlCbunDist,
         'code-editor/highlight.js',
       ),
-      '@vanduo-oss/vwl-cbun/code-editor': path.join(vdlCbunDist, 'code-editor'),
-      '@vanduo-oss/vwl-cbun/draw/css': path.join(vdlCbunDist, 'draw/vd3-draw.css'),
-      '@vanduo-oss/vwl-cbun/draw': path.join(vdlCbunDist, 'draw'),
-      '@vanduo-oss/vwl-cbun/hex-grid/hex-math': path.join(vdlCbunDist, 'hex-grid/hex-math.js'),
-      '@vanduo-oss/vwl-cbun/hex-grid': path.join(vdlCbunDist, 'hex-grid'),
-      '@vanduo-oss/vwl-cbun/music-player/css': path.join(
+      '@wwl/wwl-cbun/code-editor': path.join(vdlCbunDist, 'code-editor'),
+      '@wwl/wwl-cbun/draw/css': path.join(vdlCbunDist, 'draw/vd3-draw.css'),
+      '@wwl/wwl-cbun/draw': path.join(vdlCbunDist, 'draw'),
+      '@wwl/wwl-cbun/hex-grid/hex-math': path.join(vdlCbunDist, 'hex-grid/hex-math.js'),
+      '@wwl/wwl-cbun/hex-grid': path.join(vdlCbunDist, 'hex-grid'),
+      '@wwl/wwl-cbun/music-player/css': path.join(
         vdlCbunDist,
         'music-player/vd3-music-player.css',
       ),
-      '@vanduo-oss/vwl-cbun/music-player': path.join(vdlCbunDist, 'music-player'),
-      '@vanduo-oss/vwl-cbun': vdlCbunDist,
+      '@wwl/wwl-cbun/music-player': path.join(vdlCbunDist, 'music-player'),
+      '@wwl/wwl-cbun': vdlCbunDist,
     }
   : {};
 
 export default defineConfig(({ command, mode }) => ({
-  // Project site: https://nostromo-618.github.io/labs/
+  // Project site: https://nostromo-618.github.io/weekend-web-labs/
   // Dev and Playwright keep `/` so the Vite server stays at the host root.
   base: command === 'build' ? '/labs/' : '/',
   plugins: [

@@ -1,5 +1,5 @@
 <script setup>
-import { VdMusicPlayer } from '@vanduo-oss/vwl-cbun/music-player';
+import { VdMusicPlayer } from '@wwl/wwl-cbun/music-player';
 
 const base = import.meta.env.BASE_URL;
 

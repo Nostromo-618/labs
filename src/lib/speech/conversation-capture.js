@@ -140,7 +140,7 @@ export async function createConversationCapture({
     if (context.state !== 'running')
       throw new Error('Microphone audio is suspended. Resume Voice Conversation Mode.');
     source = context.createMediaStreamSource(stream);
-    node = new globalThis.AudioWorkletNode(context, 'vwl-conversation-capture');
+    node = new globalThis.AudioWorkletNode(context, 'wwl-conversation-capture');
     sink = context.createGain();
     sink.gain.value = 0;
     node.port.onmessage = ({ data }) => {

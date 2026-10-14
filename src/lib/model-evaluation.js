@@ -1,4 +1,4 @@
-import { AiChat, getModelOption } from '@vanduo-oss/vwl-ai-chat';
+import { AiChat, getModelOption } from '@wwl/wwl-ai-chat';
 import {
   scoreCase,
   summarizeModelResults,

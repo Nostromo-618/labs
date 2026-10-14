@@ -1,4 +1,4 @@
-# vwl-ai-draw Specification (delta)
+# wwl-ai-draw Specification (delta)
 
 ## ADDED Requirements
 

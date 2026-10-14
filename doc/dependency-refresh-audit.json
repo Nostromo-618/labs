@@ -13,7 +13,7 @@
       "advisories": []
     },
     {
-      "project": "vwl-ai-chat",
+      "project": "wwl-ai-chat",
       "counts": {
         "info": 0,
         "low": 0,
@@ -70,7 +70,7 @@
       ]
     },
     {
-      "project": "vwl-hybrid-search",
+      "project": "wwl-hybrid-search",
       "counts": {
         "info": 0,
         "low": 0,
@@ -127,7 +127,7 @@
       ]
     },
     {
-      "project": "vwl-cbun",
+      "project": "wwl-cbun",
       "counts": {
         "info": 0,
         "low": 3,
@@ -364,7 +364,7 @@
       ]
     },
     {
-      "project": "vwl-hex-earth",
+      "project": "wwl-hex-earth",
       "counts": {
         "info": 0,
         "low": 0,

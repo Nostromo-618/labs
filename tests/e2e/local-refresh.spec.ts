@@ -19,9 +19,9 @@ test('Hex Earth panels fit the stage at every dock edge and after resizing', asy
   const startedWide = (page.viewportSize()?.width || 0) > 640;
   await main(page, 'demos/hex-earth');
   for (const edge of ['left', 'right', 'top', 'bottom']) {
-    await page.evaluate((value) => localStorage.setItem('vwl-site-dock', value), edge);
+    await page.evaluate((value) => localStorage.setItem('wwl-site-dock', value), edge);
     await page.reload();
-    const stage = page.locator('.vwl-earth-stage');
+    const stage = page.locator('.wwl-earth-stage');
     await expect(stage.locator('canvas')).toBeVisible();
     if ((page.viewportSize()?.width || 0) <= 640) await page.getByTestId('controls-toggle').click();
     const panel = page.getByTestId('controls-panel');
@@ -74,7 +74,7 @@ test('Compare is lazy, keeps two pane statuses on mobile, and does not load mode
   await expect(page.getByRole('button', { name: 'Load pair' })).toBeDisabled();
   await modelB.selectOption('LFM2.5-2.6B-q4f16-ONNX');
   await expect(page.getByRole('button', { name: 'Load pair' })).toBeEnabled();
-  const tabs = page.locator('.vwl-compare-tabs');
+  const tabs = page.locator('.wwl-compare-tabs');
   await expect(tabs.locator('[role="tab"]')).toHaveCount(2);
   if ((page.viewportSize()?.width || 0) <= 700) {
     await expect(tabs).toBeVisible();
@@ -104,17 +104,17 @@ test('actual Vue chat stops, resets, preserves General history, escapes HTML and
   await input.fill('hold');
   await input.press('Enter');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await expect(page.locator('.vwl-ai-messages')).toContainText('Generation stopped');
+  await expect(page.locator('.wwl-ai-messages')).toContainText('Generation stopped');
   await page.getByRole('button', { name: 'New conversation' }).click();
   await input.fill('html');
   await input.press('Enter');
-  await expect(page.locator('.vwl-ai-messages img')).toHaveCount(0);
+  await expect(page.locator('.wwl-ai-messages img')).toHaveCount(0);
   expect(await page.evaluate(() => window.injected)).toBeUndefined();
   await expect(page.getByLabel('Conversation', { exact: true })).toHaveCount(0);
   await input.fill('follow up');
   await input.press('Enter');
-  await expect(page.locator('.vwl-ai-messages')).toContainText('Answer: follow up');
-  await expect(page.locator('.vwl-ai-messages')).toContainText('onerror');
+  await expect(page.locator('.wwl-ai-messages')).toContainText('Answer: follow up');
+  await expect(page.locator('.wwl-ai-messages')).toContainText('onerror');
   await page.screenshot({
     path: path.join(shots, `${info.project.name}-chat-general.png`),
     fullPage: true,
@@ -143,11 +143,11 @@ test('search works offline after index load with denied storage and no model dow
   const input = page.getByRole('combobox', { name: 'Search documentation' });
   await expect(input).toBeVisible();
   await input.fill('Dock');
-  await expect(page.locator('.vwl-neptune-result').first()).toContainText('Dock');
+  await expect(page.locator('.wwl-neptune-result').first()).toContainText('Dock');
   await context.setOffline(true);
   await page.getByRole('combobox').first().selectOption('embeddinggemma');
   await input.fill('Login');
-  await expect(page.locator('.vwl-neptune-result').first()).toContainText('Login');
+  await expect(page.locator('.wwl-neptune-result').first()).toContainText('Login');
   expect(modelRequests).toEqual([]);
   await page.screenshot({
     path: path.join(shots, `${info.project.name}-search.png`),
@@ -160,7 +160,7 @@ test('missing WebGPU is explained before any download', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: /Load AI Model|Runtime unsupported/ }),
   ).toBeDisabled();
-  await expect(page.locator('.vwl-ai-chat-primary')).toContainText(/WebGPU/);
+  await expect(page.locator('.wwl-ai-chat-primary')).toContainText(/WebGPU/);
 });
 test('Hex Earth lazy route retains dock, panels, gestures and releases canvas on exit', async ({
   page,
@@ -173,7 +173,7 @@ test('Hex Earth lazy route retains dock, panels, gestures and releases canvas on
   await main(page);
   expect(geography).toEqual([]);
   await page.goto('/#demos/hex-earth');
-  const stage = page.locator('.vwl-earth-demo');
+  const stage = page.locator('.wwl-earth-demo');
   await expect(stage.locator('canvas')).toBeVisible();
   await expect.poll(() => geography.length).toBeGreaterThan(0);
   const phone = (page.viewportSize()?.width || 0) <= 640;
@@ -231,6 +231,6 @@ test('General chat never requests documentation retrieval assets', async ({ page
   const input = page.getByRole('textbox', { name: 'Message' });
   await input.fill('VdDock placement');
   await input.press('Enter');
-  await expect(page.locator('.vwl-ai-messages')).toContainText('Answer: VdDock placement');
+  await expect(page.locator('.wwl-ai-messages')).toContainText('Answer: VdDock placement');
   expect(requests).toEqual([]);
 });

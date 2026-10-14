@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
-const TOC_KEY = 'vanduo-labs-toc-accepted';
-const DECLINED_KEY = 'vanduo-labs-toc-declined';
+const TOC_KEY = 'wwl-toc-accepted';
+const DECLINED_KEY = 'wwl-toc-declined';
 
 test.describe('Labs disclaimer gate', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       try {
-        localStorage.removeItem('vanduo-labs-toc-accepted');
-        sessionStorage.removeItem('vanduo-labs-toc-declined');
+        localStorage.removeItem('wwl-toc-accepted');
+        sessionStorage.removeItem('wwl-toc-declined');
         localStorage.removeItem('vanduo-labs-demos-disclaimer-v1');
       } catch {
         /* ignore */

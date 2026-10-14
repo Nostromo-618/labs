@@ -26,10 +26,10 @@ Registry metadata and `pnpm outdated --format json` were checked on 2026-10-04. 
 | prettier                      | 3.9.6                          | **3.9.9**                                                                       |
 | vite                          | 8.2.1                          | **8.3.2**                                                                       |
 | vite-plugin-static-copy       | 4.1.1                          | **Removed**; latest release still includes the vulnerable chain                 |
-| @vanduo-oss/vwl-ai-chat       | Local link, 0.1.1              | Retained local package; audited separately                                      |
-| @vanduo-oss/vwl-hybrid-search | Local link, 0.2.0              | Retained local package; audited separately                                      |
-| @vanduo-oss/vwl-cbun          | Local link, 1.0.0              | Retained local package; audited separately                                      |
-| @vanduo-oss/vwl-hex-earth     | Local link, 0.1.0              | Retained local package; audited separately                                      |
+| @wwl/wwl-ai-chat       | Local link, 0.1.1              | Retained local package; audited separately                                      |
+| @wwl/wwl-hybrid-search | Local link, 0.2.0              | Retained local package; audited separately                                      |
+| @wwl/wwl-cbun          | Local link, 1.0.0              | Retained local package; audited separately                                      |
+| @wwl/wwl-hex-earth     | Local link, 0.1.0              | Retained local package; audited separately                                      |
 
 pnpm was updated within the existing major from 10.28.2 to **10.34.6**. Registry latest is 12.9.1; that separate major migration was not included in this compatible dependency refresh. Stable ONNX Runtime 1.30.0 is not substituted for Transformers' required development build: direct VAD runtime, Transformers runtime and copied WASM must match exactly. Installed versions and byte-identical runtime assets were validated.
 
@@ -45,10 +45,10 @@ Linked siblings have separate lockfiles and build processes, so a clean Labs aud
 
 | Separate project  | Low | Moderate | High | Findings / follow-up                                                                                                                                          |
 | ----------------- | --: | -------: | ---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| vwl-ai-chat       |   0 |        1 |    2 | TypeScript ESLint parser → minimatch → brace-expansion 5.0.9; update to 5.0.12                                                                                |
-| vwl-hybrid-search |   0 |        1 |    2 | Same parser dependency; update to 5.0.12                                                                                                                      |
-| vwl-cbun          |   3 |        7 |    5 | jsdom → undici 7.29.0 (fix ≥7.29.1), stylelint → fast-uri 3.1.7 (fix ≥3.1.8), parser → brace-expansion 5.0.9 (fix 5.0.12), stylelint → unpatched braces 3.0.3 |
-| vwl-hex-earth     |   0 |        0 |    0 | No known audit advisories                                                                                                                                     |
+| wwl-ai-chat       |   0 |        1 |    2 | TypeScript ESLint parser → minimatch → brace-expansion 5.0.9; update to 5.0.12                                                                                |
+| wwl-hybrid-search |   0 |        1 |    2 | Same parser dependency; update to 5.0.12                                                                                                                      |
+| wwl-cbun          |   3 |        7 |    5 | jsdom → undici 7.29.0 (fix ≥7.29.1), stylelint → fast-uri 3.1.7 (fix ≥3.1.8), parser → brace-expansion 5.0.9 (fix 5.0.12), stylelint → unpatched braces 3.0.3 |
+| wwl-hex-earth     |   0 |        0 |    0 | No known audit advisories                                                                                                                                     |
 
 Those paths originate in sibling development tools; they are not installed by Labs' local links. They still matter to sibling testing/build trust. Their configurations were examined but not edited in this Labs-scoped change. Full advisory IDs, affected paths and patch ranges are recorded in [the audit snapshot](./dependency-refresh-audit.json).
 

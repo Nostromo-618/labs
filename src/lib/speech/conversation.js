@@ -1,4 +1,4 @@
-import { validateLlmInput } from '@vanduo-oss/vwl-ai-chat/guardrails/llm';
+import { validateLlmInput } from '@wwl/wwl-ai-chat/guardrails/llm';
 import {
   createConversationCapture,
   requestConversationMicrophone,

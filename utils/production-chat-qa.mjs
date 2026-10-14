@@ -53,12 +53,12 @@ for (const [name, type] of Object.entries({ chromium, webkit })) {
     await page.waitForFunction(
       () =>
         !!document.querySelector('textarea[aria-label="Message"]') ||
-        !!document.querySelector('.vwl-ai-error'),
+        !!document.querySelector('.wwl-ai-error'),
       null,
       { timeout: 120000 },
     );
-    if (await page.locator('.vwl-ai-error').count())
-      throw Error(await page.locator('.vwl-ai-error').innerText());
+    if (await page.locator('.wwl-ai-error').count())
+      throw Error(await page.locator('.wwl-ai-error').innerText());
     console.log(name, 'loaded');
     const input = page.getByRole('textbox', { name: 'Message' });
     await input.fill('Reply with exactly: ready');

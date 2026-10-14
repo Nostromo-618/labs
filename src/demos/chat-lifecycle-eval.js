@@ -1,4 +1,4 @@
-import { getModelOption } from '@vanduo-oss/vwl-ai-chat';
+import { getModelOption } from '@wwl/wwl-ai-chat';
 /** Real-model cases complement deterministic adversarial harness tests. */
 export async function evaluateLifecycle(chat, log, { signal, includeWarmReload = true } = {}) {
   const results = [];

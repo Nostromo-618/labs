@@ -249,7 +249,7 @@ test('denied and full storage are best effort; clearing targets only speech cach
   expect(result).toEqual({
     available: false,
     match: true,
-    deleted: ['vwl-speech-whisper-v1', 'vwl-speech-kokoro-v1', 'vwl-speech-vad-v1'],
+    deleted: ['wwl-speech-whisper-v1', 'wwl-speech-kokoro-v1', 'wwl-speech-vad-v1'],
   });
 });
 
@@ -352,7 +352,7 @@ test('General read-aloud uses the final answer and reset/navigation release spee
 }) => {
   await page.evaluate(() =>
     localStorage.setItem(
-      'vwl-chat-settings-v1',
+      'wwl-chat-settings-v1',
       JSON.stringify({ provider: 'system', voiceURI: 'qa-local' }),
     ),
   );
@@ -372,7 +372,7 @@ test('General read-aloud uses the final answer and reset/navigation release spee
   const input = page.getByRole('textbox', { name: 'Message' });
   await input.fill('VdDock placement');
   await input.press('Enter');
-  await expect(page.locator('.vwl-ai-messages')).toContainText('Answer: VdDock placement');
+  await expect(page.locator('.wwl-ai-messages')).toContainText('Answer: VdDock placement');
   await page.getByRole('button', { name: 'Read aloud', exact: true }).click();
   expect(await page.evaluate(() => window.speechQA.spoken)).toEqual(['Answer: VdDock placement']);
   await page.getByRole('button', { name: 'New conversation' }).click();
@@ -566,7 +566,7 @@ test('completed replies support manual playback, stop, sending interruption and 
 }) => {
   await page.evaluate(() =>
     localStorage.setItem(
-      'vwl-chat-settings-v1',
+      'wwl-chat-settings-v1',
       JSON.stringify({ provider: 'system', voiceURI: 'qa-local' }),
     ),
   );
@@ -599,7 +599,7 @@ test('completed replies support manual playback, stop, sending interruption and 
   expect(await page.evaluate(() => window.speechQA.loads)).toEqual([]);
   await page.getByRole('button', { name: 'Load Neural voice', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Neural voice ready' })).toBeDisabled();
-  if ((await page.locator('.vwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
+  if ((await page.locator('.wwl-ai-settings-panel').getAttribute('aria-modal')) === 'true')
     await page.getByRole('button', { name: 'Close settings', exact: true }).click();
   await page.getByRole('button', { name: 'Read aloud', exact: true }).last().click();
   await expect

@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 async function acceptDisclaimer(page) {
   await page.addInitScript(() => {
     try {
-      localStorage.removeItem('vanduo-labs-toc-accepted');
-      sessionStorage.removeItem('vanduo-labs-toc-declined');
+      localStorage.removeItem('wwl-toc-accepted');
+      sessionStorage.removeItem('wwl-toc-declined');
       localStorage.removeItem('vanduo-labs-demos-disclaimer-v1');
     } catch {
       /* ignore */
@@ -28,7 +28,7 @@ test.describe('Labs site dock', () => {
 
     await page.addInitScript(() => {
       try {
-        localStorage.removeItem('vwl-site-dock');
+        localStorage.removeItem('wwl-site-dock');
       } catch {
         /* ignore */
       }
@@ -60,7 +60,7 @@ test.describe('Labs site dock', () => {
 
     // Force left edge via storage + reload so persist restores vertical.
     await page.evaluate(() => {
-      localStorage.setItem('vwl-site-dock', 'left');
+      localStorage.setItem('wwl-site-dock', 'left');
     });
     await page.reload();
     await acceptDisclaimer(page);
@@ -73,7 +73,7 @@ test.describe('Labs site dock', () => {
 
     // Horizontal restores wordmark.
     await page.evaluate(() => {
-      localStorage.setItem('vwl-site-dock', 'top');
+      localStorage.setItem('wwl-site-dock', 'top');
     });
     await page.reload();
     await acceptDisclaimer(page);
@@ -115,7 +115,7 @@ test.describe('Labs site dock', () => {
     await expect(fan).not.toHaveClass(/is-open/);
     await expect(page.locator('html')).toHaveAttribute('data-primary', 'yellow');
     await expect
-      .poll(async () => page.evaluate(() => localStorage.getItem('vwl-primary-color')))
+      .poll(async () => page.evaluate(() => localStorage.getItem('wwl-primary-color')))
       .toBe('yellow');
     expect(await page.evaluate(() => localStorage.getItem('vanduo-primary-color'))).toBeNull();
   });

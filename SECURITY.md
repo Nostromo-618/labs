@@ -2,9 +2,9 @@
 
 ## Reporting a vulnerability
 
-If you believe you have found a security issue in **vanduo-oss/labs**, please report it privately.
+If you believe you have found a security issue in **Nostromo-618/weekend-web-labs**, please report it privately.
 
-Preferred: use [GitHub private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability) on this repository — open a security advisory for [vanduo-oss/labs](https://github.com/vanduo-oss/labs).
+Preferred: use [GitHub private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability) on this repository — open a security advisory for [Nostromo-618/weekend-web-labs](https://github.com/Nostromo-618/weekend-web-labs).
 
 Do not open a public issue for sensitive reports.
 

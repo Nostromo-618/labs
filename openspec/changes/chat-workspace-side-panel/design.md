@@ -1,6 +1,6 @@
 ## Context
 
-See proposal.md. VwlAiChatUI owns chat and SpeechSession; VwlChatSpeech owns read-aloud preferences. Settings must not remount that controller when the viewport changes.
+See proposal.md. WwlAiChatUI owns chat and SpeechSession; WwlChatSpeech owns read-aloud preferences. Settings must not remount that controller when the viewport changes.
 
 ## Goals / Non-Goals
 
